@@ -23,6 +23,16 @@
 	$(PYTHON) map_vc_like_simple.py ../fakedata/l120_500_d0.sav \
 	-o $@ --nvcirc=201 --los=120. --distuncertainty=0.
 
+#simple analysis without errors, sigma_R=0.1, l=120
+../fakedata/l120_500_so.1_d0.sav: create_fake_los.py
+	$(PYTHON) create_fake_los.py -n 500 $@ --distuncertainty=0. \
+	--los=120. \
+	--so=0.1
+../plots/l120_500_d0_so.1_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l120_500_so.1_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l120_500_so.1_d0.sav \
+	-o $@ --nvcirc=201 --los=120. --distuncertainty=0. --so=0.1
+
 #simple analysis without errors, fit for beta too
 ../plots/l30_500_so.1_d0_vcbetalike.ps: map_vc_like_simple.py \
 	../fakedata/l30_500_so.1_d0.sav
@@ -30,17 +40,23 @@
 	-o $@ --nvcirc=51 --los=30. --distuncertainty=0. \
 	--nbeta=51 --so=0.1
 #simple analysis without errors, fit for beta too
+../plots/l120_500_so.1_d0_vcbetalike.ps: map_vc_like_simple.py \
+	../fakedata/l120_500_so.1_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l120_500_so.1_d0.sav \
+	-o $@ --nvcirc=51 --los=120. --distuncertainty=0. \
+	--nbeta=51 --so=0.1
+#simple analysis without errors, fit for beta too
 ../plots/l30_500_d0_vcbetalike.ps: map_vc_like_simple.py \
 	../fakedata/l30_500_d0.sav
 	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_d0.sav \
-	-o $@ --nvcirc=21 --los=30. --distuncertainty=0. \
-	--nbeta=21
+	-o $@ --nvcirc=51 --los=30. --distuncertainty=0. \
+	--nbeta=51
 #simple analysis without errors, fit for beta too
 ../plots/l120_500_d0_vcbetalike.ps: map_vc_like_simple.py \
 	../fakedata/l120_500_d0.sav
 	$(PYTHON) map_vc_like_simple.py ../fakedata/l120_500_d0.sav \
-	-o $@ --nvcirc=21 --los=120. --distuncertainty=0. \
-	--nbeta=21
+	-o $@ --nvcirc=51 --los=120. --distuncertainty=0. \
+	--nbeta=51
 
 #test data
 ../fakedata/l30_500.sav: create_fake_los.py
