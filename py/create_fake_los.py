@@ -30,6 +30,24 @@ def create_fake_los(parser):
     print "Setting up DF ..."
     dfc= dehnendf(beta=options.beta,profileParams=(options.rd,options.rs,options.so),correct=True,niter=20)
     #Sample until we have nobjects
+    if options.local:
+        sample_local(options,args,dfc)
+    else:
+        sample_los(options,args,dfc)
+    return None
+
+def sample_local(options,args,dfc):
+    print "Sampling locally ..."
+    #We just sample the velocity distribution at (R,phi)= (1,0)
+    out= dfc.sampleVRVT(1.,n=options.nobjects)
+    #No uncertainty for now
+    #Save
+    picklefile= open(args[0],'wb')
+    pickle.dump(out,picklefile)
+    picklefile.close()
+    return None
+
+def sample_los(options,args,dfc):
     print "Sampling the LOS ..."
     n= 0
     out= []

@@ -6,7 +6,7 @@ import math as m
 import numpy as nu
 from optparse import OptionParser
 #import subprocess
-#from galpy.orbit import Orbit
+from galpy.orbit import Orbit
 from galpy.df import dehnendf, shudf
 from galpy.util import bovy_plot
 _DEGTORAD= m.pi/180.
@@ -59,6 +59,43 @@ def plot_fake_data(parser):
         bovy_plot.bovy_text(r'$l = %i^\circ$' % round(options.los),
                             top_left=True)
         bovy_plot.bovy_end_print(options.vlosdname)
+    if not options.vtname is None:
+        vts= nu.array([o[1]-1. for o in out]).flatten() #subtract vc
+        #Calculate expected
+        ntheory= 1001
+        vx= nu.linspace(-1.,1.,ntheory)
+        y= nu.zeros(ntheory)
+        for ii in range(ntheory):
+            y[ii]= dfc(Orbit([1.,0.,vx[ii]+1.]))
+        y/= nu.sum(y)*(vx[1]-vx[0])
+        bovy_plot.bovy_print()
+        bovy_plot.bovy_hist(vts,bins=options.histbins,normed=True,
+                            xlabel=r'$v_T / v_0 - 1$')
+        bovy_plot.bovy_plot(vx,y,overplot=True)
+        bovy_plot.bovy_end_print(options.vtname)
+    if not options.vrname is None:
+        vrs= nu.array([o[0] for o in out]).flatten() #subtract vc
+        #Calculate expected
+        ntheory= 1001
+        vx= nu.linspace(-1.,1.,ntheory)
+        y= nu.zeros(ntheory)
+        vT= 1.-dfc.asymmetricdrift(1.)
+        for ii in range(ntheory):
+            y[ii]= dfc(Orbit([1.,vx[ii],vT]))
+        y/= nu.sum(y)*(vx[1]-vx[0])
+        bovy_plot.bovy_print()
+        bovy_plot.bovy_hist(vrs,bins=options.histbins,normed=True,
+                            xlabel=r'$v_R / v_0$')
+        bovy_plot.bovy_plot(vx,y,overplot=True)
+        bovy_plot.bovy_end_print(options.vrname)
+    if not options.vrvtname is None:
+        vts= nu.array([o[1]-1. for o in out]).flatten() #subtract vc
+        vrs= nu.array([o[0] for o in out]).flatten() #subtract vc
+        bovy_plot.bovy_print()
+        bovy_plot.scatterplot(vrs,vts,'.',bins=options.scatterbins,
+                              xlabel=r'$v_R / v_0$',
+                              ylabel=r'$v_T / v_0 - 1$')
+        bovy_plot.bovy_end_print(options.vrvtname)
 
 def get_options():
     usage = "usage: %prog [options] <savefilename>\n\nsavefilename= name of the file that holds the los (as a pickle)"
@@ -67,9 +104,21 @@ def get_options():
     parser.add_option("--vlosdname",dest="vlosdname",
                       default=None,
                       help="Plot of the distribution of v_los and d")
+    parser.add_option("--vtname",dest="vtname",
+                      default=None,
+                      help="Plot of the distribution of v_T (for local sample)")
+    parser.add_option("--vrname",dest="vrname",
+                      default=None,
+                      help="Plot of the distribution of v_R (for local sample)")
+    parser.add_option("--vrvtname",dest="vrvtname",
+                      default=None,
+                      help="Plot of the distribution of v_R and v_T (for local sample)")
     parser.add_option("--scatterbins",dest="scatterbins",type='int',
                       default=15,
                       help="Number of bins to use in scatterplot (in one dimension)")
+    parser.add_option("--histbins",dest="histbins",type='int',
+                      default=20,
+                      help="Number of bins to use in a histogram (in one dimension)")
     parser.add_option("-n","--nobjects",dest="nobjects",type='int',
                       default=500,
                       help="Number of objects to simulate")
