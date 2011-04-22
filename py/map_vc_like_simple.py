@@ -1,10 +1,11 @@
+_EPSREL=10.**-14.
 import sys
 import os, os.path
 #import shutil
 import cPickle as pickle
 import math as m
 import numpy as nu
-from scipy import linalg
+from scipy import linalg, integrate
 from scipy.maxentropy import logsumexp
 from optparse import OptionParser
 from matplotlib import pyplot
@@ -222,17 +223,38 @@ def single_vlos_loglike(vc,o,dfc,options,l,beta=0.):
             sigmaT2= sigmaR2/dfc._gamma
             vtmean= vc*R**beta-dfc.asymmetricdrift(R)
         vrmean= 0.
-        AT= nu.zeros((2,2))
-        AT[0,0]= m.sin(phi+l)
-        AT[0,1]= m.cos(phi+l)
-        AT[1,0]= -m.cos(phi+l)
-        AT[1,1]= m.sin(phi+l)
-        vlosmean= nu.dot(AT,nu.array([vrmean,vtmean]))[1]-vc*m.sin(l)
-        V= nu.zeros((2,2))
-        V[0,0]= sigmaR2
-        V[1,1]= sigmaT2
-        vlossigma2= nu.dot(AT,nu.dot(V,AT.T))[1,1]
+        vlosmean= m.sin(phi+l)*vtmean-vc*m.sin(l)
+        vlossigma2= m.sin(phi+l)**2.*(sigmaT2-sigmaR2)+sigmaR2
         return -0.5*(o.vlos(obs=[1.,0.,0.,0.,1.,0.],ro=1.,vo=1.)-vlosmean)**2./vlossigma2
+    elif options.distuncertainty == 10.: #infinity
+        sigmaR2= dfc.targetSigma2(1.)
+        sigmaT2= sigmaR2/dfc._gamma
+        out= integrate.quad(_marginalizedIntegrand,
+                              0.01,1.25,
+                              (l,dfc,vc,beta,
+                               o.vlos(obs=[1.,0.,0.,0.,1.,0.],ro=1.,vo=1.),
+                               options),
+                              epsrel=_EPSREL)[0]
+        return m.log(out)
+
+def _marginalizedIntegrand(d,l,dfc,vc,beta,vlos,options):
+    pd= dfc.surfacemassLOS(d,l,deg=False)
+    R= nu.sqrt(1.+d**2.-2.*d*m.cos(l))
+    if 1./m.cos(l) < d and m.cos(l) > 0.:
+        phi= m.pi-m.asin(d/R*m.sin(l))
+    else:
+        phi= m.asin(d/R*m.sin(l))
+    if options.fixdfmoments:
+        sigmaR2= dfc.targetSigma2(1.)
+        sigmaT2= sigmaR2/dfc._gamma
+        vtmean= vc*R**beta-dfc.asymmetricdrift(1.)
+    else:
+        sigmaR2= dfc.targetSigma2(R)
+        sigmaT2= sigmaR2/dfc._gamma
+        vtmean= vc*R**beta-dfc.asymmetricdrift(R)
+    vlosmean= m.sin(phi+l)*vtmean-vc*m.sin(l)
+    vlossigma2= m.sin(phi+l)**2.*(sigmaT2-sigmaR2)+sigmaR2
+    return m.exp(-0.5*(vlos-vlosmean)**2./vlossigma2)/m.sqrt(vlossigma2)*pd*d
 
 def get_options():
     usage = "usage: %prog [options] <savefilename>\n\nsavefilename= name of the file that holds the los data (as a pickle)"

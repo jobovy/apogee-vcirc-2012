@@ -5,6 +5,10 @@
 ../plots/l30_500_d0_vclike.ps: map_vc_like_simple.py ../fakedata/l30_500_d0.sav
 	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_d0.sav \
 	-o $@ --nvcirc=201 --los=30. --distuncertainty=0.
+../plots/l30_500_dinf_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l30_500_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_d0.sav \
+	-o $@ --nvcirc=101 --los=30. --distuncertainty=10.
 ../plots/l30_500_d0_vclinear.ps: map_vc_like_simple.py \
 	../fakedata/l30_500_d0.sav
 	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_d0.sav \
@@ -78,6 +82,18 @@
 	../fakedata/l120_500_d0.sav
 	$(PYTHON) map_vc_like_simple.py ../fakedata/l120_500_d0.sav \
 	-o $@ --nvcirc=201 --los=120. --distuncertainty=0.
+../plots/l120_500_dinf_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l120_500_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l120_500_d0.sav \
+	-o $@ --nvcirc=201 --los=120. --distuncertainty=10.
+../plots/l120_500_vlosd.ps: plot_fake_data.py ../fakedata/l120_500_d0.sav
+	$(PYTHON) plot_fake_data.py ../fakedata/l120_500_d0.sav \
+	--scatterbins=10 --vlosdname=$@ --los=120.
+../plots/l120_500_d0_so.1_fixdf_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l120_500_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_d0.sav \
+	-o $@ --nvcirc=201 --los=30. --distuncertainty=0. \
+	--fixdfmoments
 
 #simple analysis without errors, sigma_R=0.1, l=120
 ../fakedata/l120_500_so.1_d0.sav: create_fake_los.py
