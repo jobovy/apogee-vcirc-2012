@@ -5,6 +5,21 @@
 ../plots/l30_500_d0_vclike.ps: map_vc_like_simple.py ../fakedata/l30_500_d0.sav
 	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_d0.sav \
 	-o $@ --nvcirc=201 --los=30. --distuncertainty=0.
+../plots/l30_500_d0_vclinear.ps: map_vc_like_simple.py \
+	../fakedata/l30_500_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_d0.sav \
+	-o $@ --los=30. --distuncertainty=0. --linearfit
+
+#simple analysis without errors, 10k
+../fakedata/l30_10k_d0.sav: create_fake_los.py
+	$(PYTHON) create_fake_los.py -n 10000 $@ --distuncertainty=0. --los=30.
+../plots/l30_10k_d0_vclike.ps: map_vc_like_simple.py ../fakedata/l30_10k_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_10k_d0.sav \
+	-o $@ --nvcirc=201 --los=30. --distuncertainty=0.
+../plots/l30_10k_d0_vclinear.ps: map_vc_like_simple.py \
+	../fakedata/l30_10k_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_10k_d0.sav \
+	-o $@ --los=30. --distuncertainty=0. --linearfit
 
 #simple analysis without errors, sigma_R=0.1
 ../fakedata/l30_500_so.1_d0.sav: create_fake_los.py
@@ -14,6 +29,47 @@
 	../fakedata/l30_500_so.1_d0.sav
 	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_so.1_d0.sav \
 	-o $@ --nvcirc=201 --los=30. --distuncertainty=0. --so=0.1
+../plots/l30_500_d0_so.1_fixdf_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l30_500_so.1_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_so.1_d0.sav \
+	-o $@ --nvcirc=201 --los=30. --distuncertainty=0. --so=0.1 \
+	--fixdfmoments
+../plots/l30_500_d0_so.1_vclinear.ps: map_vc_like_simple.py \
+	../fakedata/l30_500_so.1_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_so.1_d0.sav \
+	-o $@ --so=0.1 --los=30. --linearfit
+
+#simple analysis without errors, sigma_R=0.1, 10k
+../fakedata/l30_10k_so.1_d0.sav: create_fake_los.py
+	$(PYTHON) create_fake_los.py -n 10000 $@ \
+	--distuncertainty=0. --los=30. \
+	--so=0.1
+../plots/l30_10k_d0_so.1_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l30_10k_so.1_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_10k_so.1_d0.sav \
+	-o $@ --nvcirc=201 --los=30. --distuncertainty=0. --so=0.1
+../plots/l30_10k_d0_so.1_fixdf_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l30_10k_so.1_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_10k_so.1_d0.sav \
+	-o $@ --nvcirc=201 --los=30. --distuncertainty=0. --so=0.1 \
+	--fixdfmoments
+../plots/l30_10k_d0_so.1_vclinear.ps: map_vc_like_simple.py \
+	../fakedata/l30_10k_so.1_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_10k_so.1_d0.sav \
+	-o $@ --so=0.1 --los=30. --linearfit
+
+#simple analysis without errors, sigma_R=0.1
+../fakedata/l30_500_so.0125_d0.sav: create_fake_los.py
+	$(PYTHON) create_fake_los.py -n 500 $@ --distuncertainty=0. --los=30. \
+	--so=0.0125
+../plots/l30_500_d0_so.0125_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l30_500_so.0125_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_so.0125_d0.sav \
+	-o $@ --nvcirc=201 --los=30. --distuncertainty=0. --so=0.0125
+../plots/l30_500_d0_so.0125_vclinear.ps: map_vc_like_simple.py \
+	../fakedata/l30_500_so.0125_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_so.0125_d0.sav \
+	-o $@ --so=0.0125 --los=30. --linearfit
 
 #simple analysis without errors, l=120
 ../fakedata/l120_500_d0.sav: create_fake_los.py

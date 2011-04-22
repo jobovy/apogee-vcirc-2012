@@ -4,8 +4,10 @@ import os, os.path
 import cPickle as pickle
 import math as m
 import numpy as nu
+from scipy import linalg
 from scipy.maxentropy import logsumexp
 from optparse import OptionParser
+from matplotlib import pyplot
 #import subprocess
 from galpy.orbit import Orbit
 from galpy.df import dehnendf, shudf
@@ -36,6 +38,9 @@ def map_vc_like_simple(parser):
     out= pickle.load(picklefile)
     picklefile.close()
     ndata= len(out)
+    if options.linearfit:
+        plot_linear(out,options.los*_DEGTORAD,options,dfc)
+        return None
     #Map likelihood
     vcirc= nu.linspace(options.vmin,options.vmax,options.nvcirc)
     if not options.nbeta is None:
@@ -91,15 +96,131 @@ def map_vc_like_simple(parser):
                             top_left=True)
         bovy_plot.bovy_end_print(options.plotfilename)
 
+def plot_linear(out,l,options,dfc):
+    #Calculate sin(phi+l) for each
+    ndata= len(out)
+    sinphil= nu.zeros(ndata)
+    vloss= nu.zeros(ndata)
+    for ii in range(ndata):
+        o= out[ii]
+        sinphil[ii]= m.sin(o.phi()+l)
+        vloss[ii]= o.vlos(obs=[1.,0.,0.,0.,1.,0.],ro=1.,vo=1.)
+    #Perform linear fit
+    vlosf= []
+    sphilf= []
+    syf= []
+    nsphilbins, minobjs= 150, 5
+    for ii in range(nsphilbins):
+        if ii == 0.:
+            sphilmin, sphilmax= -1., -1.+1./nsphilbins*2.
+        elif ii == (nsphilbins - 1):
+            sphilmin, sphilmax= 1.-1./nsphilbins*2., 1.
+        else:
+            sphilmin, sphilmax= -1.+float(ii)/nsphilbins*2., -1.+2.*(ii+1.)/nsphilbins
+        indx= (sinphil <= sphilmax)*(sinphil > sphilmin)
+        if len(set(indx)) == 1: continue
+        if len(vloss[indx]) < minobjs: continue
+        sphilf.append(nu.mean(sinphil[indx]))
+        vlosf.append(nu.mean(vloss[indx]))
+        syf.append(nu.var(vloss[indx])/len(vloss[indx]))
+    pfit= _my_polyfit(sphilf,vlosf,sy=syf)
+    #Get asymmetricdrift
+    va= dfc.asymmetricdrift(1.)
+    vsun= -m.sin(l)
+    #Fit for sigma_R and sigma_T
+    svlos= []
+    sphil= []
+    sy= []
+    nsphilbins, minobjs= 50, 10
+    for ii in range(nsphilbins):
+        if ii == 0.:
+            sphilmin, sphilmax= 0., 1./nsphilbins
+        elif ii == (nsphilbins - 1):
+            sphilmin, sphilmax= 1.-1./nsphilbins, 1.
+        else:
+            sphilmin, sphilmax= float(ii)/nsphilbins, (ii+1.)/nsphilbins
+        indx= (sinphil**2. <= sphilmax)*(sinphil**2.> sphilmin)
+        if len(set(indx)) == 1: continue
+        if len(vloss[indx]) < minobjs: continue
+        sphil.append(nu.mean(sinphil[indx]**2.))
+        svlos.append(nu.var(vloss[indx]))
+        sy.append(nu.var(vloss[indx])**2./(len(vloss[indx]-1)))
+    #And fit that
+    sfit= _my_polyfit(sphil,svlos,sy=sy)
+    bovy_plot.bovy_print()
+    fig= pyplot.figure()
+    pyplot.subplot(211)
+    bovy_plot.bovy_plot(sphilf,vlosf,'k.',overplot=True)
+    pyplot.xlim(0.5,1.)
+    pyplot.ylim(0.,.6)
+    pyplot.xlabel(r'$sin(\phi + l)$')
+    pyplot.ylabel(r'$v_{los} / v_0$')
+    bovy_plot.bovy_plot(nu.array([-1.,1.]),
+                        nu.array([pfit[1]-pfit[0],pfit[1]+pfit[0]]),'k-',overplot=True)
+    bovy_plot.bovy_text(r'$v_c - v_a = %4.2f \ v_0$' % pfit[0]\
+                            +'\n'+
+                        r'$\mathrm{expected}\ v_c - v_a = %4.2f\ v_0$' % (1.-va)\
+                            +'\n'+
+                        r'$v_{local}\,\sin l = %4.2f\ v_0$' % (-pfit[1])\
+                            +'\n'+
+                        r'$\mathrm{expected}\ v_{local}\,\sin l = %4.2f$'\
+                            % (-vsun)\
+                            +'\n'+
+                        r'$\sigma_R(R_0) = %4.2f \ v_0$' % options.so+'\n'+\
+                            r'$l  = %i^\circ$' % round(options.los),
+                        top_left=True)
+    fig.subplots_adjust(hspace=0.3)
+    pyplot.subplot(210)
+    bovy_plot.bovy_plot(sphil,svlos,'k.',overplot=True)
+    pyplot.xlabel(r'$sin^2(\phi + l)$')
+    pyplot.ylabel(r'$\sigma^2_{v_{los}} / v_0^2$')
+    bovy_plot.bovy_text(r'$\sigma_R = %4.2f \ v_0$' % (nu.sqrt(sfit[1]))\
+                            +'\n'+
+                        r'$\mathrm{expected}\ \sigma_R = %4.2f\ v_0$' % (options.so)\
+                            +'\n'+
+                        r'$\sigma_T = %4.2f \ v_0$' % (nu.sqrt(sfit[0]+sfit[1]))\
+                            +'\n'+
+                        r'$\mathrm{expected}\ \sigma_T = %4.2f\ v_0$' % (options.so/dfc._gamma),
+                        top_left=True)
+    pyplot.ylim(0.,0.1)
+    bovy_plot.bovy_plot(nu.array([0.,1.]),
+                        nu.array([sfit[1],sfit[1]+sfit[0]]),'k-',overplot=True)
+    bovy_plot.bovy_end_print(options.plotfilename)
+    return None
+
+def _my_polyfit(x,y,sy=None):
+    #Put the dat in the appropriate arrays and matrices
+    nsample= len(x)
+    Y= nu.zeros(nsample)
+    A= nu.ones((nsample,2))
+    C= nu.eye(nsample)
+    for jj in range(nsample):
+        Y[jj]= y[jj]
+        A[jj,1]= x[jj]
+        if not sy is None: C[jj,jj]= sy[jj]
+    #Now compute the best fit and the uncertainties
+    bestfit= nu.dot(linalg.inv(C),Y.T)
+    bestfit= nu.dot(A.T,bestfit)
+    bestfitvar= nu.dot(linalg.inv(C),A)
+    bestfitvar= nu.dot(A.T,bestfitvar)
+    bestfitvar= linalg.inv(bestfitvar)
+    bestfit= nu.dot(bestfitvar,bestfit)
+    return bestfit[::-1]
+
 def single_vlos_loglike(vc,o,dfc,options,l,beta=0.):
     """Log likelihood of a single los velocity"""
     #Currently we only do distuncertain = 0.
     if options.distuncertainty == 0.:
         R= o.R()
         phi= o.phi()
-        sigmaR2= dfc.targetSigma2(R)
-        sigmaT2= sigmaR2/dfc._gamma
-        vtmean= vc*R**beta-dfc.asymmetricdrift(R)
+        if options.fixdfmoments:
+            sigmaR2= dfc.targetSigma2(1.)
+            sigmaT2= sigmaR2/dfc._gamma
+            vtmean= vc*R**beta-dfc.asymmetricdrift(1.)
+        else:
+            sigmaR2= dfc.targetSigma2(R)
+            sigmaT2= sigmaR2/dfc._gamma
+            vtmean= vc*R**beta-dfc.asymmetricdrift(R)
         vrmean= 0.
         AT= nu.zeros((2,2))
         AT[0,0]= m.sin(phi+l)
@@ -155,6 +276,12 @@ def get_options():
     parser.add_option("--nbeta",dest="nbeta",type='int',
                       default=None,
                       help="Number of circular velocities to consider")
+    parser.add_option("--linearfit",action="store_true", 
+                      default=False, dest="linearfit",
+                      help="Perform a simple linear fit assuming a flat rotation curve")
+    parser.add_option("--fixdfmoments",action="store_true", 
+                      default=False, dest="fixdfmoments",
+                      help="Fix the moments of the DF to the values on the Solar circle")
     return parser
 
 if __name__ == '__main__':
