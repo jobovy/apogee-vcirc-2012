@@ -227,8 +227,6 @@ def single_vlos_loglike(vc,o,dfc,options,l,beta=0.):
         vlossigma2= m.sin(phi+l)**2.*(sigmaT2-sigmaR2)+sigmaR2
         return -0.5*(o.vlos(obs=[1.,0.,0.,0.,1.,0.],ro=1.,vo=1.)-vlosmean)**2./vlossigma2
     elif options.distuncertainty == 10.: #infinity
-        sigmaR2= dfc.targetSigma2(1.)
-        sigmaT2= sigmaR2/dfc._gamma
         out= integrate.quad(_marginalizedIntegrand,
                               0.01,1.25,
                               (l,dfc,vc,beta,

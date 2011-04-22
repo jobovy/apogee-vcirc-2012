@@ -21,11 +21,11 @@ def create_fake_los(parser):
     HISTORY:
        2011-04-20 - Written - Bovy (NYU)
     """
-    nu.random.seed(seed=1)
     (options,args)= parser.parse_args()
     if len(args) == 0:
         parser.print_help()
         sys.exit(-1)
+    nu.random.seed(seed=options.seed)
     #Set up DF
     print "Setting up DF ..."
     dfc= dehnendf(beta=options.beta,profileParams=(options.rd,options.rs,options.so),correct=True,niter=20)
@@ -111,6 +111,9 @@ def get_options():
     parser.add_option("--local",action="store_true", 
                       default=False, dest="local",
                       help="Create a local sample")
+    parser.add_option("--seed",dest="seed",type='int',
+                      default=1,
+                      help="Seed for the random number generator")
     return parser
 
 if __name__ == '__main__':

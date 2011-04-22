@@ -13,6 +13,9 @@
 	../fakedata/l30_500_d0.sav
 	$(PYTHON) map_vc_like_simple.py ../fakedata/l30_500_d0.sav \
 	-o $@ --los=30. --distuncertainty=0. --linearfit
+../plots/l30_500_d0_vlosd.ps: plot_fake_data.py ../fakedata/l30_500_d0.sav
+	$(PYTHON) plot_fake_data.py ../fakedata/l30_500_d0.sav \
+	--scatterbins=10 --vlosdname=$@ --los=30.
 
 #simple analysis without errors, 10k
 ../fakedata/l30_10k_d0.sav: create_fake_los.py
@@ -104,6 +107,49 @@
 	../fakedata/l120_500_so.1_d0.sav
 	$(PYTHON) map_vc_like_simple.py ../fakedata/l120_500_so.1_d0.sav \
 	-o $@ --nvcirc=201 --los=120. --distuncertainty=0. --so=0.1
+
+#simple analysis without errors
+../fakedata/l75_500_d0.sav: create_fake_los.py
+	$(PYTHON) create_fake_los.py -n 500 $@ --distuncertainty=0. --los=75.
+../fakedata/l75_500_d0_2.sav: create_fake_los.py
+	$(PYTHON) create_fake_los.py -n 500 $@ --distuncertainty=0. --los=75. \
+	--seed=2
+../plots/l75_500_d0_vclike.ps: map_vc_like_simple.py ../fakedata/l75_500_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l75_500_d0.sav \
+	-o $@ --nvcirc=201 --los=75. --distuncertainty=0.
+../plots/l75_500_dinf_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l75_500_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l75_500_d0.sav \
+	-o $@ --nvcirc=201 --los=75. --distuncertainty=10.
+../plots/l75_500_dinf_2_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l75_500_d0_2.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l75_500_d0_2.sav \
+	-o $@ --nvcirc=201 --los=75. --distuncertainty=10.
+../plots/l75_500_d0_vclinear.ps: map_vc_like_simple.py \
+	../fakedata/l75_500_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l75_500_d0.sav \
+	-o $@ --los=75. --distuncertainty=0. --linearfit
+../plots/l75_500_d0_vcbetalike.ps: map_vc_like_simple.py \
+	../fakedata/l75_500_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l75_500_d0.sav \
+	-o $@ --nvcirc=51 --los=75. --distuncertainty=0. \
+	--nbeta=51
+../plots/l75_500_vlosd.ps: plot_fake_data.py ../fakedata/l75_500_d0.sav
+	$(PYTHON) plot_fake_data.py ../fakedata/l75_500_d0.sav \
+	--scatterbins=10 --vlosdname=$@ --los=75.
+
+#simple analysis without errors
+../fakedata/l75_500_so.1_d0.sav: create_fake_los.py
+	$(PYTHON) create_fake_los.py -n 500 $@ --distuncertainty=0. --los=75. \
+	--so=0.1
+../plots/l75_500_so.1_d0_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l75_500_so.1_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l75_500_so.1_d0.sav \
+	-o $@ --nvcirc=201 --los=75. --distuncertainty=0. --so=0.1
+../plots/l75_500_so.1_dinf_vclike.ps: map_vc_like_simple.py \
+	../fakedata/l75_500_so.1_d0.sav
+	$(PYTHON) map_vc_like_simple.py ../fakedata/l75_500_so.1_d0.sav \
+	-o $@ --nvcirc=201 --los=75. --distuncertainty=10. --so=.1
 
 #simple analysis without errors, fit for beta too
 ../plots/l30_500_so.1_d0_vcbetalike.ps: map_vc_like_simple.py \
