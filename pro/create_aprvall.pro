@@ -1,5 +1,6 @@
-PRO create_aprvall, outfile
+PRO create_aprvall, outfile=outfile
 redux= 'v0.91'
+if ~keyword_set(outfile) then outfile='$DATADIR/bovy/apogee/aprvall-'+redux+'.fits
 ;;Get all of the plates
 basedir= '$APOGEE_ROOT/spectro/'+redux+'/plates/'
 plateDirs= file_search(basedir+'*',/test_directory)
@@ -12,10 +13,11 @@ for ii=0L, n_elements(plateDirs)-1 do begin
         filename= mjdDirs[jj]+'/apRV-'+strtrim(string(plate,format='(I4)'),2)+'-'+strtrim(string(mjd,format='(I5)'),2)+'.fits'
         if ~file_test(filename) then continue
         if foundFirst EQ 0 then begin
-            outStr= mrdfits(filename,1)
-            foundFirst= 1
+            outStr= mrdfits(filename,1,/silent)
+            if tag_exist(outStr,'vhelio',/quiet) then foundFirst= 1
         endif else begin
-            outStr= [outStr,mrdfits(filename,1)]
+            xtra= mrdfits(filename,1,/silent)
+            if tag_exist(xtra,'vhelio',/quiet) then outStr= [outStr,xtra]
         endelse
     endfor
 endfor
