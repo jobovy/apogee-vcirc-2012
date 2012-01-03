@@ -71,7 +71,7 @@ vsun= [-11.1,240.]
 vsolar= numpy.zeros(len(ls))
 for ii in range(len(ls)):
     l= ls[ii]/180.*math.pi
-    vsolar[ii]= numpy.dot(vsun,numpy.array([-math.cos(l),math.sin(l)]))
+    vsolar[ii]= numpy.dot(vsun,numpy.array([math.cos(l),math.sin(l)]))
 bovy_plot.bovy_plot(ls,235.*avg_pred-vsolar,'k-',overplot=True)
 bovy_plot.bovy_plot(ls,220.*avg_pred-vsolar,'k--',overplot=True)
 bovy_plot.bovy_plot(ls,250.*avg_pred-vsolar,'k-.',overplot=True)
