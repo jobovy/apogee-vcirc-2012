@@ -11,6 +11,7 @@ from matplotlib.ticker import NullFormatter
 import apogee
 #set up
 nodups= True
+postshutdown= True
 betas, vcbetas= False, 220.
 ext= 'png'
 datafile= apogee.tools.apallPath(nodups=nodups)
@@ -18,6 +19,10 @@ data= fitsio.read(datafile,1)
 #data cuts
 data=data[(numpy.fabs(data['GLAT']) < 2.)*(numpy.fabs(data['GLON']) > 15.)]
 data= data[((data['APOGEE_TARGET1'] & 2**9) == 0)] #no probable cluster members
+indx= numpy.array(['STAR' in data['OBJTYPE'][ii] for ii in range(len(data))],dtype='bool')
+data= data[indx]
+if postshutdown:
+    data= data[(data['MJD5'] > 55788)]
 #Calculate means
 plates= list(set(data['PLATE']))
 nplates= len(plates)
@@ -149,7 +154,7 @@ if betas:
                   frameon=False)
 else:
     bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 15^\circ$'
-                        +'\n'+r'$%i,%i\ \mathrm{stars}$' % (ndata_t,ndata_h)
+                        +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
                         +'\n'+r'$\mathrm{assuming}\ R_0\ = 8\ \mathrm{kpc}$'
                         +'\n'+r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R} = 0\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
                         top_right=True)
@@ -168,16 +173,22 @@ interpolPred= interpolate.InterpolatedUnivariateSpline(ls,220.*avg_pred-vsolar)
 bovy_plot.bovy_plot(l_plate,avg_plate-interpolPred(l_plate),'ko',overplot=True)
 pyplot.errorbar(l_plate,avg_plate-interpolPred(l_plate),
                 yerr=siga_plate,marker='o',color='k',ls='none')
-bovy_plot.bovy_plot([0.,360.],[0.,0.],'k-',overplot=True)
+bovy_plot.bovy_plot([0.,360.],[0.,0.],'k--',overplot=True)
+if betas:
+    bovy_plot.bovy_plot(ls,vcbetas*avg_pred2-vcbetas*avg_pred,'k-',overplot=True)
+    bovy_plot.bovy_plot(ls,vcbetas*avg_pred3-vcbetas*avg_pred,'k-.',overplot=True)
+else:
+    bovy_plot.bovy_plot(ls,235.*avg_pred-220.*avg_pred,'k-',overplot=True)
+    bovy_plot.bovy_plot(ls,250.*avg_pred-220.*avg_pred,'k-.',overplot=True)
 pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
 pyplot.ylabel(r'$\langle v_{\mathrm{los}}^{\mathrm{helio}}\rangle^{\mathrm{data}}-\langle v_{\mathrm{los}}^{\mathrm{helio}}\rangle^{\mathrm{model}}$')
 if betas:
-    bovy_plot.bovy_text(r'$\mathrm{for}\ \frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R} = 0\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
+    bovy_plot.bovy_text(r'$\mathrm{flat\ for}\ \frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R} = 0\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
                     top_right=True)
 else:
-    bovy_plot.bovy_text(r'$\mathrm{for}\ v_{\mathrm{circ}}\ =\ 220\ \mathrm{km\ s}^{-1}$',
+    bovy_plot.bovy_text(r'$\mathrm{flat\ for}\ v_{\mathrm{circ}}\ =\ 220\ \mathrm{km\ s}^{-1}$',
                         top_right=True)
-pyplot.ylim(-25.,25.)
+pyplot.ylim(-14.5,14.5)
 pyplot.xlim(0.,360.)
 bovy_plot._add_ticks()
 if betas:
