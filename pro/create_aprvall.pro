@@ -1,6 +1,6 @@
 PRO create_aprvall, outfile=outfile, fromapvisit=fromapvisit
 redux= 'v0.91'
-if ~keyword_set(outfile) then outfile='$DATADIR/bovy/apogee/aprvall-'+redux+'.fits'
+if ~keyword_set(outfile) then outfile='$DATADIR/bovy/apogee/apall-'+redux+'.fits'
 ;;Get all of the plates
 basedir= '$APOGEE_ROOT/spectro/'+redux+'/plates/'
 plateDirs= file_search(basedir+'*',/test_directory)
@@ -18,6 +18,15 @@ for ii=0L, n_elements(plateDirs)-1 do begin
             for kk=1L, n_elements(apVisits)-1 do begin
                 apvisit= [apvisit,read_apvisit_header(apVisits[kk])]
             endfor
+            ;;Add plPlugMap structure's relevant entries
+            plPlugMap= mrdfits(mjdDirs[jj]+'/apPlate-b-'+strtrim(string(plate,format='(I4)'),2)+'-'+strtrim(string(mjd,format='(I5)'),2)+'.fits',11,/silent)
+            match, apvisit.fiberid, plPlugMap.fiberid, suba, subb, /sort
+            newtag= {apogee_target1:0L,apogee_target2:0L,objtype:''}
+            newtag= replicate(newtag,n_elements(apvisit))
+            newtag[suba].apogee_target1= plPlugMap[subb].primtarget
+            newtag[suba].apogee_target2= plPlugMap[subb].sectarget
+            newtag[suba].objtype= plPlugMap[subb].objtype
+            apvisit= struct_combine(apvisit,newtag)
             if foundFirst EQ 0 then begin
                 outStr= apvisit
                 if tag_exist(outStr,'vhelio',/quiet) then foundFirst= 1
