@@ -1,6 +1,6 @@
 PRO create_aprvall, outfile=outfile, fromapvisit=fromapvisit
 redux= 'v0.91'
-if ~keyword_set(outfile) then outfile='$DATADIR/bovy/apogee/aprvall-'+redux+'.fits
+if ~keyword_set(outfile) then outfile='$DATADIR/bovy/apogee/aprvall-'+redux+'.fits'
 ;;Get all of the plates
 basedir= '$APOGEE_ROOT/spectro/'+redux+'/plates/'
 plateDirs= file_search(basedir+'*',/test_directory)
