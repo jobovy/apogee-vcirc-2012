@@ -145,9 +145,9 @@ if betas:
                         +'\n'+r'$v_{\mathrm{circ}}\ = %i\ \mathrm{km\ s}^{-1}$' % (int(vcbetas)),
                         top_right=True)
     #Legend
-    pyplot.legend((line1,line2,line3),(r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R} = \,\,0\,\,\,\,\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
-                                       r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R} = \,\,2.75\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
-                                       r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R} = -2.75\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$'),
+    pyplot.legend((line1,line2,line3),(r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ =\ \,\,0\,\,\,\,\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
+                                       r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ =\ \,\,2.75\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
+                                       r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ =\ -2.75\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$'),
                   loc='upper right',bbox_to_anchor=(.91,.375),
                   numpoints=2,
                   prop={'size':12},
@@ -156,7 +156,7 @@ else:
     bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 15^\circ$'
                         +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
                         +'\n'+r'$\mathrm{assuming}\ R_0\ =\ 8\ \mathrm{kpc}$'
-                        +'\n'+r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R} = 0\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
+                        +'\n'+r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ =\ 0\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
                         top_right=True)
     #Legend
     pyplot.legend((line1,line2,line3),(r'$v_{\mathrm{circ}}\ =\ 230\ \mathrm{km\ s}^{-1}$',
@@ -183,7 +183,7 @@ else:
 pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
 pyplot.ylabel(r'$\langle v_{\mathrm{los}}^{\mathrm{helio}}\rangle^{\mathrm{data}}-\langle v_{\mathrm{los}}^{\mathrm{helio}}\rangle^{\mathrm{model}}$')
 if betas:
-    bovy_plot.bovy_text(r'$\mathrm{flat\ for}\ \frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R} = 0\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
+    bovy_plot.bovy_text(r'$\mathrm{flat\ for}\ \frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ =\ 0\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
                     top_right=True)
 else:
     bovy_plot.bovy_text(r'$\mathrm{flat\ for}\ v_{\mathrm{circ}}\ =\ 210\ \mathrm{km\ s}^{-1}$',
