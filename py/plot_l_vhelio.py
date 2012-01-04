@@ -116,10 +116,11 @@ pyplot.ylim(-200.,200.)
 nullfmt   = NullFormatter()         # no labels
 axTop.xaxis.set_major_formatter(nullfmt)
 bovy_plot.bovy_plot(data['GLON'],data['VHELIO'],'k,',
-                    
                     yrange=[-200.,200.],
                     xrange=[0.,360.],overplot=True)
-bovy_plot.bovy_plot(l_plate,avg_plate,'o',overplot=True,mfc='0.5',mec='none')
+bovy_plot.bovy_plot(l_plate,
+                    avg_plate,
+                    'o',overplot=True,mfc='0.5',mec='none')
 #pyplot.errorbar(l_plate,avg_plate,yerr=sig_plate,marker='o',mfc='k',mec='w',
 #                ls='none',color='0.75')
 #Solar motion
