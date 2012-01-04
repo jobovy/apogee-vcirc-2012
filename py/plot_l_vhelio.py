@@ -145,9 +145,9 @@ if betas:
                         +'\n'+r'$v_{\mathrm{circ}}\ = %i\ \mathrm{km\ s}^{-1}$' % (int(vcbetas)),
                         top_right=True)
     #Legend
-    pyplot.legend((line1,line2,line3),(r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ =\ \,\,0\,\,\,\,\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
-                                       r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ =\ \,\,2.75\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
-                                       r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ =\ -2.75\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$'),
+    pyplot.legend((line1,line2,line3),(r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ = \,\,0\,\,\,\,\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
+                                       r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ = \,\,2.75\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
+                                       r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ = -2.75\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$'),
                   loc='upper right',bbox_to_anchor=(.91,.375),
                   numpoints=2,
                   prop={'size':12},
