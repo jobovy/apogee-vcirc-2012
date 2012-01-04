@@ -9,10 +9,13 @@ from galpy.util import bovy_plot
 from matplotlib import pyplot
 from matplotlib.ticker import NullFormatter
 import apogee
+import marginalize_phasedist
+from velocity_field import read_output
 #set up
 nodups= True
 postshutdown= True
 betas, vcbetas= False, 210.
+addNonAxi= True
 ext= 'png'
 datafile= apogee.tools.apallPath(nodups=nodups)
 data= fitsio.read(datafile,1)
@@ -141,7 +144,7 @@ ndata_t= int(math.floor(len(data)/1000.))
 ndata_h= len(data)-ndata_t*1000
 if betas:
     bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 15^\circ$'
-                        +'\n'+r'$%i,%i\ \mathrm{stars}$' % (ndata_t,ndata_h)
+                        +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
                         +'\n'+r'$\mathrm{assuming}\ R_0\ =\ 8\ \mathrm{kpc}$'
                         +'\n'+r'$v_{\mathrm{circ}}\ = %i\ \mathrm{km\ s}^{-1}$' % (int(vcbetas)),
                         top_right=True)
@@ -174,13 +177,57 @@ interpolPred= interpolate.InterpolatedUnivariateSpline(ls,210.*avg_pred-vsolar)
 bovy_plot.bovy_plot(l_plate,avg_plate-interpolPred(l_plate),'ko',overplot=True)
 pyplot.errorbar(l_plate,avg_plate-interpolPred(l_plate),
                 yerr=siga_plate,marker='o',color='k',ls='none')
-bovy_plot.bovy_plot([0.,360.],[0.,0.],'k--',overplot=True)
 if betas:
-    bovy_plot.bovy_plot(ls,vcbetas*avg_pred2-vcbetas*avg_pred,'k-',overplot=True)
+    bovy_plot.bovy_plot([0.,360.],[0.,0.],'k-',overplot=True)
+    bovy_plot.bovy_plot(ls,vcbetas*avg_pred2-vcbetas*avg_pred,'k--',overplot=True)
     bovy_plot.bovy_plot(ls,vcbetas*avg_pred3-vcbetas*avg_pred,'k-.',overplot=True)
 else:
+    bovy_plot.bovy_plot([0.,360.],[0.,0.],'k--',overplot=True)
     bovy_plot.bovy_plot(ls,230.*avg_pred-210.*avg_pred,'k-',overplot=True)
     bovy_plot.bovy_plot(ls,250.*avg_pred-210.*avg_pred,'k-.',overplot=True)
+########NONAXI
+if addNonAxi:
+    nonAxiFile= 'predict_l_vhelio_nonaxi.sav'
+    if os.path.exists(nonAxiFile):
+        nonaxi_file= open(nonAxiFile,'rb')
+        nonaxils= pickle.load(nonaxi_file)
+        nonaxiEl= pickle.load(nonaxi_file)
+        nonaxiBar= pickle.load(nonaxi_file)
+        nonaxi_file.close()
+    else:
+        print "Working on NonAxi ..."
+        elfile= '/work/bovy/data/bovy/nonaximw/elliptical/el_rect_so_0.2_res_51_grid_101_tform_-150._tsteady_125._cp_0.05_nsigma_4.sav'
+        print "Reading bar file ..."
+        barfile= '/work/bovy/data/bovy/nonaximw/bar/bar_rect_vr_tform-150_tsteady-4pi_51_101.sav'
+        #elliptical
+        surfmass,meanvr,meanvt,sigmar2,sigmat2,sigmart,vertexdev,surfmass_init,meanvt_init,sigmar2_init,sigmat2_init,ii,jj,grid = read_output(elfile)
+        xgrid, ygrid= marginalize_phasedist.phiR_input(51,0.5,2.)
+        interpObj= marginalize_phasedist.interp_velocity_field(xgrid,ygrid,surfmass,meanvr,meanvt)
+        interpObjAxi= marginalize_phasedist.interp_velocity_field(xgrid,ygrid,surfmass_init,0.,meanvt_init)
+        nonaxils= numpy.linspace(30.,330.,1001)
+        nonaxiEl= numpy.zeros(len(nonaxils))
+        phio=70.
+        print "Calculating elliptical perturbation ..."
+        for ii in range(len(nonaxils)):
+            print ii
+            nonaxiEl[ii]= marginalize_phasedist.mvlos_l(nonaxils[ii],interpObj,degree=True,phio=phio)-marginalize_phasedist.mvlos_l(nonaxils[ii],interpObjAxi,degree=True,phio=phio)
+        #Bar
+        surfmass,meanvr,meanvt,sigmar2,sigmat2,sigmart,vertexdev,surfmass_init,meanvt_init,sigmar2_init,sigmat2_init,ii,jj,grid = read_output(barfile)
+        interpObj= marginalize_phasedist.interp_velocity_field(xgrid,ygrid,surfmass,meanvr,meanvt)
+        interpObjAxi= marginalize_phasedist.interp_velocity_field(xgrid,ygrid,surfmass_init,0.,meanvt_init)
+        nonaxiBar= numpy.zeros(len(nonaxils))
+        print "Calculating bar perturbation ..."
+        for ii in range(len(nonaxils)):
+            print ii
+            nonaxiBar[ii]= marginalize_phasedist.mvlos_l(nonaxils[ii],interpObj,degree=True)-marginalize_phasedist.mvlos_l(nonaxils[ii],interpObjAxi,degree=True)
+        #Save
+        nonaxi_file= open(nonAxiFile,'wb')
+        pickle.dump(nonaxils,nonaxi_file)
+        pickle.dump(nonaxiEl,nonaxi_file)
+        pickle.dump(nonaxiBar,nonaxi_file)
+        nonaxi_file.close()
+    bovy_plot.bovy_plot(nonaxils,210.*nonaxiEl,'-',color='0.5',overplot=True)
+    bovy_plot.bovy_plot(nonaxils,210.*nonaxiBar,'--',color='0.5',overplot=True)
 pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
 pyplot.ylabel(r'$\langle v_{\mathrm{los}}^{\mathrm{helio}}\rangle^{\mathrm{data}}-\langle v_{\mathrm{los}}^{\mathrm{helio}}\rangle^{\mathrm{model}}$')
 if betas:
@@ -194,5 +241,7 @@ pyplot.xlim(0.,360.)
 bovy_plot._add_ticks()
 if betas:
     bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_betas.'+ext)
+elif addNonAxi:
+    bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_nonaxi.'+ext)
 else:
     bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio.'+ext)
