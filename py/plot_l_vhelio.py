@@ -204,7 +204,7 @@ if addNonAxi:
         xgrid, ygrid= marginalize_phasedist.phiR_input(51,0.5,2.)
         interpObj= marginalize_phasedist.interp_velocity_field(xgrid,ygrid,surfmass,meanvr,meanvt)
         interpObjAxi= marginalize_phasedist.interp_velocity_field(xgrid,ygrid,surfmass_init,0.,meanvt_init)
-        nonaxils= numpy.linspace(30.,330.,1001)
+        nonaxils= numpy.linspace(30.,330.,501)
         nonaxiEl= numpy.zeros(len(nonaxils))
         phio=70.
         print "Calculating elliptical perturbation ..."
