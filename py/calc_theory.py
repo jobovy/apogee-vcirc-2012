@@ -9,6 +9,7 @@ from galpy.util import bovy_coords
 nls= 501
 ls= numpy.linspace(0.,360.,nls)
 nds= 101
+ds= numpy.linspace(0.,10./8.,nds)
 _SAVEDIR= os.path.join(os.getenv('DATADIR'),
                        'bovy',
                        'vclos')
@@ -23,7 +24,7 @@ def safe_dl_to_rphi(d,l):
     else:
         theta= math.asin(d/R*math.sin(l))
     return (R,theta)
-def calc_pred(pred_file,dfc,nls,nds,ls)
+def calc_pred(pred_file,dfc,nls,nds,ls):
     avg_pred= numpy.zeros(nls)
     for ii in range(nls):
         meanvlos= 0.
@@ -58,7 +59,7 @@ for beta in betas:
 #hr
 hrs= [1./4.,1./2.]
 for hr in hrs:
-    pred_file= os.path.join(_SAVEDIR,'l_vhelio_hr_%.2f.sav' % hr)
+    pred_file= os.path.join(_SAVEDIR,'l_vhelio_hr_%.6f.sav' % hr)
     if not os.path.exists(pred_file):
         print "Working on hr %.2f ..." % hr
         dfc= dehnendf(beta=0.,correct=True,niter=20,
@@ -66,7 +67,7 @@ for hr in hrs:
         calc_pred(pred_file,dfc,nls,nds,ls)
 #hs
 hs= 2./3.
-pred_file= os.path.join(_SAVEDIR,'l_vhelio_hr_%.2f.sav' % hr)
+pred_file= os.path.join(_SAVEDIR,'l_vhelio_hs_%.6f.sav' % hs)
 if not os.path.exists(pred_file):
     print "Working on hs %.2f ..." % hs
     dfc= dehnendf(beta=0.,correct=True,niter=20,
@@ -78,3 +79,12 @@ if not os.path.exists(pred_file):
     print "Working on Shu ..."
     dfc= shudf(beta=0.,correct=True,niter=20)
     calc_pred(pred_file,dfc,nls,nds,ls)
+altdmaxs= [5./8.,15./8.]
+for altdmax in altdmaxs:
+    thisds= numpy.linspace(0.,altdmax,nds)
+    pred_file= os.path.join(_SAVEDIR,'l_vhelio_dmax_%.6f.sav' % altdmax)
+    if not os.path.exists(pred_file):
+        print "Working on dmax %.2f ..." % altdmax
+        dfc= dehnendf(beta=0.,correct=True,niter=20)
+        calc_pred(pred_file,dfc,nls,thisnds,ls)
+
