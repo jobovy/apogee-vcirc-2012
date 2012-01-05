@@ -4,7 +4,7 @@ import cPickle as pickle
 import math
 import numpy
 from galpy.df import dehnendf, shudf
-from galpy.util import bovy_coords
+from galpy.util import bovy_coords, save_pickles
 #Overall setup
 nls= 501
 ls= numpy.linspace(0.,360.,nls)
@@ -36,10 +36,8 @@ def calc_pred(pred_file,dfc,nls,nds,ls):
             meanvlos+= surfmass*dfc.meanvT(R)*math.sin(theta+l)
             norm+= surfmass
         avg_pred[ii]= meanvlos/norm
-    savefile= open(pred_file,'wb')
-    pickle.dump(ls,savefile)
-    pickle.dump(avg_pred,savefile)
-    savefile.close()
+        save_pickles(pred_file,ls,avg_pred)
+    save_pickles(pred_file,ls,avg_pred)
 
 #Start calculating
 #Fiducial
