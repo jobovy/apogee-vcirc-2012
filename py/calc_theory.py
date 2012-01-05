@@ -11,9 +11,9 @@ _ERASESTR= "                                                                    
 import warnings
 warnings.filterwarnings("ignore")
 #Overall setup
-nls= 501
+nls= 201
 ls= numpy.linspace(0.,360.,nls)
-nds= 101
+nds= 51
 ds= numpy.linspace(0.,10./8.,nds)
 _SAVEDIR= os.path.join(os.getenv('DATADIR'),
                        'bovy',
