@@ -226,8 +226,8 @@ if addNonAxi:
         pickle.dump(nonaxiEl,nonaxi_file)
         pickle.dump(nonaxiBar,nonaxi_file)
         nonaxi_file.close()
-    bovy_plot.bovy_plot(nonaxils,210.*nonaxiEl,'-',color='0.5',overplot=True)
-    bovy_plot.bovy_plot(nonaxils,210.*nonaxiBar,'--',color='0.5',overplot=True)
+    bovy_plot.bovy_plot(nonaxils,210.*nonaxiEl,'-',color='0.5',overplot=True,lw=2.,zorder=-1)
+    bovy_plot.bovy_plot(nonaxils,210.*nonaxiBar,'-',color='0.65',overplot=True,lw=2.,zorder=-1)
 pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
 pyplot.ylabel(r'$\langle v_{\mathrm{los}}^{\mathrm{helio}}\rangle^{\mathrm{data}}-\langle v_{\mathrm{los}}^{\mathrm{helio}}\rangle^{\mathrm{model}}$')
 if betas:
