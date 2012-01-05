@@ -17,13 +17,13 @@ _SAVEDIR= os.path.join(os.getenv('DATADIR'),
 def safe_dl_to_rphi(d,l):
     R= math.sqrt(1.+d**2.-2.*d*math.cos(l))
     if R == 0.:
-        R+= 0.0001
+        R= 0.0001
         d+= 0.0001
     if 1./math.cos(l) < d and math.cos(l) > 0.:
         theta= math.pi-math.asin(d/R*math.sin(l))
     else:
         theta= math.asin(d/R*math.sin(l))
-    return (R,theta)
+    return (R,theta,d,l)
 def calc_pred(pred_file,dfc,nls,nds,ls):
     avg_pred= numpy.zeros(nls)
     for ii in range(nls):
@@ -31,7 +31,7 @@ def calc_pred(pred_file,dfc,nls,nds,ls):
         norm= 0.
         for jj in range(nds):
             d,l= ds[jj], ls[ii]/180.*numpy.pi
-            R,theta= safe_dl_to_rphi(d,l)
+            R,theta,d,l= safe_dl_to_rphi(d,l)
             surfmass= dfc.surfacemassLOS(d,l,deg=False)
             meanvlos+= surfmass*dfc.meanvT(R)*math.sin(theta+l)
             norm+= surfmass
@@ -88,3 +88,11 @@ for altdmax in altdmaxs:
         dfc= dehnendf(beta=0.,correct=True,niter=20)
         calc_pred(pred_file,dfc,nls,thisnds,ls)
 
+#sig0.1
+sig= 0.1
+pred_file= os.path.join(_SAVEDIR,'l_vhelio_sig_%.6f.sav' % sig)
+if not os.path.exists(pred_file):
+    print "Working on sig %.2f ..." % sig
+    dfc= dehnendf(beta=0.,correct=True,niter=20,
+                  profileParams=(1./3.,1.,sig))
+    calc_pred(pred_file,dfc,nls,nds,ls)
