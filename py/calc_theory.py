@@ -35,6 +35,7 @@ def calc_pred(pred_file,dfc,nls,nds,ls):
         ls= pickle.load(savefile)
         avg_pred= pickle.load(savefile)
         ii= pickle.load(savefile)
+        pred_file.close()
     else:
         avg_pred= numpy.zeros(nls)
         ii= 0
