@@ -35,7 +35,7 @@ def calc_pred(pred_file,dfc,nls,nds,ls):
         ls= pickle.load(savefile)
         avg_pred= pickle.load(savefile)
         ii= pickle.load(savefile)
-        pred_file.close()
+        savefile.close()
     else:
         avg_pred= numpy.zeros(nls)
         ii= 0
@@ -55,7 +55,7 @@ def calc_pred(pred_file,dfc,nls,nds,ls):
         save_pickles(pred_file,ls,avg_pred,ii)
     sys.stdout.write('\r'+_ERASESTR+'\r')
     sys.stdout.flush()
-    save_pickles(pred_file,ls,avg_pred)
+    save_pickles(pred_file,ls,avg_pred,ii)
 
 #Start calculating
 #Fiducial
