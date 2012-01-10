@@ -12,9 +12,12 @@ from matplotlib.ticker import NullFormatter
 import apogee
 import marginalize_phasedist
 from velocity_field import read_output
-#set up
+#set up; kind of plot
 justData= False
-dataMean= True
+dataMean= False
+noSolar= False
+justSolar= True
+#Data selection
 nodups= True
 postshutdown= True
 betas, vcbetas= False, 210.
@@ -113,7 +116,7 @@ else:
 left, bottom, width, height= 0.1, 0.3, 0.8, 0.6
 axTop= pyplot.axes([left,bottom,width,height])
 left, bottom, width, height= 0.1, 0.1, 0.8, 0.2
-if not justData and not dataMean:
+if not justData and not dataMean and not noSolar and not justSolar:
     axBottom= pyplot.axes([left,bottom,width,height])
 fig= pyplot.gcf()
 fig.sca(axTop)
@@ -145,7 +148,10 @@ if dataMean:
 #pyplot.errorbar(l_plate,avg_plate,yerr=sig_plate,marker='o',mfc='k',mec='w',
 #                ls='none',color='0.75')
 #Solar motion
-vsun= [-11.1,240.]
+if noSolar or justSolar:
+    vsun= [0.,0.]
+else:
+    vsun= [-11.1,240.]
 vsolar= numpy.zeros(len(ls))
 for ii in range(len(ls)):
     l= ls[ii]/180.*math.pi
@@ -158,6 +164,13 @@ else:
     line1= bovy_plot.bovy_plot(ls,230.*avg_pred-vsolar,'k-',overplot=True)
     line2= bovy_plot.bovy_plot(ls,210.*avg_pred-vsolar,'k--',overplot=True)
     line3= bovy_plot.bovy_plot(ls,250.*avg_pred-vsolar,'k-.',overplot=True)
+if justSolar:
+    vsun= [-11.1,240.]
+    vsolar= numpy.zeros(len(ls))
+    for ii in range(len(ls)):
+        l= ls[ii]/180.*math.pi
+        vsolar[ii]= numpy.dot(vsun,numpy.array([-math.cos(l),math.sin(l)]))
+    bovy_plot.bovy_plot(ls,-vsolar,'k-',overplot=True)   
 if betas:
     bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 15^\circ$'
                         +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
@@ -187,6 +200,12 @@ else:
                   prop={'size':12},
                   frameon=False)
 bovy_plot._add_ticks()
+if noSolar:
+    bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_noSolar.'+ext)
+    sys.exit(0)
+elif justSolar:
+    bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_justSolar.'+ext)
+    sys.exit(0)
 fig.sca(axBottom)
 #Interpolate prediction
 interpolPred= interpolate.InterpolatedUnivariateSpline(ls,210.*avg_pred-vsolar)
