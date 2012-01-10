@@ -1,3 +1,4 @@
+import sys
 import os, os.path
 import cPickle as pickle
 import math
@@ -12,6 +13,8 @@ import apogee
 import marginalize_phasedist
 from velocity_field import read_output
 #set up
+justData= False
+dataMean= True
 nodups= True
 postshutdown= True
 betas, vcbetas= False, 210.
@@ -110,7 +113,8 @@ else:
 left, bottom, width, height= 0.1, 0.3, 0.8, 0.6
 axTop= pyplot.axes([left,bottom,width,height])
 left, bottom, width, height= 0.1, 0.1, 0.8, 0.2
-axBottom= pyplot.axes([left,bottom,width,height])
+if not justData and not dataMean:
+    axBottom= pyplot.axes([left,bottom,width,height])
 fig= pyplot.gcf()
 fig.sca(axTop)
 pyplot.ylabel(r'$\mathrm{Heliocentric\ velocity}\ [\mathrm{km\ s}^{-1}]$')
@@ -121,9 +125,23 @@ axTop.xaxis.set_major_formatter(nullfmt)
 bovy_plot.bovy_plot(data['GLON'],data['VHELIO'],'k,',
                     yrange=[-200.,200.],
                     xrange=[0.,360.],overplot=True)
+ndata_t= int(math.floor(len(data)/1000.))
+ndata_h= len(data)-ndata_t*1000
+if justData:
+    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 15^\circ$'
+                        +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h),
+                        top_right=True)
+    bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_justdata.'+ext)
+    sys.exit(0)
 bovy_plot.bovy_plot(l_plate,
                     avg_plate,
                     'o',overplot=True,mfc='0.5',mec='none')
+if dataMean:
+    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 15^\circ$'
+                        +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h),
+                        top_right=True)
+    bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_datamean.'+ext)
+    sys.exit(0)
 #pyplot.errorbar(l_plate,avg_plate,yerr=sig_plate,marker='o',mfc='k',mec='w',
 #                ls='none',color='0.75')
 #Solar motion
@@ -140,8 +158,6 @@ else:
     line1= bovy_plot.bovy_plot(ls,230.*avg_pred-vsolar,'k-',overplot=True)
     line2= bovy_plot.bovy_plot(ls,210.*avg_pred-vsolar,'k--',overplot=True)
     line3= bovy_plot.bovy_plot(ls,250.*avg_pred-vsolar,'k-.',overplot=True)
-ndata_t= int(math.floor(len(data)/1000.))
-ndata_h= len(data)-ndata_t*1000
 if betas:
     bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 15^\circ$'
                         +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
