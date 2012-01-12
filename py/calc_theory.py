@@ -78,18 +78,6 @@ for hr in hrs:
     dfc= dehnendf(beta=0.,correct=True,niter=20,
                   profileParams=(hr,1.,0.2))
     calc_pred(pred_file,dfc,nls,nds,ls)
-#hs
-hs= 2./3.
-pred_file= os.path.join(_SAVEDIR,'l_vhelio_hs_%.6f.sav' % hs)
-print "Working on hs %.2f ..." % hs
-dfc= dehnendf(beta=0.,correct=True,niter=20,
-              profileParams=(1./3.,hs,0.2))
-calc_pred(pred_file,dfc,nls,nds,ls)
-#shu
-pred_file= os.path.join(_SAVEDIR,'l_vhelio_shu.sav')
-print "Working on Shu ..."
-dfc= shudf(beta=0.,correct=True,niter=20)
-calc_pred(pred_file,dfc,nls,nds,ls)
 #Alt dmax
 altdmaxs= [5./8.,15./8.]
 for altdmax in altdmaxs:
@@ -98,6 +86,11 @@ for altdmax in altdmaxs:
     print "Working on dmax %.2f ..." % altdmax
     dfc= dehnendf(beta=0.,correct=True,niter=20)
     calc_pred(pred_file,dfc,nls,thisnds,ls)
+#shu
+pred_file= os.path.join(_SAVEDIR,'l_vhelio_shu.sav')
+print "Working on Shu ..."
+dfc= shudf(beta=0.,correct=True,niter=20)
+calc_pred(pred_file,dfc,nls,nds,ls)
 #sig0.1
 sig= 0.1
 pred_file= os.path.join(_SAVEDIR,'l_vhelio_sig_%.6f.sav' % sig)
@@ -106,3 +99,10 @@ if not os.path.exists(pred_file):
     dfc= dehnendf(beta=0.,correct=True,niter=20,
                   profileParams=(1./3.,1.,sig))
     calc_pred(pred_file,dfc,nls,nds,ls)
+#hs
+hs= 2./3.
+pred_file= os.path.join(_SAVEDIR,'l_vhelio_hs_%.6f.sav' % hs)
+print "Working on hs %.2f ..." % hs
+dfc= dehnendf(beta=0.,correct=True,niter=20,
+              profileParams=(1./3.,hs,0.2))
+calc_pred(pred_file,dfc,nls,nds,ls)
