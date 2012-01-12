@@ -85,7 +85,7 @@ for altdmax in altdmaxs:
     pred_file= os.path.join(_SAVEDIR,'l_vhelio_dmax_%.6f.sav' % altdmax)
     print "Working on dmax %.2f ..." % altdmax
     dfc= dehnendf(beta=0.,correct=True,niter=20)
-    calc_pred(pred_file,dfc,nls,thisnds,ls)
+    calc_pred(pred_file,dfc,nls,thisds,ls)
 #shu
 pred_file= os.path.join(_SAVEDIR,'l_vhelio_shu.sav')
 print "Working on Shu ..."
