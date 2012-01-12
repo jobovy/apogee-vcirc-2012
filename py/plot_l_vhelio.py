@@ -16,12 +16,13 @@ from velocity_field import read_output
 justData= False
 dataMean= False
 noSolar= False
-justSolar= True
+justSolar= False
+betas, vcbetas= False, 210.
+hrs= False
+addNonAxi= False
 #Data selection
 nodups= True
 postshutdown= True
-betas, vcbetas= False, 210.
-addNonAxi= True
 ext= 'png'
 datafile= apogee.tools.apallPath(nodups=nodups)
 data= fitsio.read(datafile,1)
@@ -48,6 +49,9 @@ for ii in range(nplates):
 #Prediction
 if betas:
     pred_file= 'predict_l_vhelio_betas.sav'
+elif hrs:
+    pred_file= os.path.join(os.getenv('DATADIR'),'bovy','vclos',
+                            'l_vhelio_fid.sav')
 else:
     pred_file= 'predict_l_vhelio.sav'
 if os.path.exists(pred_file):
@@ -56,6 +60,19 @@ if os.path.exists(pred_file):
     avg_pred= pickle.load(pred_file)
     if betas:
         avg_pred2= pickle.load(pred_file)
+        avg_pred3= pickle.load(pred_file)
+    elif hrs:
+        pred_file.close()
+        pred_file= os.path.join(os.getenv('DATADIR'),'bovy','vclos',
+                                'l_vhelio_hr_0.250000.sav')
+        pred_file= open(pred_file,'rb')
+        ls= pickle.load(pred_file)
+        avg_pred2= pickle.load(pred_file)
+        pred_file.close()
+        pred_file= os.path.join(os.getenv('DATADIR'),'bovy','vclos',
+                                'l_vhelio_hr_0.500000.sav')
+        pred_file= open(pred_file,'rb')
+        ls= pickle.load(pred_file)
         avg_pred3= pickle.load(pred_file)
     pred_file.close()
 else:
@@ -156,7 +173,7 @@ vsolar= numpy.zeros(len(ls))
 for ii in range(len(ls)):
     l= ls[ii]/180.*math.pi
     vsolar[ii]= numpy.dot(vsun,numpy.array([-math.cos(l),math.sin(l)]))
-if betas:
+if betas or hrs:
     line1= bovy_plot.bovy_plot(ls,vcbetas*avg_pred-vsolar,'k-',overplot=True)
     line2= bovy_plot.bovy_plot(ls,vcbetas*avg_pred2-vsolar,'k--',overplot=True)
     line3= bovy_plot.bovy_plot(ls,vcbetas*avg_pred3-vsolar,'k-.',overplot=True)
@@ -182,6 +199,20 @@ if betas:
                                        r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ = \,\,2.75\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
                                        r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ = -2.75\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$'),
                   loc='upper right',bbox_to_anchor=(.91,.375),
+                  numpoints=2,
+                  prop={'size':12},
+                  frameon=False)
+elif hrs:
+    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 15^\circ$'
+                        +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
+                        +'\n'+r'$\mathrm{assuming}\ R_0\ =\ 8\ \mathrm{kpc}$'
+                        +'\n'+r'$v_{\mathrm{circ}}\ = %i\ \mathrm{km\ s}^{-1}$' % (int(vcbetas)),
+                        top_right=True)
+    #Legend
+    pyplot.legend((line1,line2,line3),(r'$h_R\ =\ R_0 / 3$',
+                                       r'$h_R\ =\ R_0 / 4$',
+                                       r'$h_R\ =\ R_0 / 2$'),
+                  loc='upper right',bbox_to_anchor=(.95,.375),
                   numpoints=2,
                   prop={'size':12},
                   frameon=False)
@@ -211,8 +242,8 @@ fig.sca(axBottom)
 interpolPred= interpolate.InterpolatedUnivariateSpline(ls,210.*avg_pred-vsolar)
 bovy_plot.bovy_plot(l_plate,avg_plate-interpolPred(l_plate),'ko',overplot=True)
 pyplot.errorbar(l_plate,avg_plate-interpolPred(l_plate),
-                yerr=siga_plate,marker='o',color='k',ls='none')
-if betas:
+                yerr=siga_plate,marker='o',color='k',linestyle='none',elinestyle='-')
+if betas or hrs:
     bovy_plot.bovy_plot([0.,360.],[0.,0.],'k-',overplot=True)
     bovy_plot.bovy_plot(ls,vcbetas*avg_pred2-vcbetas*avg_pred,'k--',overplot=True)
     bovy_plot.bovy_plot(ls,vcbetas*avg_pred3-vcbetas*avg_pred,'k-.',overplot=True)
@@ -268,6 +299,9 @@ pyplot.ylabel(r'$\langle v_{\mathrm{los}}^{\mathrm{helio}}\rangle^{\mathrm{data}
 if betas:
     bovy_plot.bovy_text(r'$\mathrm{flat\ for}\ \frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ =\ 0\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',
                     top_right=True)
+elif hrs:
+    bovy_plot.bovy_text(r'$\mathrm{flat\ for}\ h_R\ =\ R_0 /3$',
+                        top_right=True)
 else:
     bovy_plot.bovy_text(r'$\mathrm{flat\ for}\ v_{\mathrm{circ}}\ =\ 210\ \mathrm{km\ s}^{-1}$',
                         top_right=True)
@@ -276,6 +310,8 @@ pyplot.xlim(0.,360.)
 bovy_plot._add_ticks()
 if betas:
     bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_betas.'+ext)
+elif hrs:
+    bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_hrs.'+ext)
 elif addNonAxi:
     bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_nonaxi.'+ext)
 else:
