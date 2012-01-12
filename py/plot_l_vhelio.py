@@ -19,6 +19,7 @@ noSolar= False
 justSolar= False
 betas, vcbetas= False, 210.
 hrs= False
+dmaxs= True
 addNonAxi= False
 #Data selection
 nodups= True
@@ -49,7 +50,7 @@ for ii in range(nplates):
 #Prediction
 if betas:
     pred_file= 'predict_l_vhelio_betas.sav'
-elif hrs:
+elif hrs or dmaxs:
     pred_file= os.path.join(os.getenv('DATADIR'),'bovy','vclos',
                             'l_vhelio_fid.sav')
 else:
@@ -71,6 +72,19 @@ if os.path.exists(pred_file):
         pred_file.close()
         pred_file= os.path.join(os.getenv('DATADIR'),'bovy','vclos',
                                 'l_vhelio_hr_0.500000.sav')
+        pred_file= open(pred_file,'rb')
+        ls= pickle.load(pred_file)
+        avg_pred3= pickle.load(pred_file)
+    elif dmaxs:
+        pred_file.close()
+        pred_file= os.path.join(os.getenv('DATADIR'),'bovy','vclos',
+                                'l_vhelio_dmax_0.625000.sav')
+        pred_file= open(pred_file,'rb')
+        ls= pickle.load(pred_file)
+        avg_pred2= pickle.load(pred_file)
+        pred_file.close()
+        pred_file= os.path.join(os.getenv('DATADIR'),'bovy','vclos',
+                                'l_vhelio_dmax_1.875000.sav')
         pred_file= open(pred_file,'rb')
         ls= pickle.load(pred_file)
         avg_pred3= pickle.load(pred_file)
@@ -173,7 +187,7 @@ vsolar= numpy.zeros(len(ls))
 for ii in range(len(ls)):
     l= ls[ii]/180.*math.pi
     vsolar[ii]= numpy.dot(vsun,numpy.array([-math.cos(l),math.sin(l)]))
-if betas or hrs:
+if betas or hrs or dmaxs:
     line1= bovy_plot.bovy_plot(ls,vcbetas*avg_pred-vsolar,'k-',overplot=True)
     line2= bovy_plot.bovy_plot(ls,vcbetas*avg_pred2-vsolar,'k--',overplot=True)
     line3= bovy_plot.bovy_plot(ls,vcbetas*avg_pred3-vsolar,'k-.',overplot=True)
@@ -216,6 +230,20 @@ elif hrs:
                   numpoints=2,
                   prop={'size':12},
                   frameon=False)
+elif dmaxs:
+    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 15^\circ$'
+                        +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
+                        +'\n'+r'$\mathrm{assuming}\ R_0\ =\ 8\ \mathrm{kpc}$'
+                        +'\n'+r'$v_{\mathrm{circ}}\ = %i\ \mathrm{km\ s}^{-1}$' % (int(vcbetas)),
+                        top_right=True)
+    #Legend
+    pyplot.legend((line1,line2,line3),(r'$d_{\mathrm{max}}h_R\ =\ 10\ \mathrm{kpc}$',
+                                       r'$d_{\mathrm{max}}h_R\ =\ 5\ \ \mathrm{kpc}$',
+                                       r'$d_{\mathrm{max}}h_R\ =\ 15\ \mathrm{kpc}$'),
+                  loc='upper right',bbox_to_anchor=(.93,.375),
+                  numpoints=2,
+                  prop={'size':12},
+                  frameon=False)
 else:
     bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 15^\circ$'
                         +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
@@ -243,7 +271,7 @@ interpolPred= interpolate.InterpolatedUnivariateSpline(ls,210.*avg_pred-vsolar)
 bovy_plot.bovy_plot(l_plate,avg_plate-interpolPred(l_plate),'ko',overplot=True)
 pyplot.errorbar(l_plate,avg_plate-interpolPred(l_plate),
                 yerr=siga_plate,marker='o',color='k',linestyle='none',elinestyle='-')
-if betas or hrs:
+if betas or hrs or dmaxs:
     bovy_plot.bovy_plot([0.,360.],[0.,0.],'k-',overplot=True)
     bovy_plot.bovy_plot(ls,vcbetas*avg_pred2-vcbetas*avg_pred,'k--',overplot=True)
     bovy_plot.bovy_plot(ls,vcbetas*avg_pred3-vcbetas*avg_pred,'k-.',overplot=True)
@@ -302,6 +330,9 @@ if betas:
 elif hrs:
     bovy_plot.bovy_text(r'$\mathrm{flat\ for}\ h_R\ =\ R_0 /3$',
                         top_right=True)
+elif dmaxs:
+    bovy_plot.bovy_text(r'$\mathrm{flat\ for}\ d_{\mathrm{max}}\ =\ 10\ \mathrm{kpc}$',
+                        top_right=True)
 else:
     bovy_plot.bovy_text(r'$\mathrm{flat\ for}\ v_{\mathrm{circ}}\ =\ 210\ \mathrm{km\ s}^{-1}$',
                         top_right=True)
@@ -312,6 +343,8 @@ if betas:
     bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_betas.'+ext)
 elif hrs:
     bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_hrs.'+ext)
+elif dmaxs:
+    bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_dmaxs.'+ext)
 elif addNonAxi:
     bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_nonaxi.'+ext)
 else:
