@@ -14,12 +14,12 @@ import marginalize_phasedist
 from velocity_field import read_output
 #set up; kind of plot
 justData= False
-dataMean= False
+dataMean=False
 noSolar= False
 justSolar= False
 betas, vcbetas= False, 210.
 hrs= False
-dmaxs= True
+dmaxs= False
 addNonAxi= False
 #Data selection
 nodups= True
@@ -152,10 +152,13 @@ if not justData and not dataMean and not noSolar and not justSolar:
 fig= pyplot.gcf()
 fig.sca(axTop)
 pyplot.ylabel(r'$\mathrm{Heliocentric\ velocity}\ [\mathrm{km\ s}^{-1}]$')
+if justSolar or noSolar or justData or dataMean:
+    pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
 pyplot.xlim(0.,360.)
 pyplot.ylim(-200.,200.)
-nullfmt   = NullFormatter()         # no labels
-axTop.xaxis.set_major_formatter(nullfmt)
+if not justData and not dataMean and not noSolar and not justSolar:
+    nullfmt   = NullFormatter()         # no labels
+    axTop.xaxis.set_major_formatter(nullfmt)
 bovy_plot.bovy_plot(data['GLON'],data['VHELIO'],'k,',
                     yrange=[-200.,200.],
                     xrange=[0.,360.],overplot=True)
