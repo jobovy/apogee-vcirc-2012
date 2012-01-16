@@ -56,6 +56,41 @@ def calc_pred(pred_file,dfc,nls,nds,ls,ds):
     sys.stdout.flush()
     save_pickles(pred_file,ls,avg_pred,ii)
 
+def calc_pred_sigv(pred_file,avg_file,dfc,nls,nds,ls,ds):
+    if os.path.exists(avg_file):
+        savefile= open(avg_file,'rb')
+        ls= pickle.load(savefile)
+        avg_pred= pickle.load(savefile)
+        savefile.close()
+    else:
+        raise IOError("avg file does not exist ...")
+    if os.path.exists(pred_file):
+        savefile= open(pred_file,'rb')
+        ls= pickle.load(savefile)
+        sigv_pred= pickle.load(savefile)
+        ii= pickle.load(savefile)
+        savefile.close()
+    else:
+        sigv_pred= numpy.zeros(nls)
+        ii= 0
+    while ii < len(ls):
+        sys.stdout.write('\r'+"Working on %i / %i ...\r" %(ii+1,len(ls)))
+        sys.stdout.flush()
+        meanvlos2= 0.
+        norm= 0.
+        for jj in range(nds):
+            d,l= ds[jj], ls[ii]/180.*numpy.pi
+            R,theta,d,l= safe_dl_to_rphi(d,l)
+            surfmass= dfc.surfacemassLOS(d,l,deg=False)
+            meanvlos2+= surfmass*dfc.vmomentsurfacemass(R,0,2)*math.sin(theta+l)**2.+surfmass*dfc.vmomentsurfacemass(R,2,0)*math.cos(theta+l)**2.
+            norm+= surfmass
+        sigv_pred[ii]= math.sqrt(meanvlos2/norm-avg_pred[ii]**2.)
+        ii+= 1
+        save_pickles(pred_file,ls,sigv_pred,ii)
+    sys.stdout.write('\r'+_ERASESTR+'\r')
+    sys.stdout.flush()
+    save_pickles(pred_file,ls,sigv_pred,ii)
+
 ds= numpy.linspace(0.,10./8.,nds)
 #Start calculating
 #Fiducial
@@ -106,3 +141,11 @@ print "Working on hs %.2f ..." % hs
 dfc= dehnendf(beta=0.,correct=True,niter=20,
               profileParams=(1./3.,hs,0.2))
 calc_pred(pred_file,dfc,nls,nds,ls,ds)
+
+#SIGV
+#Fiducial
+pred_file= os.path.join(_SAVEDIR,'l_vhelio_sigv_fid.sav')
+avg_file= os.path.join(_SAVEDIR,'l_vhelio_fid.sav')
+print "Working on fiducial ..."
+dfc= dehnendf(beta=0.,correct=True,niter=20)
+calc_pred_sigv(pred_file,avg_file,dfc,nls,nds,ls,ds)
