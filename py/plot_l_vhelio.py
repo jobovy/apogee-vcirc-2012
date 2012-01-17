@@ -29,7 +29,7 @@ ext= 'png'
 datafile= apogee.tools.apallPath(nodups=nodups)
 data= fitsio.read(datafile,1)
 #data cuts
-data=data[(numpy.fabs(data['GLAT']) < 2.)*(numpy.fabs(data['GLON']) > 30.)]
+data=data[(numpy.fabs(data['GLAT']) < 2.)*(numpy.fabs(data['GLON']) > 35.)]
 data= data[((data['APOGEE_TARGET1'] & 2**9) == 0)] #no probable cluster members
 indx= numpy.array(['STAR' in data['OBJTYPE'][ii] for ii in range(len(data))],dtype='bool')
 data= data[indx]
@@ -168,7 +168,7 @@ bovy_plot.bovy_plot(data['GLON'],data['VHELIO'],'k,',
 ndata_t= int(math.floor(len(data)/1000.))
 ndata_h= len(data)-ndata_t*1000
 if justData:
-    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 30^\circ$'
+    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 35^\circ$'
                         +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h),
                         top_right=True)
     bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_justdata.'+ext)
@@ -177,7 +177,7 @@ bovy_plot.bovy_plot(l_plate,
                     avg_plate,
                     'o',overplot=True,mfc='0.5',mec='none')
 if dataMean:
-    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 30^\circ$'
+    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 35^\circ$'
                         +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h),
                         top_right=True)
     bovy_plot.bovy_end_print('apogee_vcirc_l_vhelio_datamean.'+ext)
@@ -209,7 +209,7 @@ if justSolar:
         vsolar[ii]= numpy.dot(vsun,numpy.array([-math.cos(l),math.sin(l)]))
     bovy_plot.bovy_plot(ls,-vsolar,'k-',overplot=True)   
 if betas:
-    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 30^\circ$'
+    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 35^\circ$'
                         +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
                         +'\n'+r'$\mathrm{assuming}\ R_0\ =\ 8\ \mathrm{kpc}$'
                         +'\n'+r'$v_{\mathrm{circ}}\ = %i\ \mathrm{km\ s}^{-1}$' % (int(vcbetas)),
@@ -223,7 +223,7 @@ if betas:
                   prop={'size':12},
                   frameon=False)
 elif hrs:
-    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 30^\circ$'
+    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 35^\circ$'
                         +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
                         +'\n'+r'$\mathrm{assuming}\ R_0\ =\ 8\ \mathrm{kpc}$'
                         +'\n'+r'$v_{\mathrm{circ}}\ = %i\ \mathrm{km\ s}^{-1}$' % (int(vcbetas)),
@@ -237,7 +237,7 @@ elif hrs:
                   prop={'size':12},
                   frameon=False)
 elif dmaxs:
-    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 30^\circ$'
+    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 35^\circ$'
                         +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
                         +'\n'+r'$\mathrm{assuming}\ R_0\ =\ 8\ \mathrm{kpc}$'
                         +'\n'+r'$v_{\mathrm{circ}}\ = %i\ \mathrm{km\ s}^{-1}$' % (int(vcbetas)),
@@ -251,7 +251,7 @@ elif dmaxs:
                   prop={'size':12},
                   frameon=False)
 else:
-    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 30^\circ$'
+    bovy_plot.bovy_text(r'$|b|\ <\ 2^\circ,\ |l|\ >\ 35^\circ$'
                         +'\n'+r'$%i,%03i\ \mathrm{stars}$' % (ndata_t,ndata_h)
                         +'\n'+r'$\mathrm{assuming}\ R_0\ =\ 8\ \mathrm{kpc}$'
                         +'\n'+r'$\frac{\mathrm{d} v_{\mathrm{circ}}}{\mathrm{d}R}\ =\ 0\ \mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}$',

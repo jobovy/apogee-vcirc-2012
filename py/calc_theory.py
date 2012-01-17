@@ -82,9 +82,11 @@ def calc_pred_sigv(pred_file,avg_file,dfc,nls,nds,ls,ds):
             d,l= ds[jj], ls[ii]/180.*numpy.pi
             R,theta,d,l= safe_dl_to_rphi(d,l)
             surfmass= dfc.surfacemassLOS(d,l,deg=False)
-            meanvlos2+= surfmass*dfc.vmomentsurfacemass(R,0,2)*math.sin(theta+l)**2.+surfmass*dfc.vmomentsurfacemass(R,2,0)*math.cos(theta+l)**2.
+            vmass= dfc.targetSurfacemass(R)
+            meanvlos2+= surfmass/vmass*(dfc.vmomentsurfacemass(R,0,2)*math.sin(theta+l)**2.+dfc.vmomentsurfacemass(R,2,0)*math.cos(theta+l)**2.)
             norm+= surfmass
         sigv_pred[ii]= math.sqrt(meanvlos2/norm-avg_pred[ii]**2.)
+        print sigv_pred[ii]
         ii+= 1
         save_pickles(pred_file,ls,sigv_pred,ii)
     sys.stdout.write('\r'+_ERASESTR+'\r')
