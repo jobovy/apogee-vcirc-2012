@@ -50,6 +50,8 @@ for ii in range(nplates):
     avg_plate[ii]= numpy.mean(data['VHELIO'][indx])
     sig_plate[ii]= numpy.std(data['VHELIO'][indx])
     siga_plate[ii]= numpy.std(data['VHELIO'][indx])/numpy.sqrt(numpy.sum(indx))
+#print sig_plate
+#print l_plate
 #Prediction
 if betas:
     pred_file= 'predict_l_vhelio_betas.sav'
