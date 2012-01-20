@@ -47,5 +47,7 @@ for ii=0L, n_elements(plateDirs)-1 do begin
         endelse
     endfor
 endfor
-mwrfits, outStr, outfile, /create
+;;flag duplicates
+apogee_rem_dups, outStr, out, /flag, /structs
+mwrfits, out, outfile, /create
 END
