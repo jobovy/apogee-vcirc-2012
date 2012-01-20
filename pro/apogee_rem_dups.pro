@@ -1,4 +1,4 @@
-PRO APOGEE_REM_DUPS, infile, outfile, flag=flag
+PRO APOGEE_REM_DUPS, infile, outfile, flag=flag, structs=structs
 ;+
 ;   NAME:
 ;      apogee_rem_dups
@@ -9,6 +9,8 @@ PRO APOGEE_REM_DUPS, infile, outfile, flag=flag
 ;      outfile - file with the duplicates removed (or flagged)
 ;   KEYWORDS:
 ;      flag= if set, just flag the duplicates, don't remove them
+;      structs= if set, input is a struct and output is a struct,
+;               rather than a file
 ;   OUTPUT:
 ;      in outfile
 ;   BUGS:
@@ -16,7 +18,7 @@ PRO APOGEE_REM_DUPS, infile, outfile, flag=flag
 ;   HISTORY:
 ;      11-11 - Started - Bovy (IAS)
 ;-
-in= mrdfits(infile,1)
+if ~keyword_set(structs) then in= mrdfits(infile,1) else in= infile
 ;;first sort on snr to resolve multiple matches
 if tag_exist(in,'sna') then begin
     sortindx= reverse(sort(in.sna))
@@ -64,5 +66,6 @@ endif else begin
     extra.uniqid= extra.specid
     out= struct_combine(out,extra)
 endelse
-mwrfits, out, outfile, /create
+if keyword_set(structs) then outfile= out else $
+  mwrfits, out, outfile, /create
 END
