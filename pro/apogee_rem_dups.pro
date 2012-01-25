@@ -52,14 +52,11 @@ if keyword_set(flag) then begin
     ;;at this stage, we can record nvisits
     nvisits= lindgen(n_elements(m1_uniq1))+1L
     nvisits= nvisits[uniqindx2];;last one of series gives cumulative number of nvisits
-    print, nvisits[-1]
     nvzero= nvisits[0] ;;record before shifting array
     nvisits= nvisits-shift(nvisits,1) ;;get differential number of visits
     nvisits[0]= nvzero ;;restore zero-th element
-    print, nvisits[0:10]
     extra[m1_uniq2].nvisits= nvisits
     extra[m1_uniq1].nvisits= extra[m2_uniq1].nvisits
-    print, total(extra[where(extra.specprimary)].nvisits)
     out= struct_combine(in,extra)
 endif else begin
     extra=  {specprimary:1B,uniqid:0LL,specid:0LL}
