@@ -13,56 +13,57 @@ PRO APOGEE_REM_DUPS, infile, outfile, flag=flag, structs=structs
 ;               rather than a file
 ;   OUTPUT:
 ;      in outfile
-;   BUGS:
-;      SNR sorting does not seem to work
 ;   HISTORY:
 ;      11-11 - Started - Bovy (IAS)
 ;-
 if ~keyword_set(structs) then in= mrdfits(infile,1) else in= infile
 ;;first sort on snr to resolve multiple matches
 if tag_exist(in,'sna') then begin
-    sortindx= sort(in.sna)
+    sortindx= reverse(sort(in.sna))
 endif else if tag_exist(in,'snr') then begin
-    sortindx= sort(in.snr)
+    sortindx= reverse(sort(in.snr))
 endif else if tag_exist(in,'vraderr') then begin
     sortVal= in.vraderr/abs(in.vrad)
     sortVal[where(sortVal EQ 0.)]= max(sortVal) ;;remove bad measurements
-    sortindx= reverse(sort(sortVal))
+    sortindx= sort(sortVal)
 endif
 in= in[sortindx]
 spherematch, in.ra, in.dec, in.ra, in.dec, 0.5/3600., m1, m2, maxmatch=0
 ;;first get uniqs in m1
-sortindx= sort(m1)
+sortindx= reverse(sort(m1))
 m1= m1[sortindx]
 m2= m2[sortindx]
 uniqindx= uniq(m1)
-m1= m1[uniqindx]
-m2= m2[uniqindx]
+m1_uniq1= m1[uniqindx]
+m2_uniq1= m2[uniqindx]
 ;;then get uniq in m2
-sortindx2= sort(m2)
-m1= m1[sortindx2]
-m2= m2[sortindx2]
-uniqindx2= uniq(m2)
-m1= m1[uniqindx2]
-m2= m2[uniqindx2]
+sortindx2= sort(m2_uniq1)
+m1_uniq1= m1_uniq1[sortindx2]
+m2_uniq1= m2_uniq1[sortindx2]
+uniqindx2= uniq(m2_uniq1)
+m1_uniq2= m1_uniq1[uniqindx2]
+m2_uniq2= m2_uniq1[uniqindx2]
 if keyword_set(flag) then begin
-    extra=  {specprimary:0B,uniqid:0LL,specid:0LL}
+    extra=  {specprimary:0B,uniqid:0LL,specid:0LL,nvisits:0L}
     extra= replicate(extra,n_elements(in))
     extra.specid= specid(in.plate,in.mjd5,in.fiberid)
-    extra[m1].specprimary= 1B
-    ;;match again to get uniqid
-    spherematch, in.ra, in.dec, in.ra, in.dec, 0.5/3600., m1, m2, maxmatch=0
-    sortindx= sort(m1)
-    m1= m1[sortindx]
-    m2= m2[sortindx]
-    uniqindx= uniq(m1)
-    m1= m1[uniqindx]
-    m2= m2[uniqindx]
-    extra[m1].uniqid= extra[m2].specid
+    extra[m1_uniq2].specprimary= 1B
+    extra[m1_uniq1].uniqid= extra[m2_uniq1].specid
+    ;;at this stage, we can record nvisits
+    nvisits= lindgen(n_elements(m1_uniq1))+1L
+    nvisits= nvisits[uniqindx2];;last one of series gives cumulative number of nvisits
+    print, nvisits[-1]
+    nvzero= nvisits[0] ;;record before shifting array
+    nvisits= nvisits-shift(nvisits,1) ;;get differential number of visits
+    nvisits[0]= nvzero ;;restore zero-th element
+    print, nvisits[0:10]
+    extra[m1_uniq2].nvisits= nvisits
+    extra[m1_uniq1].nvisits= extra[m2_uniq1].nvisits
+    print, total(extra[where(extra.specprimary)].nvisits)
     out= struct_combine(in,extra)
 endif else begin
     extra=  {specprimary:1B,uniqid:0LL,specid:0LL}
-    out= in[m1]
+    out= in[m1_uniq2]
     extra= replicate(extra,n_elements(out))
     extra.specid= specid(out.plate,out.mjd5,out.fiberid)
     extra.uniqid= extra.specid
