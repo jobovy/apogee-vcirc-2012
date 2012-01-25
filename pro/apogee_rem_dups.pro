@@ -21,9 +21,9 @@ PRO APOGEE_REM_DUPS, infile, outfile, flag=flag, structs=structs
 if ~keyword_set(structs) then in= mrdfits(infile,1) else in= infile
 ;;first sort on snr to resolve multiple matches
 if tag_exist(in,'sna') then begin
-    sortindx= reverse(sort(in.sna))
+    sortindx= sort(in.sna)
 endif else if tag_exist(in,'snr') then begin
-    sortindx= reverse(sort(in.snr))
+    sortindx= sort(in.snr)
 endif else if tag_exist(in,'vraderr') then begin
     sortVal= in.vraderr/abs(in.vrad)
     sortVal[where(sortVal EQ 0.)]= max(sortVal) ;;remove bad measurements
