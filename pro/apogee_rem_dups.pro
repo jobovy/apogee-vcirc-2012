@@ -25,7 +25,9 @@ if tag_exist(in,'sna') then begin
 endif else if tag_exist(in,'snr') then begin
     sortindx= reverse(sort(in.snr))
 endif else if tag_exist(in,'vraderr') then begin
-    sortindx= sort(in.vraderr/abs(in.vrad))
+    sortVal= in.vraderr/abs(in.vrad)
+    sortVal[where(sortVal EQ 0.)]= max(sortVal) ;;remove bad measurements
+    sortindx= reverse(sort(sortVal))
 endif
 in= in[sortindx]
 spherematch, in.ra, in.dec, in.ra, in.dec, 0.5/3600., m1, m2, maxmatch=0
