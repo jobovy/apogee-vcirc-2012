@@ -108,4 +108,4 @@ if __name__ == '__main__':
     locations= list(set(data['LOCATION']))
     for l in locations:
         print l
-        simplePlot(location=l,plotfile='/home/bovy/Desktop/locationPlots/vlosdist_%i.png' % l,predict=True,nv=201)
+        simplePlot(location=l,plotfile=os.path.join(os.getenv('HOME'),'Desktop/locationPlots/vlosdist_%i.png' % l),predict=True,nv=201)
