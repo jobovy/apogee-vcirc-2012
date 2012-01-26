@@ -44,7 +44,6 @@ def simplePlot(location=4242,plotfile=None,predict=False,nv=11,dmax=10./8.,
         pred_dist= _calc_pred(pred_vs,location,numpy.mean(data['GLON']),dmax)
         data_int= numpy.sum(hist)*(xvec[1]-xvec[0])
         pred_dist*= data_int/numpy.sum(pred_dist)/(pred_vs[1]-pred_vs[0])
-        print pred_dist
         bovy_plot.bovy_plot(pred_vs,pred_dist,'-',color='0.65',overplot=True)
     #Add text
     bovy_plot.bovy_text(r'$\mathrm{location}\ =\ %i$' % location

@@ -26,6 +26,8 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False):
     data= data[((data['APOGEE_TARGET1'] & 2**9) == 0)] #no probable cluster members
     indx= numpy.array(['STAR' in data['OBJTYPE'][ii] for ii in range(len(data))],dtype='bool')
     data= data[indx]
+    #Remove anything with vraderr= 0.
+    data= data[(data['VRADERR'] != 0.)]
     if postshutdown:
         data= data[(data['MJD5'] > 55788)]
     if fehcut:
