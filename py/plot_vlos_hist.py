@@ -91,7 +91,7 @@ def _calc_pred(vs,location,l,dmax):
                 vT= thisvs[ii]*math.sin(theta+thisl)
                 o= Orbit([R,vR,vT,theta])
                 surfmass= dfc.surfacemassLOS(d,thisl,deg=False)
-                out+= surfmass*dfc(o,marginalizeVperp=True)
+                out+= surfmass*dfc(o,marginalizeVperp=True)/dfc.targetSurfacemass(R)
                 norm+= surfmass
             pred_dist[ii]= out/norm
             ii+= 1
