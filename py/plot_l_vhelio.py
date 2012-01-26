@@ -12,6 +12,7 @@ from matplotlib.ticker import NullFormatter
 import apogee
 import marginalize_phasedist
 from velocity_field import read_output
+from readVclosData import readVclosData
 #set up; kind of plot
 justData= False
 dataMean=False
@@ -26,17 +27,7 @@ nodups= True
 fehcut= False
 postshutdown= True
 ext= 'png'
-datafile= apogee.tools.apallPath(nodups=nodups)
-data= fitsio.read(datafile,1)
-#data cuts
-data=data[(numpy.fabs(data['GLAT']) < 2.)*(numpy.fabs(data['GLON']) > 35.)]
-data= data[((data['APOGEE_TARGET1'] & 2**9) == 0)] #no probable cluster members
-indx= numpy.array(['STAR' in data['OBJTYPE'][ii] for ii in range(len(data))],dtype='bool')
-data= data[indx]
-if postshutdown:
-    data= data[(data['MJD5'] > 55788)]
-if fehcut:
-    data= data[(data['FEH'] > -0.5)]
+data= readVclosData(postshutdown=postshutdown,fehcut=fehcut)
 #Calculate means
 plates= list(set(data['PLATE']))
 nplates= len(plates)
