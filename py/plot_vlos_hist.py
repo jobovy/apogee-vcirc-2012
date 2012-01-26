@@ -67,7 +67,7 @@ def _calc_pred(vs,location,l,dmax):
         savefile.close()
     else:
         ds= numpy.linspace(0.,dmax,_PREDICTNDS)
-        dfc= dehnendf(beta=beta,profileParams=(1./3.,1.,_PREDICTSIGMA),correct=True,niter=20)
+        dfc= dehnendf(beta=0.,profileParams=(1./3.,1.,_PREDICTSIGMA),correct=True,niter=20)
         thisl= l*_DEGTORAD
         thisvsolar= numpy.dot(_PREDICTVSOLAR,numpy.array([-numpy.cos(thisl),numpy.sin(thisl)]))
         thisvs+= thisvsolar
