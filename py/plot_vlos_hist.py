@@ -8,7 +8,7 @@ from galpy.util import bovy_plot, save_pickles
 from readVclosData import readVclosData
 _DEGTORAD= numpy.pi/180.
 _PREDICTVC= 220.
-_PREDICTSIGMA= 0.2
+_PREDICTSIGMA= 0.1
 _PREDICTCACHE= True
 _PREDICTVSOLAR= [-11.1,240.]
 _PREDICTNDS= 201
