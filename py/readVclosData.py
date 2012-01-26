@@ -1,7 +1,7 @@
 import numpy
 import fitsio
 import apogee
-def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False):
+def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None):
     """
     NAME:
        readVclosData
@@ -32,4 +32,11 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False):
         data= data[(data['MJD5'] > 55788)]
     if fehcut:
         data= data[(data['FEH'] > -0.5)]
+    if not cohort is None:
+        if cohort.lower() == 'short':
+            data= data[((data['APOGEE_TARGET1'] & 2L**11) != 0)]
+        elif cohort.lower() == 'medium' or cohort.lower() == 'intermediate':
+            data= data[((data['APOGEE_TARGET1'] & 2L**12) != 0)]
+        elif cohort.lower() == 'long':
+            data= data[((data['APOGEE_TARGET1'] & 2L**13) != 0)]           
     return data

@@ -26,8 +26,9 @@ addNonAxi= False
 nodups= True
 fehcut= False
 postshutdown= True
+cohort= None
 ext= 'png'
-data= readVclosData(postshutdown=postshutdown,fehcut=fehcut)
+data= readVclosData(postshutdown=postshutdown,fehcut=fehcut,cohort=cohort)
 #Calculate means
 plates= list(set(data['PLATE']))
 nplates= len(plates)
