@@ -1,7 +1,8 @@
 import numpy
 import fitsio
 import apogee
-def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None):
+def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
+                  meanb=0.,meanb_tol=0.5):
     """
     NAME:
        readVclosData
@@ -12,6 +13,9 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None):
        bmax - maximal Galactic latitude
        postshutdown= if True, only use post-shutdown data (default: True)
        fehcut= if True, cut to rough FeH > -0.5 (default: False)
+       meanb= (default: 0.) require the mean b to be meanb within meanb_tol
+              [useful to make sure one has plates in the plane]
+       meanb_tol= (default:0.5) tolerance on meanb
     OUTPUT:
     HISTORY:
        2012-01-25 - Written - Bovy (IAS)
@@ -39,4 +43,12 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None):
             data= data[((data['APOGEE_TARGET1'] & 2L**12) != 0)]
         elif cohort.lower() == 'long':
             data= data[((data['APOGEE_TARGET1'] & 2L**13) != 0)]           
+    #For every plate, calculate meanb, then cut on it
+    plates= list(set(data['PLATE']))
+    nplates= len(plates)
+    for ii in range(nplates):
+        #Calculate meanb
+        mb= numpy.mean(data[(data['PLATE'] == plates[ii])]['GLAT'])
+        if (mb-meanb)**2./meanb_tol**2. > 1.:
+            data= data[(data['PLATE'] != plates[ii])]
     return data
