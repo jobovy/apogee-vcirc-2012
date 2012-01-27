@@ -20,7 +20,10 @@ def plot_lb():
     ndata= len(data)
     yrange= [-6.,6.]
     #Plot
-    bovy_plot.bovy_print(fig_width=16.,fig_height=6.)
+    if OUTEXT == 'ps':
+        bovy_plot.bovy_print(fig_width=8.5,fig_height=6./16.*8.5)
+    else:
+        bovy_plot.bovy_print(fig_width=16.,fig_height=6.)
     fig= pyplot.figure()
     #Set up axes
     nullfmt   = NullFormatter()         # no labels
@@ -36,7 +39,7 @@ def plot_lb():
     axHisty.xaxis.set_major_formatter(nullfmt)
     axHisty.yaxis.set_major_formatter(nullfmt)
     fig.sca(axScatter)  
-    bovy_plot.bovy_plot(data['GLON'],data['GLAT'],'k.',ms=2.,
+    bovy_plot.bovy_plot(data['GLON'],data['GLAT'],'k.',ms=1.5,
                         overplot=True)
     pyplot.xlim(0.,250.)
     pyplot.ylim(yrange[0],yrange[1])
@@ -53,7 +56,7 @@ def plot_lb():
     npdata= len(otherdata2)
     otherl.extend(list(otherdata2['GLON']))
     otherb.extend(list(otherdata2['GLAT']))
-    bovy_plot.bovy_plot(otherl,otherb,'.',mec='0.5',mfc='0.5',ms=2.,
+    bovy_plot.bovy_plot(otherl,otherb,'.',mec='0.5',mfc='0.5',ms=1.5,
                         overplot=True)
     #Add histogram of bs
     otherl.extend(list(data['GLON']))
