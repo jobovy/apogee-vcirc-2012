@@ -13,6 +13,10 @@ import apogee
 import marginalize_phasedist
 from velocity_field import read_output
 from readVclosData import readVclosData
+import theoryDistributions
+#Constants
+ro= 8000.
+hz= 250.
 #set up; kind of plot
 justData= False
 dataMean=False
@@ -117,14 +121,14 @@ else:
                 theta= math.pi-math.asin(d/R*math.sin(l))
             else:
                 theta= math.asin(d/R*math.sin(l))
-            surfmass= dfc.surfacemassLOS(d,l,deg=False)
+            surfmass= theoryDistributions.surfacemassLOSb(d,ls[ii],-1.5,1.5,dfc,hz/ro)
             meanvlos+= surfmass*dfc.meanvT(R)*math.sin(theta+l)
             norm+= surfmass
             if betas:
-                surfmass= dfc2.surfacemassLOS(d,l,deg=False)
+                surfmass= theoryDistributions.surfacemassLOSb(d,ls[ii],-1.5,1.5,dfc2,hz/ro)
                 meanvlos2+= surfmass*dfc2.meanvT(R)*math.sin(theta+l)
                 norm2+= surfmass
-                surfmass= dfc3.surfacemassLOS(d,l,deg=False)
+                surfmass= theoryDistributions.surfacemassLOSb(d,ls[ii],-1.5,1.5,dfc3,hz/ro)
                 meanvlos3+= surfmass*dfc3.meanvT(R)*math.sin(theta+l)
                 norm3+= surfmass
         avg_pred[ii]= meanvlos/norm
@@ -302,6 +306,7 @@ if addNonAxi:
         nonaxiEl= numpy.zeros(len(nonaxils))
         phio=70.
         print "Calculating elliptical perturbation ..."
+        print "WARNING: DOES NOT CORRECTLY USE SURFMASS"
         for ii in range(len(nonaxils)):
             print ii
             nonaxiEl[ii]= marginalize_phasedist.mvlos_l(nonaxils[ii],interpObj,degree=True,phio=phio)-marginalize_phasedist.mvlos_l(nonaxils[ii],interpObjAxi,degree=True,phio=phio)

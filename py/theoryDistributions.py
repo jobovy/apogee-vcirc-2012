@@ -20,12 +20,35 @@ def surfacemassLOSbd(d,b,l,bmean,diskdf,hz):
     """
     return diskdf.surfacemassLOS(d*math.cos(b*_DEGTORAD),l,deg=True)*d*math.cos(b*_DEGTORAD)*math.exp(-d*math.fabs(math.sin(b*_DEGTORAD))/hz)*math.sqrt(1.5**2.-(b-bmean)**2.)
 
+def surfacemassLOS(l,bmin,bmax,dmin,dmax,diskdf,hz):
+    """
+    NAME:
+       surfacemassLOS
+    PURPOSE:
+       calculate the number density on a plate as a function of l, integrated over d,l, and b
+    INPUT:
+       l- angle in degree
+       bmin, bmax - range in b in degree
+       dmin, dmax - range in d/ro
+       diskdf - galpy diskdf object
+       hz - scale height in /ro units
+    OUTPUT:
+       density
+    HISTORY:
+       2012-01-27 - Written - Bovy (IAS)
+    """
+    return integrate.quad(_surfacemassLOSIntegrand,dmin,dmax,
+                          args=(l,bmin,bmax,diskdf,hz))[0]
+
+def _surfacemassLOSIntegrand(d,l,bmin,bmax,diskdf,hz):
+    return surfacemassLOSb(d,l,bmin,bmax,diskdf,hz)
+
 def surfacemassLOSb(d,l,bmin,bmax,diskdf,hz):
     """
     NAME:
        surfacemassLOSb
     PURPOSE:
-       calculate the number density on a plate as a function of d (integrated over l and balready)
+       calculate the number density on a plate as a function of d (integrated over l and b already)
     INPUT:
        d, l- distance in /ro units, and angles in degree
        bmin, bmax - range in b in degree
