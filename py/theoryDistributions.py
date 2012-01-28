@@ -18,7 +18,7 @@ def surfacemassLOSbd(d,b,l,bmean,diskdf,hz):
     HISTORY:
        2012-01-27 - Written - Bovy (IAS)
     """
-    return diskdf.surfacemassLOS(d,l,deg=True)*d*math.cos(b*_DEGTORAD)*math.exp(-d*math.fabs(math.sin(b*_DEGTORAD))/hz)*math.sqrt(1.5**2.-(b-bmean)**2.)
+    return diskdf.surfacemassLOS(d*math.cos(b*_DEGTORAD),l,deg=True)*d*math.cos(b*_DEGTORAD)*math.exp(-d*math.fabs(math.sin(b*_DEGTORAD))/hz)*math.sqrt(1.5**2.-(b-bmean)**2.)
 
 def surfacemassLOSb(d,l,bmin,bmax,diskdf,hz):
     """
