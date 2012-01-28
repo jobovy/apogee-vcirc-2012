@@ -22,7 +22,7 @@ justData= False
 dataMean=False
 noSolar= False
 justSolar= False
-betas, vcbetas= False, 210.
+betas, vcbetas= True, 250.
 hrs= False
 dmaxs= False
 addNonAxi= False
@@ -271,7 +271,7 @@ elif justSolar:
     sys.exit(0)
 fig.sca(axBottom)
 #Interpolate prediction
-interpolPred= interpolate.InterpolatedUnivariateSpline(ls,210.*avg_pred-vsolar)
+interpolPred= interpolate.InterpolatedUnivariateSpline(ls,250.*avg_pred-vsolar)
 bovy_plot.bovy_plot(l_plate,avg_plate-interpolPred(l_plate),'ko',overplot=True)
 pyplot.errorbar(l_plate,avg_plate-interpolPred(l_plate),
                 yerr=siga_plate,marker='o',color='k',linestyle='none',elinestyle='-')
@@ -281,8 +281,8 @@ if betas or hrs or dmaxs:
     bovy_plot.bovy_plot(ls,vcbetas*avg_pred3-vcbetas*avg_pred,'k-.',overplot=True)
 else:
     bovy_plot.bovy_plot([0.,360.],[0.,0.],'k--',overplot=True)
-    bovy_plot.bovy_plot(ls,230.*avg_pred-210.*avg_pred,'k-',overplot=True)
-    bovy_plot.bovy_plot(ls,250.*avg_pred-210.*avg_pred,'k-.',overplot=True)
+    bovy_plot.bovy_plot(ls,230.*avg_pred-250.*avg_pred,'k-',overplot=True)
+    bovy_plot.bovy_plot(ls,210.*avg_pred-250.*avg_pred,'k-.',overplot=True)
 ########NONAXI
 if addNonAxi:
     nonAxiFile= 'predict_l_vhelio_nonaxi.sav'
