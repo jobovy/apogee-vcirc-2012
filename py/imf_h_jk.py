@@ -1,6 +1,7 @@
 #Plot the IMF vs. H and J-K, sensibly
 import sys
 import os, os.path
+import copy
 import numpy
 import isodist
 from galpy.util import bovy_plot
@@ -30,7 +31,7 @@ def imf_h_jk(Z=None,h=12.):
             for ii in range(1,len(thisiso['M_ini'])-1):
                 JK= thisiso['J'][ii]-thisiso['Ks'][ii]
                 H= thisiso['H'][ii]
-                if JK < 0.5 or H > 3.5:
+                if JK < 0.5: # or thisiso['logg'][ii] > 3.5:
                     continue
                 if dmpm[ii] > 0.: 
                     sample.append([thisiso['J'][ii]-thisiso['Ks'][ii],
@@ -47,7 +48,8 @@ def imf_h_jk(Z=None,h=12.):
     #Normalize each J-K
     for ii in range(len(hist[:,0])):
         hist[ii,:]/= numpy.nanmax(hist[ii,:])/numpy.nanmax(hist)
-    hist[:,:]= hist[:,::-1]
+        rev= copy.copy(hist[ii,::-1]) #reverse, but in one go does not always work
+        hist[ii,:]= rev
     #Plot
     bovy_plot.bovy_print()
     bovy_plot.bovy_dens2d(hist.T,origin='lower',cmap='gist_yarg',
