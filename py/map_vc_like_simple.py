@@ -252,7 +252,7 @@ def _marginalizedIntegrand(d,l,dfc,vc,beta,vlos,options):
         vtmean= vc*R**beta-dfc.asymmetricdrift(R)
     vlosmean= m.sin(phi+l)*vtmean-vc*m.sin(l)
     vlossigma2= m.sin(phi+l)**2.*(sigmaT2-sigmaR2)+sigmaR2
-    return m.exp(-0.5*(vlos-vlosmean)**2./vlossigma2)/m.sqrt(vlossigma2)*pd*d
+    return m.exp(-0.5*(vlos-vlosmean)**2./vlossigma2)/m.sqrt(vlossigma2)*pd
 
 def get_options():
     usage = "usage: %prog [options] <savefilename>\n\nsavefilename= name of the file that holds the los data (as a pickle)"
