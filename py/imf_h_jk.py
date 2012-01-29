@@ -27,7 +27,7 @@ def imf_h_jk(Z=None,h=12.):
     for logage in p.logages():
         for z in Zs:
             thisiso= p(logage,z)
-            dmpm= numpy.roll(thisiso['M_ini'],-1)-thisiso['M_ini']
+            dmpm= numpy.roll(thisiso['int_IMF'],-1)-thisiso['int_IMF']
             for ii in range(1,len(thisiso['M_ini'])-1):
                 JK= thisiso['J'][ii]-thisiso['Ks'][ii]
                 H= thisiso['H'][ii]
