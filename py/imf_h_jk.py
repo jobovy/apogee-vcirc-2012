@@ -3,6 +3,7 @@ import sys
 import os, os.path
 import copy
 import numpy
+from optparse import OptionParser
 import isodist
 from galpy.util import bovy_plot
 from matplotlib import pyplot
@@ -10,7 +11,7 @@ from matplotlib.ticker import FuncFormatter, MultipleLocator
 OUTDIR= os.path.join(os.getenv('HOME'),'Desktop')
 OUTDIR= '../tex/'
 OUTEXT= 'ps'
-def imf_h_jk(Z=None,h=12.):
+def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.):
     #Read isochrones
     zs= numpy.arange(0.0005,0.03005,0.0005)
     if Z is None:
@@ -43,8 +44,12 @@ def imf_h_jk(Z=None,h=12.):
     sample= numpy.array(sample)
     weights= numpy.array(weights)
     #Histogram
-    hist, edges= numpy.histogramdd(sample,weights=weights,bins=36,
-                                   range=[[0.5,1.6],[-11.,2]])
+    if dwarf:
+        hist, edges= numpy.histogramdd(sample,weights=weights,bins=51,
+                                       range=[[0.5,1.6],[2.,9.]])
+    else:
+        hist, edges= numpy.histogramdd(sample,weights=weights,bins=41,
+                                       range=[[0.5,1.6],[-11.,2]])
     #Normalize each J-K
     for ii in range(len(hist[:,0])):
         hist[ii,:]/= numpy.nanmax(hist[ii,:])/numpy.nanmax(hist)
@@ -52,6 +57,8 @@ def imf_h_jk(Z=None,h=12.):
         hist[ii,:]= rev
     #Plot
     bovy_plot.bovy_print()
+    if log:
+        hist= numpy.log(hist)
     bovy_plot.bovy_dens2d(hist.T,origin='lower',cmap='gist_yarg',
                           xrange=[edges[0][0],edges[0][-1]],
                           yrange=[edges[1][-1],edges[1][0]],
@@ -62,11 +69,18 @@ def imf_h_jk(Z=None,h=12.):
     #Add twin y axis
     ax= pyplot.gca()
     def my_formatter(x, pos):
-        """distance in kpc for m=12.2"""
+        """distance in kpc for m=h"""
         xs= 10.**((h-x)/5.-2.)
         return r'$%.0f$' % xs
+    def my_formatter2(x, pos):
+        """distance in kpc for m=h"""
+        xs= 10.**((h-x)/5.+1.)
+        return r'$%.0f$' % xs
     ax2= pyplot.twinx()
-    major_formatter = FuncFormatter(my_formatter)
+    if dwarf:
+        major_formatter = FuncFormatter(my_formatter2)
+    else:
+        major_formatter = FuncFormatter(my_formatter)
     ax2.yaxis.set_major_formatter(major_formatter)
     ystep= ax.yaxis.get_majorticklocs()
     ystep= ystep[1]-ystep[0]
@@ -75,21 +89,41 @@ def imf_h_jk(Z=None,h=12.):
     ax2.yaxis.set_label_position('right')
     ymin, ymax= ax.yaxis.get_view_interval()
     ax2.yaxis.set_view_interval(ymin,ymax,ignore=True)
-    ax2.set_ylabel('$\mathrm{distance\ for}\ H_0\ =\ %.1f\ [\mathrm{kpc}]$' % h)
+    if dwarf:
+        ax2.set_ylabel('$\mathrm{distance\ for}\ H_0\ =\ %.1f\ [\mathrm{pc}]$' % h)
+    else:
+        ax2.set_ylabel('$\mathrm{distance\ for}\ H_0\ =\ %.1f\ [\mathrm{kpc}]$' % h)
     xstep= ax.xaxis.get_majorticklocs()
     xstep= xstep[1]-xstep[0]
     ax2.xaxis.set_minor_locator(MultipleLocator(xstep/5.))
     if Z is None:
-        bovy_plot.bovy_end_print(os.path.join(OUTDIR,'imf_h_jk.'+OUTEXT))
+        bovy_plot.bovy_end_print(plotfile)
     else:
         bovy_plot.bovy_text(r'$Z\ =\ %.3f$' % Z,top_right=True,size=14.)
-        bovy_plot.bovy_end_print(os.path.join(OUTDIR,'imf_h_jk_%.4f.' % Z
-                                              +OUTEXT))
+        bovy_plot.bovy_end_print(plotfile)
     return None
 
+def get_options():
+    usage = "usage: %prog [options]"
+    parser = OptionParser(usage=usage)
+    parser.add_option("-o",dest='plotfile',
+                      help="Name of file for plot")
+    parser.add_option("-Z",dest='Z',type='float',default=None,
+                      help="Metallicity Z")
+    parser.add_option("--ho",dest='ho',type='float',default=12.,
+                      help="H_0 to use for distance scale")
+    parser.add_option("--dwarf",action="store_true", 
+                      dest="dwarf",
+                      default=False,
+                      help="Show the dwarf part of the isochrone")
+    parser.add_option("--log",action="store_true", 
+                      dest="log",
+                      default=False,
+                      help="Use a logarithmic grayscale")
+    return parser
+
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        imf_h_jk(Z=float(sys.argv[1]))
-    else:
-        imf_h_jk()
-                          
+    parser= get_options()
+    (options,args)= parser.parse_args()
+    imf_h_jk(options.plotfile,Z=options.Z,dwarf=options.dwarf,log=options.log,
+             h=options.ho)
