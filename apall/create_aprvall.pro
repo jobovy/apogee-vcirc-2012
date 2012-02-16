@@ -50,4 +50,7 @@ endfor
 ;;flag duplicates
 apogee_rem_dups, outStr, out, /flag, /structs
 mwrfits, out, outfile, /create
+;;add AK w/ python
+cmd= "python add_ak "+outfile+" "+outfile
+spawn, cmd
 END

@@ -1,6 +1,7 @@
-###################################################################################
+###############################################################################
 #  add_ak: add the Ak values
-###################################################################################
+###############################################################################
+import sys
 import os, os.path
 import numpy
 import esutil
@@ -34,7 +35,21 @@ def add_ak(infilename,outfilename):
         except KeyError:
             cat['AK'][ii]= -9999.9999
             cat['AK_METHOD'][ii]= 'none'
-    return cat #For now
+    #Calculate AH and AJ, and apply to get H0MAG, etc.
+    #Assume AH/AK= 1.55, AJ/AK=2.53 (A_l \propto l^-1.66)
+    aj= cat['AK']*2.53
+    ah= cat['AK']*1.55
+    cat= esutil.numpy_util.add_fields(cat,[('J0MAG', float),
+                                           ('H0MAG', float),
+                                           ('K0MAG', float)])
+    cat['J0MAG']= cat['JMAG']-aj
+    cat['H0MAG']= cat['HMAG']-ah
+    cat['K0MAG']= cat['KMAG']-cat['AK']
+    cat['J0MAG'][(cat['AK'] == -9999.9999)]= -9999.9999
+    cat['H0MAG'][(cat['AK'] == -9999.9999)]= -9999.9999
+    cat['K0MAG'][(cat['AK'] == -9999.9999)]= -9999.9999
+    #Save
+    fitsio.write(outfilename,cat,clobber=True)
     
 def _load_ak():
     akfile= os.path.join(_APOGEE_DATA,'ak.dat')
@@ -49,3 +64,6 @@ def _load_ak():
         out[input[ii,0].lower()]= input[ii,:]
     return out
     
+
+if __name__ == '__main__':
+    add_ak(sys.argv[1],sys.argv[0])
