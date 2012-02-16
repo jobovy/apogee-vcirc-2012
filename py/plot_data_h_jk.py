@@ -13,7 +13,7 @@ def plot_data_h_jk():
                         ylabel=r'$H_0\ [\mathrm{mag}]$',
                         xrange=[0.4,1.6],
                         yrange=[5.,14.],
-                        onedhists=True)
+                        onedhists=True,bins=31)
     bovy_plot.bovy_end_print(os.path.join(OUTDIR,'data_h_jk.'+OUTEXT))
     return None
 
