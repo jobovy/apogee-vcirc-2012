@@ -2,7 +2,7 @@ import numpy
 import fitsio
 import apogee
 def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
-                  meanb=0.,meanb_tol=0.5):
+                  meanb=0.,meanb_tol=0.5,ak=True):
     """
     NAME:
        readVclosData
@@ -16,6 +16,7 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
        meanb= (default: 0.) require the mean b to be meanb within meanb_tol
               [useful to make sure one has plates in the plane]
        meanb_tol= (default:0.5) tolerance on meanb
+       ak= (default: True) only use objects for which dereddened mags exist
     OUTPUT:
     HISTORY:
        2012-01-25 - Written - Bovy (IAS)
@@ -43,6 +44,8 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
             data= data[((data['APOGEE_TARGET1'] & 2L**12) != 0)]
         elif cohort.lower() == 'long':
             data= data[((data['APOGEE_TARGET1'] & 2L**13) != 0)]           
+    if ak:
+        data= data[(data['AK'] != -9999.9999)]
     #For every plate, calculate meanb, then cut on it
     plates= list(set(data['PLATE']))
     nplates= len(plates)

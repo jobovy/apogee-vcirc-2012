@@ -63,7 +63,7 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.):
                           xrange=[edges[0][0],edges[0][-1]],
                           yrange=[edges[1][-1],edges[1][0]],
                           aspect=(edges[0][-1]-edges[0][0])/float(edges[1][-1]-edges[1][0]),
-                          xlabel=r'$J-K_s\ [\mathrm{mag}]$',
+                          xlabel=r'$(J-K_s)_0\ [\mathrm{mag}]$',
                           ylabel=r'$M_H\ [\mathrm{mag}]$',
                           interpolation='nearest')
     #Add twin y axis
