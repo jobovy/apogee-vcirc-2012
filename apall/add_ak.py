@@ -36,8 +36,8 @@ def add_ak(infilename,outfilename):
             cat['AK'][ii]= -9999.9999
             cat['AK_METHOD'][ii]= 'none'
     #Calculate AH and AJ, and apply to get H0MAG, etc.
-    #Assume AH/AK= 1.55, AJ/AK=2.53 (A_l \propto l^-1.66)
-    aj= cat['AK']*2.53
+    #Assume AH/AK= 1.55, AJ/AK=2.5 (A_l \propto l^-1.66)
+    aj= cat['AK']*2.5
     ah= cat['AK']*1.55
     cat= esutil.numpy_util.add_fields(cat,[('J0MAG', float),
                                            ('H0MAG', float),
