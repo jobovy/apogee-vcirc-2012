@@ -2,7 +2,7 @@ import numpy
 import fitsio
 import apogee
 def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
-                  meanb=0.,meanb_tol=0.5,ak=True):
+                  meanb=0.,meanb_tol=0.5,jkmax=1.2,ak=True):
     """
     NAME:
        readVclosData
@@ -13,10 +13,12 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
        bmax - maximal Galactic latitude
        postshutdown= if True, only use post-shutdown data (default: True)
        fehcut= if True, cut to rough FeH > -0.5 (default: False)
+       cohort= (default: None) if set to 'short', 'medium', or 'long', cut to those cohorts
        meanb= (default: 0.) require the mean b to be meanb within meanb_tol
               [useful to make sure one has plates in the plane]
        meanb_tol= (default:0.5) tolerance on meanb
        ak= (default: True) only use objects for which dereddened mags exist
+       jkmax - maximum (J-K)_0 (only in conjunction with ak=True)
     OUTPUT:
     HISTORY:
        2012-01-25 - Written - Bovy (IAS)
@@ -46,6 +48,8 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
             data= data[((data['APOGEE_TARGET1'] & 2L**13) != 0)]           
     if ak:
         data= data[(data['AK'] != -9999.9999)]
+        if not jkmax is None:
+            data= data[(data['J0MAG']-data['K0MAG'] < jkmax)]
     #For every plate, calculate meanb, then cut on it
     plates= list(set(data['PLATE']))
     nplates= len(plates)
