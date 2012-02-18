@@ -60,7 +60,7 @@ class isomodel:
                 for ii in range(1,len(thisiso.int_IMF)-1):
                     JK= thisiso.J[ii]-thisiso.Ks[ii]
                     H= thisiso.H[ii]
-                    if JK < 0.5: # or thisiso['logg'][ii] > 3.5:
+                    if JK < 0.5: # or thisiso['logg'][ii] > 3.:
                         continue
                     if dN[ii] > 0.: 
                         sample.append([JK,H])
@@ -137,13 +137,29 @@ class isomodel:
         if self._interpolate:
             return numpy.log(self._interpolatedhist(jk,h))
         else:
-            jkbin= int(math.floor((jk-self._jkmin)/self._djk))
-            hbin= int(math.floor((h-self._hmin)/self._dh))
-            if jkbin < 0 or jkbin >= self._nbins:
-                return -numpy.finfo(numpy.dtype(numpy.float64)).max
-            if hbin < 0 or hbin >= self._nbins:
-                return -numpy.finfo(numpy.dtype(numpy.float64)).max
-            return self._loghist[jkbin,hbin]
+            jkbin= numpy.floor((jk-self._jkmin)/self._djk)
+            hbin= numpy.floor((h-self._hmin)/self._dh)
+            if isinstance(jk,numpy.ndarray):
+                out= numpy.zeros(len(jk))
+                jkbin= jkbin.astype('int')
+                hbin= hbin.astype('int')
+                indx= (jkbin < 0.)
+                out[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
+                indx= (hbin < 0.)
+                out[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
+                indx= (jkbin >= self._nbins)
+                out[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
+                indx= (hbin >= self._nbins)
+                out[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
+                return out
+            else:
+                jkbin= int(jkbin)
+                hbin= int(hbin)
+                if jkbin < 0 or jkbin >= self._nbins:
+                    return -numpy.finfo(numpy.dtype(numpy.float64)).max
+                if hbin < 0 or hbin >= self._nbins:
+                    return -numpy.finfo(numpy.dtype(numpy.float64)).max
+                return self._loghist[jkbin,hbin]
     
     def plot(self,log=False,conditional=False,nbins=None):
         """
