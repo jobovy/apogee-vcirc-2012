@@ -1,6 +1,16 @@
 ###############################################################################
 # fitvc.py: fit the MW rotation curve from APOGEE data
 ###############################################################################
+#
+# REMEMBER: Everything is wrt a _REFV0 and a _REFR0, likelihood is calculated
+#           in terms of current v0, R0
+#
+# To Do: - Dwarf+Giant contamination
+#        - Fits for given locationid
+#        - Outlier model
+#        - Correct Ro prior
+#
+###############################################################################
 import sys
 import os, os.path
 import cPickle as pickle
@@ -18,6 +28,7 @@ _VRSUN= -11.1
 #Reference values of parameters, such that fit should be around 1.
 _REFV0= 235. #km/s
 _REFR0= 8. #kpc
+#Integration parameters when bintegrating
 _BINTEGRATENBINS= 1001
 _BINTEGRATEDMIN= 0.001 #kpc
 _BINTEGRATEDMAX= 30. #kpc
@@ -40,6 +51,8 @@ def fitvc(parser):
                         bmax=options.bmax,
                         ak=True,
                         jkmax=options.jkmax)
+    #data= data[(data['GLON'] > 200.)*(data['GLON'] < 360.)*(data['LOGG'] < 3.)]
+    print "Using %i data points ..." % len(data)
     #Pre-calculate stuff
     l= data['GLON']*_DEGTORAD
     b= data['GLAT']*_DEGTORAD
@@ -60,9 +73,9 @@ def fitvc(parser):
     if not options.mcsample:
         print "Fitting ..."
         params= optimize.fmin_powell(mloglike,init_params,
-                                     args=(data['VHELIO']/_REFV0,
+                                     args=(data['VHELIO'],
                                            l,b,jk,h,iso,df,options,
-                                           sinl,cosl,cosb,cosl),
+                                           sinl,cosl,cosb,sinb),
                                      callback=cb)
         print params
     #Save
@@ -90,7 +103,7 @@ def mloglike(params,vhelio,l,b,jk,h,iso,df,options,sinl,cosl,cosb,sinb):
             sys.stdout.flush()
             thisout= integrate.quad(_mloglikedIntegrand,
                                     0.,numpy.inf,
-                                    args=(params,vhelio[ii]/params[0],
+                                    args=(params,vhelio[ii]/params[0]/_REFV0,
                                           l[ii],b[ii],jk[ii],h[ii],
                                           iso,df,options,
                                           sinl[ii],cosl[ii],cosb[ii],sinb[ii],
@@ -98,7 +111,6 @@ def mloglike(params,vhelio,l,b,jk,h,iso,df,options,sinl,cosl,cosb,sinb):
             if thisout == 0.:
                 print vhelio[ii], l[ii]/_DEGTORAD, jk[ii], h[ii]
             out+= -numpy.log(thisout)
-        #BOVY:Apply Ro prior correcly
         sys.stdout.write('\r'+_ERASESTR+'\r')
         sys.stdout.flush()
         print out, params
@@ -108,7 +120,7 @@ def mloglike(params,vhelio,l,b,jk,h,iso,df,options,sinl,cosl,cosb,sinb):
                            _BINTEGRATENBINS)/params[1]/_REFR0
         for ii in range(_BINTEGRATENBINS):
             thisout[:,ii]= _mloglikedIntegrand(ds[ii],
-                                               params,vhelio/params[0],
+                                               params,vhelio/params[0]/_REFV0,
                                                l,b,jk,h,iso,df,options,
                                                sinl,cosl,cosb,sinb,
                                                True)
@@ -117,7 +129,8 @@ def mloglike(params,vhelio,l,b,jk,h,iso,df,options,sinl,cosl,cosb,sinb):
         for ii in range(len(vhelio)):
             out+= -logsumexp(thisout[ii,:])
         print out, params
-    return out+(params[1]*_REFR0-8.2)**2./0.5
+    #BOVY:Apply Ro prior correcly
+    return out+(params[1]*_REFR0-8.2)**2./0.5#+(params[0]*_REFV0+2.25*math.exp(2.*params[2])*_REFV0/params[0]+12.24-_PMSGRA*params[1]*_REFR0)**2./200. #params[1]=Ro, SBD10 Solar motion
 
 def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
                         iso,df,options,sinl,cosl,cosb,sinb,returnlog):
@@ -140,7 +153,7 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
             theta= numpy.pi-numpy.arcsin(d/R*sinl)
         else:
             theta= numpy.arcsin(d/R*sinl)
-    vgal= _vgal(params,vhelio,l,b,options,sinl,cosl,cosb)
+    vgal= _vgal(params,vhelio,l,b,options,sinl,cosl)
     vpec= _vpec(params,vgal,R,options,l,theta)
     #Calculate probabilities
     logpvlos= _logdf(params,vpec,R,options,df,l,theta)
@@ -160,7 +173,7 @@ def _logpddf(params,d,l,b,R,theta,cosb,sinb,options):
     absZ= numpy.fabs(d*sinb)
     if options.densmodel.lower() == 'expdisk':
         logdensRZ= (-(R-1.)/options.hr-absZ/options.hz)*params[1]*_REFR0
-    return logdensRZ+2.*numpy.log(d)+numpy.log(cosb)
+    return logdensRZ+2.*numpy.log(d*params[1])+numpy.log(cosb)
 
 def _dm(params,d):
     """Distance modulus w/ d in ro"""
@@ -172,7 +185,8 @@ def _logdf(params,vpec,R,options,df,l,theta):
         slos= numpy.exp(params[2])/params[0]\
             *numpy.sqrt(1.-0.5*sinlt**2.)
         t= vpec/slos
-        return norm.logpdf(t)-numpy.log(slos)
+        #return numpy.log(0.95*norm.pdf(t)/slos/params[0]+0.05*norm.pdf(vpec*params[0]*_REFV0/200.)/200.)
+        return norm.logpdf(t)-numpy.log(slos*params[0])
 
 def _vc(params,R,options):
     """Circular velocity at R for different models"""
@@ -182,7 +196,7 @@ def _vc(params,R,options):
 def _vpec(params,vgal,R,options,l,theta):
     return vgal-_vc(params,R,options)*numpy.sin(l+theta)
 
-def _vgal(params,vhelio,l,b,options,sinl,cosl,cosb):
+def _vgal(params,vhelio,l,b,options,sinl,cosl):
     return vhelio-cosl*_VRSUN/params[0]/_REFV0+sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
 
 def get_options():
