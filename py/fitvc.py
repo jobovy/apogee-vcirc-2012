@@ -12,7 +12,7 @@
 #
 # BaseModel: Flat rotation curve, Ro, 
 #            Gaussian velocity distribution + outlier model (frac + mean, 
-#            fixed 100 km/s dispersion)
+#            fixed 150 km/s dispersion)
 #            --dwarf adds same for dwarfs
 #
 ###############################################################################
@@ -235,7 +235,7 @@ def _logdf(params,vpec,R,options,df,l,theta):
         slos= numpy.exp(params[2])/params[0]\
             *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
         t= vpec/slos
-        return numpy.log((1.-params[3])*norm.pdf(t)/slos/params[0]/_REFV0+params[3]*norm.pdf((vpec*params[0]-params[4])*_REFV0/100.)/100.)
+        return numpy.log((1.-params[3])*norm.pdf(t)/slos/params[0]/_REFV0+params[3]*norm.pdf((vpec*params[0]-params[4])*_REFV0/150.)/150.)
         #return norm.logpdf(t)-numpy.log(slos*params[0])
 
 def _vc(params,R,options):
