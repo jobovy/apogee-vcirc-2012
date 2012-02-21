@@ -148,26 +148,24 @@ def mloglike(params,vhelio,l,b,jk,h,iso,df,options,sinl,cosl,cosb,sinb):
         logpd= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
         ds= numpy.linspace(_BINTEGRATEDMIN,_BINTEGRATEDMAX,
                            _BINTEGRATENBINS)/params[1]/_REFR0
-        dd= ds[1]-ds[0]
         if options.dwarf:
             thisxtraout= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
             logpddwarf= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
             if options.dwarf:
                 dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
                                         _BINTEGRATENBINS)/params[1]/_REFR0
-                dwarfdd= dwarfds[1]-dwarfds[0]
         for ii in range(_BINTEGRATENBINS):
             thisout[:,ii], logpd[:,ii]= _mloglikedIntegrand(ds[ii],
                                                             params,vhelio/params[0]/_REFV0,
                                                             l,b,jk,h,iso[0],df,options,
                                                             sinl,cosl,cosb,sinb,
-                                                            True)+numpy.log(dd)
+                                                            True)
             if options.dwarf:
                 thisxtraout[:,ii], logpddwarf[:,ii]= _mloglikedIntegrand(dwarfds[ii],
                                                                          params,vhelio/params[0]/_REFV0,
                                                                          l,b,jk,h,iso[1],df,options,
                                                                          sinl,cosl,cosb,sinb,
-                                                                         True)+numpy.log(dwarfdd)
+                                                                         True)
         #Sum each one
         out= 0.
         for ii in range(len(vhelio)):
