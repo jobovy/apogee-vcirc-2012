@@ -38,7 +38,7 @@ _BINTEGRATENBINS= 1001
 _BINTEGRATEDMIN= 0.001 #kpc
 _BINTEGRATEDMAX= 30. #kpc
 _BINTEGRATEDMIN_DWARF= 0.001 #kpc
-_BINTEGRATEDMAX_DWARF= 1. #kpc
+_BINTEGRATEDMAX_DWARF= .1 #kpc
 _DEGTORAD= math.pi/180.
 _ERASESTR= "                                                                                "
 def fitvc(parser):
@@ -58,6 +58,8 @@ def fitvc(parser):
                         bmax=options.bmax,
                         ak=True,
                         jkmax=options.jkmax)
+    if not options.location is None:
+        data= data[(data['LOCATION'] == options.location)]
     #data= data[(data['GLON'] > 200.)*(data['GLON'] < 360.)*(data['LOGG'] < 3.)]
     print "Using %i data points ..." % len(data)
     #Pre-calculate stuff
@@ -96,7 +98,7 @@ def fitvc(parser):
 def _initialize_params(options):
     if options.rotcurve.lower() == 'flat' and options.dfmodel.lower() == 'simplegaussian':
         if options.dwarf:
-            return [235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.1]
+            return [235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2]
         else:
             return [235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.]
 
@@ -235,7 +237,7 @@ def _logdf(params,vpec,R,options,df,l,theta):
         slos= numpy.exp(params[2])/params[0]\
             *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
         t= vpec/slos
-        return numpy.log((1.-params[3])*norm.pdf(t)/slos/params[0]/_REFV0+params[3]*norm.pdf((vpec*params[0]-params[4])*_REFV0/150.)/150.)
+        return numpy.log((1.-params[3])*norm.pdf(t)/slos/params[0]/_REFV0+params[3]*norm.pdf((vpec*params[0]-params[4])*_REFV0/200.)/200.)
         #return norm.logpdf(t)-numpy.log(slos*params[0])
 
 def _vc(params,R,options):
@@ -284,6 +286,8 @@ def get_options():
                       help="readVclosData 'cohort'")
     parser.add_option("--jkmax",dest='jkmax',default=1.2,type='float',
                       help="readVclosData 'jkmax'")
+    parser.add_option("--location",dest='location',default=None,type='int',
+                      help="location id when looking at single los")
     #Isochrone IMF
     parser.add_option("--imfmodel",dest='imfmodel',default='lognormalChabrier2001',
                       help="imfmodel for isochrone model")
