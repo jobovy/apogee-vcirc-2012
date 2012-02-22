@@ -1,4 +1,4 @@
-FITDIR=../fits/
+FITSDIR=../fits/
 NSAMPLES=1000
 
 .PHONY: all_simple all_simple_dwarf
