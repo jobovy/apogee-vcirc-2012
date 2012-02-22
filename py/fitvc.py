@@ -239,10 +239,11 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
             if options.dwarf: #Combine
                 tmpthisout= logsumexp(thisout[ii,:])+numpy.log(1.-params[5])-logsumexp(logpd[ii,:])
                 tmpthisxtraout= logsumexp(thisxtraout[ii,:])+numpy.log(params[5])-logsumexp(logpddwarf[ii,:])
+                print tmpthisxtraout
                 c= numpy.amax([tmpthisout,tmpthisxtraout])
                 out-= numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c
             else:
-                out+= -logsumexp(thisout[ii,:])
+                out+= -logsumexp(thisout[ii,:])+logsumexp(logpd[ii,:]) #so we can compare to the +dwarf case
         print out, params
     #BOVY:Apply Ro prior correcly
     return out+(params[1]*_REFR0-8.2)**2./0.5#+(params[0]*_REFV0+2.25*math.exp(2.*params[2])*_REFV0/params[0]+12.24-_PMSGRA*params[1]*_REFR0)**2./200. #params[1]=Ro, SBD10 Solar motion
