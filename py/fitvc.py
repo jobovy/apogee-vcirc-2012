@@ -48,9 +48,9 @@ def fitvc(parser):
         return
     #Check whether the savefile already exists
     if os.path.exists(args[0]):
-        file= open(args[0],'rb')
-        params= pickle.load(file)
-        file.close()
+        savefile= open(args[0],'rb')
+        params= pickle.load(savefile)
+        savefile.close()
         if options.mcsample:
             for kk in range(len(params[0])):
                 xs= numpy.array([s[kk] for s in params])
@@ -92,6 +92,11 @@ def fitvc(parser):
     df= None
     #Initial condition for fit/sample
     init_params, isDomainFinite, domain= _initialize_params(options)
+    if not options.init is None:
+        #Load initial parameters from file
+        savefile= open(options.init,'rb')
+        init_params= pickle.load(savefile)
+        savefile.close()
     #Pre-calculate p(J-K,Hs|...)[isochrone] (in fact does not depend on the parameters
     print "Pre-calculating isochrone distance prior ..."
     logpiso= numpy.zeros((len(data),_BINTEGRATENBINS))
@@ -317,6 +322,9 @@ def _vgal(params,vhelio,l,b,options,sinl,cosl):
 def get_options():
     usage = "usage: %prog [options] <savefilename>\n\nsavefilename= name of the file that the fit/samples will be saved to"
     parser = OptionParser(usage=usage)
+    #Initial conditions file
+    parser.add_option("--init",dest='init',default=None,
+                      help="Initial parameters")
     #Rotation curve parameters/model
     parser.add_option("--rotcurve",dest='rotcurve',default='flat',
                       help="Rotation curve model to fit")

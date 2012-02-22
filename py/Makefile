@@ -1,3 +1,18 @@
+FITDIR=../fits/
+NSAMPLES=1000
+
+.PHONY: all_simple all_simple_dwarf
+
+all_simple:
+	python fitvc.py $(FITSDIR)all_simple.sav
+	python fitvc.py $(FITSDIR)all_simple_$(NSAMPLES)samples.sav \
+	init=$(FITSDIR)all_simple.sav --mcsample --nsamples=$(NSAMPLES)
+
+all_simple_dwarf:
+	python fitvc.py $(FITSDIR)all_simple_dwarf.sav --dwarf
+	python fitvc.py $(FITSDIR)all_simple_dwarf_$(NSAMPLES)samples.sav \
+	init=$(FITSDIR)all_simple_dwarf.sav --mcsample --nsamples=$(NSAMPLES) \
+	--dwarf
 
 #simple analysis without errors
 ../fakedata/l30_500_d0.sav: create_fake_los.py
