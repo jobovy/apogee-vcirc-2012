@@ -23,6 +23,7 @@ import numpy
 from scipy import integrate, optimize
 from scipy.maxentropy import logsumexp
 from scipy.stats import norm
+import acor
 import bovy_mcmc
 from galpy.util import save_pickles
 from readVclosData import readVclosData
@@ -52,9 +53,7 @@ def fitvc(parser):
         params= pickle.load(savefile)
         savefile.close()
         if options.mcsample:
-            for kk in range(len(params[0])):
-                xs= numpy.array([s[kk] for s in params])
-                print numpy.mean(xs), numpy.std(xs)
+            print_samples_qa(params)
         else:
             print params
         print "Savefile already exists, not re-fitting and overwriting"
@@ -142,9 +141,7 @@ def fitvc(parser):
                                     nsamples=options.nsamples,
                                     nwalkers=4*len(init_params),
                                     threads=options.multi)
-        for kk in range(len(init_params)):
-            xs= numpy.array([s[kk] for s in samples])
-            print numpy.mean(xs), numpy.std(xs)
+        print_samples_qa(samples)
         save_pickles(args[0],samples)
     return None
 
@@ -325,6 +322,14 @@ def _vpec(params,vgal,R,options,l,theta):
 
 def _vgal(params,vhelio,l,b,options,sinl,cosl):
     return vhelio-cosl*_VRSUN/params[0]/_REFV0+sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
+
+def print_samples_qa(samples):
+    print "Mean, standard devs, acor tau, acor mean, acor s ..."
+    for kk in range(len(samples[0])):
+        xs= numpy.array([s[kk] for s in samples])
+        #Auto-correlation time
+        tau, m, s= acor.acor(xs)
+        print numpy.mean(xs), numpy.std(xs), tau, m, s
 
 def get_options():
     usage = "usage: %prog [options] <savefilename>\n\nsavefilename= name of the file that the fit/samples will be saved to"
