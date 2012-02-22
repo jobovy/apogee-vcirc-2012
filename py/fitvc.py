@@ -5,9 +5,7 @@
 # REMEMBER: Everything is wrt a _REFV0 and a _REFR0, likelihood is calculated
 #           in terms of current v0, R0
 #
-# To Do: - Dwarf+Giant contamination
-#        - Fits for given locationid
-#        - Outlier model
+# To Do: 
 #        - Correct Ro prior
 #
 # BaseModel: Flat rotation curve, Ro, 
@@ -25,6 +23,8 @@ import numpy
 from scipy import integrate, optimize
 from scipy.maxentropy import logsumexp
 from scipy.stats import norm
+import bovy_mcmc
+from galpy.util import save_pickles
 from readVclosData import readVclosData
 import isomodel
 _PMSGRA= 30.24 #km/s/kpc
@@ -48,6 +48,15 @@ def fitvc(parser):
         return
     #Check whether the savefile already exists
     if os.path.exists(args[0]):
+        file= open(args[0],'rb')
+        params= pickle.load(file)
+        file.close()
+        if options.mcsample:
+            for kk in range(len(params[0])):
+                xs= numpy.array([s[kk] for s in params])
+                print numpy.mean(xs), numpy.std(xs)
+        else:
+            print params
         raise IOError("Savefile already exists, not re-fitting and overwriting")
     #Read the data
     print "Reading the data ..."
@@ -82,29 +91,80 @@ def fitvc(parser):
         iso= [iso]
     df= None
     #Initial condition for fit/sample
-    init_params= _initialize_params(options)
+    init_params, isDomainFinite, domain= _initialize_params(options)
+    #Pre-calculate p(J-K,Hs|...)[isochrone] (in fact does not depend on the parameters
+    print "Pre-calculating isochrone distance prior ..."
+    logpiso= numpy.zeros((len(data),_BINTEGRATENBINS))
+    ds= numpy.linspace(_BINTEGRATEDMIN,_BINTEGRATEDMAX,
+                       _BINTEGRATENBINS)
+    dm= _dm(ds)
+    for ii in range(len(data)):
+        mh= h[ii]-dm
+        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+    if options.dwarf:
+        logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
+        dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
+                                    _BINTEGRATENBINS)
+        dm= _dm(dwarfds)
+        for ii in range(len(data)):
+            mh= h[ii]-dm
+            logpisodwarf[ii,:]= iso[1](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+    else:
+        logpisodwarf= None
     #Fit/sample
     if not options.mcsample:
         print "Fitting ..."
         params= optimize.fmin_powell(mloglike,init_params,
                                      args=(data['VHELIO'],
-                                           l,b,jk,h,iso,df,options,
-                                           sinl,cosl,cosb,sinb),
+                                           l,b,jk,h,df,options,
+                                           sinl,cosl,cosb,sinb,
+                                           logpiso,logpisodwarf),
                                      callback=cb)
         print params
-    #Save
+        save_pickles(args[0],params)       
+    else:
+        samples= bovy_mcmc.markovpy(init_params,
+                                    0.01,
+                                    loglike,
+                                    (data['VHELIO'],
+                                     l,b,jk,h,df,options,
+                                     sinl,cosl,cosb,sinb,
+                                     logpiso,logpisodwarf),
+                                    isDomainFinite=isDomainFinite,
+                                    domain=domain,
+                                    nsamples=options.nsamples,
+                                    nwalkers=4*len(init_params),
+                                    threads=options.multi)
+        for kk in range(len(init_params)):
+            xs= numpy.array([s[kk] for s in samples])
+            print numpy.mean(xs), numpy.std(xs)
+        save_pickles(args[0],samples)
     return None
 
 def _initialize_params(options):
     if options.rotcurve.lower() == 'flat' and options.dfmodel.lower() == 'simplegaussian':
         if options.dwarf:
-            return [235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2]
+            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2],
+                    [[True,False],[True,True],[False,False],
+                    [True,True],[False,False],[True,True]],
+                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                     [0.,0.],[0.,1.],[0.,0.],
+                     [0.,1.]])
         else:
-            return [235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.]
+            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.],
+                    [[True,False],[True,True],[False,False],
+                     [True,True],[False,False]],
+                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                     [0.,0.],[0.,1.],[0.,0.]])
 
 def cb(x): print x
 
-def mloglike(params,vhelio,l,b,jk,h,iso,df,options,sinl,cosl,cosb,sinb):
+def loglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
+            logpiso,logpisodwarf):
+    return -mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
+                     logpiso,logpisodwarf)
+def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
+             logpiso,logpisodwarf):
     """minus log likelihood Eqn (1),
     params= [vc(ro),ro,sigmar]"""
     #Boundaries
@@ -153,21 +213,20 @@ def mloglike(params,vhelio,l,b,jk,h,iso,df,options,sinl,cosl,cosb,sinb):
         if options.dwarf:
             thisxtraout= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
             logpddwarf= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
-            if options.dwarf:
-                dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
-                                        _BINTEGRATENBINS)/params[1]/_REFR0
+            dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
+                                    _BINTEGRATENBINS)/params[1]/_REFR0
         for ii in range(_BINTEGRATENBINS):
             thisout[:,ii], logpd[:,ii]= _mloglikedIntegrand(ds[ii],
                                                             params,vhelio/params[0]/_REFV0,
-                                                            l,b,jk,h,iso[0],df,options,
+                                                            l,b,jk,h,df,options,
                                                             sinl,cosl,cosb,sinb,
-                                                            True)
+                                                            True,logpiso[:,ii])
             if options.dwarf:
                 thisxtraout[:,ii], logpddwarf[:,ii]= _mloglikedIntegrand(dwarfds[ii],
                                                                          params,vhelio/params[0]/_REFV0,
-                                                                         l,b,jk,h,iso[1],df,options,
+                                                                         l,b,jk,h,df,options,
                                                                          sinl,cosl,cosb,sinb,
-                                                                         True)
+                                                                         True,logpisodwarf[:,ii])
         #Sum each one
         out= 0.
         for ii in range(len(vhelio)):
@@ -183,7 +242,7 @@ def mloglike(params,vhelio,l,b,jk,h,iso,df,options,sinl,cosl,cosb,sinb):
     return out+(params[1]*_REFR0-8.2)**2./0.5#+(params[0]*_REFV0+2.25*math.exp(2.*params[2])*_REFV0/params[0]+12.24-_PMSGRA*params[1]*_REFR0)**2./200. #params[1]=Ro, SBD10 Solar motion
 
 def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
-                        iso,df,options,sinl,cosl,cosb,sinb,returnlog):
+                        df,options,sinl,cosl,cosb,sinb,returnlog,logpiso):
     #All positions are /ro, all velocities are /vo (d and vhelio have this already
     #Calculate coordinates, distances are /Ro (/params[1])
     #
@@ -208,15 +267,16 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
     vgal= _vgal(params,vhelio,l,b,options,sinl,cosl)
     vpec= _vpec(params,vgal,R,options,l,theta)
     #Calculate probabilities
-    logpvlos= _logdf(params,vpec,R,options,df,l,theta)
-    logpd= _logpd(params,d,l,b,jk,h,df,iso,options,R,theta,cosb,sinb)
+    logpvlos= _logdf(params,vpec,R,options,df,l,theta)+numpy.log(1.-params[3])
+    logpvlos_outlier= _logoutlierdf(params,vgal)+numpy.log(params[3])
+    c= numpy.amax(numpy.array([logpvlos,logpvlos_outlier]),axis=0)
+    logpvlos= numpy.log(numpy.exp(logpvlos-c)
+                        +numpy.exp(logpvlos_outlier-c))+c
+    logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
     if returnlog: return (logpvlos+logpd,logpd)
     else: return (numpy.exp(logpvlos+logpd),numpy.exp(logpd))
 
-def _logpd(params,d,l,b,jk,h,df,iso,options,R,theta,cosb,sinb):
-    dm= _dm(params,d)
-    mh= h-dm
-    logpiso= iso(jk,mh)
+def _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso):
     logpddf= _logpddf(params,d,l,b,R,theta,cosb,sinb,options)
     return logpiso+logpddf
 
@@ -227,9 +287,9 @@ def _logpddf(params,d,l,b,R,theta,cosb,sinb,options):
         logdensRZ= (-(R-1.)/options.hr-absZ/options.hz)*params[1]*_REFR0
     return logdensRZ+2.*numpy.log(d*params[1])+numpy.log(cosb)
 
-def _dm(params,d):
-    """Distance modulus w/ d in ro"""
-    return 5.*numpy.log10(d*params[1]*_REFR0)+10.
+def _dm(d):
+    """Distance modulus w/ d in kpc"""
+    return 5.*numpy.log10(d)+10.
 
 def _logdf(params,vpec,R,options,df,l,theta):
     if options.dfmodel.lower() == 'simplegaussian':
@@ -237,8 +297,11 @@ def _logdf(params,vpec,R,options,df,l,theta):
         slos= numpy.exp(params[2])/params[0]\
             *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
         t= vpec/slos
-        return numpy.log((1.-params[3])*norm.pdf(t)/slos/params[0]/_REFV0+params[3]*norm.pdf((vpec*params[0]-params[4])*_REFV0/200.)/200.)
-        #return norm.logpdf(t)-numpy.log(slos*params[0])
+        return norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
+
+def _logoutlierdf(params,vgal):
+    t= (vgal*params[0]-params[4])*_REFV0/200.
+    return norm.logpdf(t)-numpy.log(200.)
 
 def _vc(params,R,options):
     """Circular velocity at R for different models"""
@@ -309,6 +372,9 @@ def get_options():
                       help="If set, sample around the best fit, save in args[1]")
     parser.add_option("--nsamples",dest='nsamples',default=1000,type='int',
                       help="Number of MCMC samples to obtain")
+    #Multiprocessing?
+    parser.add_option("-m","--multi",dest='multi',default=1,type='int',
+                      help="number of cpus to use for sampling")
     return parser
 
 if __name__ == '__main__':
