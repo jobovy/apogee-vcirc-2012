@@ -248,7 +248,10 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                 out+= -logsumexp(thisout[ii,:])+logsumexp(logpd[ii,:]) #so we can compare to the +dwarf case
         print out, params
     #BOVY:Apply Ro prior correcly
-    return out+(params[1]*_REFR0-8.2)**2./0.5#+(params[0]*_REFV0+2.25*math.exp(2.*params[2])*_REFV0/params[0]+12.24-_PMSGRA*params[1]*_REFR0)**2./200. #params[1]=Ro, SBD10 Solar motion
+    if options.noroprior:
+        return out
+    else:
+        return out+(params[1]*_REFR0-8.2)**2./0.5#+(params[0]*_REFV0+2.25*math.exp(2.*params[2])*_REFV0/params[0]+12.24-_PMSGRA*params[1]*_REFR0)**2./200. #params[1]=Ro, SBD10 Solar motion
 
 def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
                         df,options,sinl,cosl,cosb,sinb,returnlog,logpiso):
@@ -340,6 +343,10 @@ def get_options():
     #Rotation curve parameters/model
     parser.add_option("--rotcurve",dest='rotcurve',default='flat',
                       help="Rotation curve model to fit")
+    #Ro prior
+    parser.add_option("--noroprior",action="store_true", dest="noroprior",
+                      default=False,
+                      help="If set, do not apply an Ro prior")
     #Velocity distribution model
     parser.add_option("--dfmodel",dest='dfmodel',default='simplegaussian',
                       help="DF model to use")
