@@ -244,7 +244,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                     out-= tmpthisout
                 else:
                     tmpthisxtraout= logsumexp(thisxtraout[ii,:])+numpy.log(params[5])-thislogpdwarf
-                    #print tmpthisxtraout, -logsumexp(logpddwarf[ii,:])
+                    #print tmpthisout, tmpthisxtraout, -logsumexp(logpddwarf[ii,:])
                     c= numpy.amax([tmpthisout,tmpthisxtraout])
                     out-= numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c
             else:
