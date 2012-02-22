@@ -70,6 +70,7 @@ def fitvc(parser):
                         jkmax=options.jkmax)
     if not options.location is None:
         data= data[(data['LOCATION'] == options.location)]
+    #data= data[(data['J0MAG']-data['K0MAG'] > 0.82)]
     #data= data[(data['GLON'] > 200.)*(data['GLON'] < 360.)*(data['LOGG'] < 3.)]
     print "Using %i data points ..." % len(data)
     #Pre-calculate stuff
@@ -238,10 +239,14 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         for ii in range(len(vhelio)):
             if options.dwarf: #Combine
                 tmpthisout= logsumexp(thisout[ii,:])+numpy.log(1.-params[5])-logsumexp(logpd[ii,:])
-                tmpthisxtraout= logsumexp(thisxtraout[ii,:])+numpy.log(params[5])-logsumexp(logpddwarf[ii,:])
-                #print tmpthisxtraout, -logsumexp(logpddwarf[ii,:])
-                c= numpy.amax([tmpthisout,tmpthisxtraout])
-                out-= numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c
+                thislogpdwarf= logsumexp(logpddwarf[ii,:])
+                if thislogpdwarf == -numpy.finfo(numpy.dtype(numpy.float64)).max:
+                    out-= tmpthisout
+                else:
+                    tmpthisxtraout= logsumexp(thisxtraout[ii,:])+numpy.log(params[5])-thislogpdwarf
+                    #print tmpthisxtraout, -logsumexp(logpddwarf[ii,:])
+                    c= numpy.amax([tmpthisout,tmpthisxtraout])
+                    out-= numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c
             else:
                 out+= -logsumexp(thisout[ii,:])+logsumexp(logpd[ii,:]) #so we can compare to the +dwarf case
         print out, params
