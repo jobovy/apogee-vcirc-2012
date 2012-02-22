@@ -140,17 +140,12 @@ class isomodel:
             jkbin= numpy.floor((jk-self._jkmin)/self._djk)
             hbin= numpy.floor((h-self._hmin)/self._dh)
             if isinstance(jk,numpy.ndarray):
-                out= numpy.zeros(len(jk))
+                out= numpy.zeros(len(jk))-numpy.finfo(numpy.dtype(numpy.float64)).max
                 jkbin= jkbin.astype('int')
                 hbin= hbin.astype('int')
-                indx= (jkbin < 0.)
-                out[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
-                indx= (hbin < 0.)
-                out[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
-                indx= (jkbin >= self._nbins)
-                out[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
-                indx= (hbin >= self._nbins)
-                out[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
+                indx= (jkbin >= 0.)*(hbin >= 0.)*(jkbin < self._nbins)\
+                    *(hbin < self._nbins)
+                out[indx]= self._loghist[jkbin[indx],hbin[indx]]
                 return out
             else:
                 jkbin= int(jkbin)
