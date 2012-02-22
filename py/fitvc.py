@@ -57,7 +57,8 @@ def fitvc(parser):
                 print numpy.mean(xs), numpy.std(xs)
         else:
             print params
-        raise IOError("Savefile already exists, not re-fitting and overwriting")
+        print "Savefile already exists, not re-fitting and overwriting"
+        return None
     #Read the data
     print "Reading the data ..."
     data= readVclosData(postshutdown=options.postshutdown,

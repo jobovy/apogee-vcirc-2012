@@ -6,12 +6,12 @@ NSAMPLES=1000
 all_simple:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simple.sav
 	$(PYTHON) fitvc.py $(FITSDIR)all_simple_$(NSAMPLES)samples.sav \
-	init=$(FITSDIR)all_simple.sav --mcsample --nsamples=$(NSAMPLES)
+	--init=$(FITSDIR)all_simple.sav --mcsample --nsamples=$(NSAMPLES)
 
 all_simple_dwarf:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simple_dwarf.sav --dwarf
 	$(PYTHON) fitvc.py $(FITSDIR)all_simple_dwarf_$(NSAMPLES)samples.sav \
-	init=$(FITSDIR)all_simple_dwarf.sav --mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FITSDIR)all_simple_dwarf.sav --mcsample --nsamples=$(NSAMPLES) \
 	--dwarf
 
 #simple analysis without errors
