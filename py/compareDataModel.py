@@ -2,15 +2,19 @@
 #  compareDataModel.py: module for comparing the data to the model
 ###################################################################################
 from optparse import OptionParser
+import cPickle as pickle
 import numpy
 from scipy.maxentropy import logsumexp
 from galpy.util import bovy_plot
 import multi
 import multiprocessing
-from fitvc import mloglike, _DEGTORAD, _REFV0, _REFR0
+from fitvc import mloglike, _dm, \
+    _DEGTORAD, _REFV0, _REFR0, \
+    _BINTEGRATEDMAX, _BINTEGRATEDMIN, _BINTEGRATENBINS, \
+    _BINTEGRATEDMAX_DWARF, _BINTEGRATEDMIN_DWARF
 from readVclosData import readVclosData
 import isomodel
-def pvlosplate(params,vhelio,data,iso,df,options):
+def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf):
     """
     NAME:
        pvlosplate
@@ -20,9 +24,9 @@ def pvlosplate(params,vhelio,data,iso,df,options):
        params - parameters of the model
        vhelio - heliocentric los velocity to evaluate
        data - data array for this location
-       iso - isochrone model
        df - df object(s) (?)
        options - options
+       logpiso, logpisodwarf - precalculated isochrones
     OUTPUT:
        log of the probability
     HISTORY:
@@ -38,26 +42,56 @@ def pvlosplate(params,vhelio,data,iso,df,options):
     jk= data['J0MAG']-data['K0MAG']
     jk[(jk < 0.5)]= 0.5 #BOVY: FIX THIS HACK BY EMAILING GAIL
     h= data['H0MAG']
+    out= -mloglike(params,numpy.zeros(len(data))+vhelio,
+                   l,
+                   b,
+                   jk,
+                   h,
+                   df,options,
+                   sinl,
+                   cosl,
+                   cosb,
+                   sinb,
+                   logpiso,
+                   logpisodwarf,True)
+    #indx= (out == 0.)
+    #print l[indx], b[indx], jk[indx], h[indx]
+    return logsumexp(out)
+    
+
     out= numpy.zeros(len(data))
     for ii in range(len(out)):
+        if options.dwarf:
+            pisodwarf= logpisodwarf[ii,:].reshape((1,logpiso.shape[1])),
+        else:
+            pisodwarf= None
         out[ii]= -mloglike(params,numpy.array([vhelio]),
                            numpy.array([l[ii]]),
                            numpy.array([b[ii]]),
                            numpy.array([jk[ii]]),
                            numpy.array([h[ii]]),
-                           iso,df,options,
+                           df,options,
                            numpy.array([sinl[ii]]),
                            numpy.array([cosl[ii]]),
                            numpy.array([cosb[ii]]),
-                           numpy.array([sinb[ii]]))
+                           numpy.array([sinb[ii]]),
+                           logpiso[ii,:].reshape((1,logpiso.shape[1])),
+                           pisodwarf)
     return logsumexp(out)
 
 def get_options():
     usage = "usage: %prog [options] <savefilename>\n\nsavefilename= name of the file that the fit/samples will be saved to"
     parser = OptionParser(usage=usage)
+    #Initial conditions file
+    parser.add_option("--init",dest='init',default=None,
+                      help="Initial parameters")
     #Rotation curve parameters/model
     parser.add_option("--rotcurve",dest='rotcurve',default='flat',
                       help="Rotation curve model to fit")
+    #Ro prior
+    parser.add_option("--noroprior",action="store_true", dest="noroprior",
+                      default=False,
+                      help="If set, do not apply an Ro prior")
     #Velocity distribution model
     parser.add_option("--dfmodel",dest='dfmodel',default='simplegaussian',
                       help="DF model to use")
@@ -66,7 +100,7 @@ def get_options():
                       help="Density model to use")
     parser.add_option("--hr",dest='hr',default=3.,type='float',
                       help="scale length in kpc")
-    parser.add_option("--hz",dest='hz',default=0.3,type='float',
+    parser.add_option("--hz",dest='hz',default=0.25,type='float',
                       help="scale height in kpc")
     parser.add_option("--hs",dest='hs',default=8.,type='float',
                       help="dispersion scale length in kpc")
@@ -128,34 +162,71 @@ if __name__ == '__main__':
                         bmax=options.bmax,
                         ak=True,
                         jkmax=options.jkmax)
+    #HACK
+    indx= (data['J0MAG']-data['K0MAG'] < 0.5)
+    data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
     #Set up the isochrone
     print "Setting up the isochrone model ..."
     iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z)
     if options.dwarf:
         iso= [iso, 
               isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,dwarf=True)]
+    else:
+        iso= [iso]
     df= None
+    print "Pre-calculating isochrone distance prior ..."
+    logpiso= numpy.zeros((len(data),_BINTEGRATENBINS))
+    ds= numpy.linspace(_BINTEGRATEDMIN,_BINTEGRATEDMAX,
+                       _BINTEGRATENBINS)
+    dm= _dm(ds)
+    for ii in range(len(data)):
+        mh= data['H0MAG'][ii]-dm
+        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+                              +(data['J0MAG']-data['K0MAG'])[ii],mh)
+    if options.dwarf:
+        logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
+        dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
+                                    _BINTEGRATENBINS)
+        dm= _dm(dwarfds)
+        for ii in range(len(data)):
+            mh= data['H0MAG'][ii]-dm
+            logpisodwarf[ii,:]= iso[1](numpy.zeros(_BINTEGRATENBINS)
+                                       +(data['J0MAG']-data['K0MAG'])[ii],mh)
+    else:
+        logpisodwarf= None
     #test
     if options.plottype.lower() == 'pvloslos':
         print set(list(data['LOCATION']))
-        data= data[(data['LOCATION'] == options.location)]
+        indx= (data['LOCATION'] == options.location)
+        data= data[indx]
+        logpiso= logpiso[indx,:]
+        if options.dwarf:
+            logpisodwarf= logpisodwarf[indx,:]
         #Fit parameters
         if options.dwarf:
             params= [270./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.025,0.5,1.]
         else:
             params= [270./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.025,0.5]
-        #Calculate vlos los
+        if not options.init is None:
+            #Load initial parameters from file
+            savefile= open(options.init,'rb')
+            params= pickle.load(savefile)
+            savefile.close()
+        #Calculate vlos | los
         vlos= numpy.linspace(-200.,200.,options.nvlos)
         pvlos= numpy.zeros(options.nvlos)
         if not options.multi is None:
             pvlos= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
-                                                            data,iso,df,options)),
+                                                            data,df,options,
+                                                            logpiso,
+                                                            logpisodwarf)),
                                       range(options.nvlos),
                                       numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
         else:
             for ii in range(options.nvlos):
                 print ii
-                pvlos[ii]= pvlosplate(params,vlos[ii],data,iso,df,options)
+                pvlos[ii]= pvlosplate(params,vlos[ii],data,df,options,
+                                      logpiso,logpisodwarf)
         pvlos-= logsumexp(pvlos)
         pvlos= numpy.exp(pvlos)
         #Plot data

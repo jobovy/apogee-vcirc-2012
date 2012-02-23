@@ -125,7 +125,7 @@ def fitvc(parser):
                                      args=(data['VHELIO'],
                                            l,b,jk,h,df,options,
                                            sinl,cosl,cosb,sinb,
-                                           logpiso,logpisodwarf),
+                                           logpiso,logpisodwarf,False),
                                      callback=cb)
         print params
         save_pickles(args[0],params)       
@@ -181,9 +181,9 @@ def cb(x): print x
 def loglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
             logpiso,logpisodwarf):
     return -mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
-                     logpiso,logpisodwarf)
+                     logpiso,logpisodwarf,False)
 def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
-             logpiso,logpisodwarf):
+             logpiso,logpisodwarf,arrout):
     """minus log likelihood Eqn (1),
     params= [vc(ro),ro,sigmar]"""
     #Boundaries
@@ -247,20 +247,32 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                                                                          sinl,cosl,cosb,sinb,
                                                                          True,logpisodwarf[:,ii])
         #Sum each one
-        out= 0.
+        if arrout:
+            out= numpy.zeros(len(vhelio))
+        else:
+            out= 0.
         for ii in range(len(vhelio)):
             if options.dwarf: #Combine
                 tmpthisout= logsumexp(thisout[ii,:])+numpy.log(1.-params[5])-logsumexp(logpd[ii,:])
                 thislogpdwarf= logsumexp(logpddwarf[ii,:])
                 if thislogpdwarf == -numpy.finfo(numpy.dtype(numpy.float64)).max:
-                    out-= tmpthisout
+                    if arrout:
+                        out[ii]= -tmpthisout
+                    else:
+                        out-= tmpthisout
                 else:
                     tmpthisxtraout= logsumexp(thisxtraout[ii,:])+numpy.log(params[5])-thislogpdwarf
                     #print tmpthisout, tmpthisxtraout, -logsumexp(logpddwarf[ii,:])
                     c= numpy.amax([tmpthisout,tmpthisxtraout])
-                    out-= numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c
+                    if arrout:
+                        out[ii]= -(numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c)
+                    else:
+                        out-= numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c
             else:
-                out+= -logsumexp(thisout[ii,:])+logsumexp(logpd[ii,:]) #so we can compare to the +dwarf case
+                if arrout:
+                    out[ii]= -logsumexp(thisout[ii,:])+logsumexp(logpd[ii,:]) #so we can compare to the +dwarf case
+                else:
+                    out+= -logsumexp(thisout[ii,:])+logsumexp(logpd[ii,:]) #so we can compare to the +dwarf case
         print out, params
     #BOVY:Apply Ro prior correcly
     if options.noroprior:

@@ -27,6 +27,10 @@ all_simpledrift_noro:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift
+	$(PYTHON) compareDataModel.py \
+	--init=$(FITSDIR)all_simpledrift_noro.sav \
+	--plottype=pvloslos -o ~/Desktop/test.png --nvlos=21 -m 4 \
+	 --dfmodel=simplegaussiandrift
 
 all_simpledrift_noro_powerlaw:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_powerlaw.sav --noroprior \
