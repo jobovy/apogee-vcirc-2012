@@ -355,7 +355,7 @@ def get_options():
                       help="Density model to use")
     parser.add_option("--hr",dest='hr',default=3.,type='float',
                       help="scale length in kpc")
-    parser.add_option("--hz",dest='hz',default=0.3,type='float',
+    parser.add_option("--hz",dest='hz',default=0.25,type='float',
                       help="scale height in kpc")
     parser.add_option("--hs",dest='hs',default=8.,type='float',
                       help="dispersion scale length in kpc")
