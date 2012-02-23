@@ -28,6 +28,7 @@ import bovy_mcmc
 from galpy.util import save_pickles
 from readVclosData import readVclosData
 import isomodel
+import asymmetricDriftModel
 _PMSGRA= 30.24 #km/s/kpc
 _PMSGRA_ERR= 0.12 #km/s/kpc
 _VRSUN= -11.1
@@ -146,7 +147,7 @@ def fitvc(parser):
     return None
 
 def _initialize_params(options):
-    if options.rotcurve.lower() == 'flat' and options.dfmodel.lower() == 'simplegaussian':
+    if options.rotcurve.lower() == 'flat' and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
         if options.dwarf:
             return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2],
                     [[True,False],[True,True],[False,False],
@@ -160,6 +161,20 @@ def _initialize_params(options):
                      [True,True],[False,False]],
                     [[0.,0.],[5./_REFR0,11./_REFR0],
                      [0.,0.],[0.,1.],[0.,0.]])
+    elif options.rotcurve.lower() == 'powerlaw' and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
+        if options.dwarf:
+            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2,0.],
+                    [[True,False],[True,True],[False,False],
+                    [True,True],[False,False],[True,True],[False,False]],
+                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                     [0.,0.],[0.,1.],[0.,0.],
+                     [0.,1.],[0.,0.]])
+        else:
+            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.],
+                    [[True,False],[True,True],[False,False],
+                     [True,True],[False,False],[False,False]],
+                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                     [0.,0.],[0.,1.],[0.,0.],[0.,0.]])
 
 def cb(x): print x
 
@@ -304,11 +319,21 @@ def _dm(d):
     return 5.*numpy.log10(d)+10.
 
 def _logdf(params,vpec,R,options,df,l,theta):
+    sinlt= numpy.sin(l+theta)
     if options.dfmodel.lower() == 'simplegaussian':
-        sinlt= numpy.sin(l+theta)
         slos= numpy.exp(params[2])/params[0]\
             *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
         t= vpec/slos
+        return norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
+    elif options.dfmodel.lower() == 'simplegaussiandrift':
+        va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],
+                                    hR=options.hr/params[1]/_REFR0,
+                                    hs=options.hs/params[1]/_REFR0,
+                                    vc=_vc(params,R,options))*sinlt 
+        #va= vc- <v>
+        slos= numpy.exp(params[2])/params[0]\
+            *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
+        t= (vpec+va)/slos
         return norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
 
 def _logoutlierdf(params,vgal):
@@ -319,6 +344,8 @@ def _vc(params,R,options):
     """Circular velocity at R for different models"""
     if options.rotcurve.lower() == 'flat':
         return 1. #vc/vo
+    elif options.rotcurve.lower() == 'powerlaw':
+        return R**params[5+options.dwarf] #vc/vo
 
 def _vpec(params,vgal,R,options,l,theta):
     return vgal-_vc(params,R,options)*numpy.sin(l+theta)
