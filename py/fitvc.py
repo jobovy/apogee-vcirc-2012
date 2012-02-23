@@ -175,6 +175,37 @@ def _initialize_params(options):
                      [True,True],[False,False],[False,False]],
                     [[0.,0.],[5./_REFR0,11./_REFR0],
                      [0.,0.],[0.,1.],[0.,0.],[0.,0.]])
+    elif options.rotcurve.lower() == 'quadratic' and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
+        if options.dwarf:
+            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2,0.,0.],
+                    [[True,False],[True,True],[False,False],
+                    [True,True],[False,False],[True,True],[False,False],
+                     [False,False]],
+                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                     [0.,0.],[0.,1.],[0.,0.],
+                     [0.,1.],[0.,0.],[0.,0.]])
+        else:
+            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.,0.],
+                    [[True,False],[True,True],[False,False],
+                     [True,True],[False,False],[False,False],[False,False]],
+                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                     [0.,0.],[0.,1.],[0.,0.],[0.,0.],[0.,0.]])
+    elif options.rotcurve.lower() == 'cubic' and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
+        if options.dwarf:
+            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2,0.,0.,0.],
+                    [[True,False],[True,True],[False,False],
+                    [True,True],[False,False],[True,True],[False,False],
+                     [False,False],[False,False]],
+                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                     [0.,0.],[0.,1.],[0.,0.],
+                     [0.,1.],[0.,0.],[0.,0.],[0.,0.]])
+        else:
+            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.,0.,0.],
+                    [[True,False],[True,True],[False,False],
+                     [True,True],[False,False],[False,False],[False,False],
+                     [False,False]],
+                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                     [0.,0.],[0.,1.],[0.,0.],[0.,0.],[0.,0.],[0.,0.]])
 
 def cb(x): print x
 
@@ -360,6 +391,11 @@ def _vc(params,R,options):
         return R**params[5+options.dwarf] #vc/vo
     elif options.rotcurve.lower() == 'linear':
         return 1.+R*params[5+options.dwarf] #vc/vo
+    elif options.rotcurve.lower() == 'quadratic':
+        return 1.+R*params[5+options.dwarf]+R**2.*params[6+options.dwarf]
+    elif options.rotcurve.lower() == 'cubic':
+        return 1.+R*params[5+options.dwarf]+R**2.*params[6+options.dwarf]\
+            +R**3.*params[7+options.dwarf]
 
 def _vpec(params,vgal,R,options,l,theta):
     return vgal-_vc(params,R,options)*numpy.sin(l+theta)
