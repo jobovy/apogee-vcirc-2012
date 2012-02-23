@@ -161,7 +161,7 @@ def _initialize_params(options):
                      [True,True],[False,False]],
                     [[0.,0.],[5./_REFR0,11./_REFR0],
                      [0.,0.],[0.,1.],[0.,0.]])
-    elif options.rotcurve.lower() == 'powerlaw' and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
+    elif (options.rotcurve.lower() == 'linear' or options.rotcurve.lower() == 'powerlaw') and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
         if options.dwarf:
             return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2,0.],
                     [[True,False],[True,True],[False,False],
@@ -346,6 +346,8 @@ def _vc(params,R,options):
         return 1. #vc/vo
     elif options.rotcurve.lower() == 'powerlaw':
         return R**params[5+options.dwarf] #vc/vo
+    elif options.rotcurve.lower() == 'linear':
+        return 1.+R*params[5+options.dwarf] #vc/vo
 
 def _vpec(params,vgal,R,options,l,theta):
     return vgal-_vc(params,R,options)*numpy.sin(l+theta)

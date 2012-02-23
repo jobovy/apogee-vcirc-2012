@@ -2,7 +2,7 @@ FITSDIR=../fits/
 NSAMPLES=1000
 
 .PHONY: all_simple all_simple_dwarf all_simple_noro all_simpledrift_noro \
-	all_simpledrift_noro_powerlaw
+	all_simpledrift_noro_powerlaw all_simpledrift_noro_linear
 
 all_simple:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simple.sav
@@ -34,6 +34,13 @@ all_simpledrift_noro_powerlaw:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_powerlaw_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_powerlaw.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift --rotcurve=powerlaw
+
+all_simpledrift_noro_linear:
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_linear.sav --noroprior \
+	--dfmodel=simplegaussiandrift --rotcurve=linear
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_linear_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_linear.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --rotcurve=linear
 
 
 
