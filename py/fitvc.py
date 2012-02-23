@@ -390,12 +390,14 @@ def _vc(params,R,options):
     elif options.rotcurve.lower() == 'powerlaw':
         return R**params[5+options.dwarf] #vc/vo
     elif options.rotcurve.lower() == 'linear':
-        return 1.+R*params[5+options.dwarf] #vc/vo
+        return 1.+(R-1.)*params[5+options.dwarf] #vc/vo
     elif options.rotcurve.lower() == 'quadratic':
-        return 1.+R*params[5+options.dwarf]+R**2.*params[6+options.dwarf]
+        return 1.+(R-1.)*params[5+options.dwarf]\
+            +(R-1.)**2.*params[6+options.dwarf]
     elif options.rotcurve.lower() == 'cubic':
-        return 1.+R*params[5+options.dwarf]+R**2.*params[6+options.dwarf]\
-            +R**3.*params[7+options.dwarf]
+        return 1.+(R-1.)*params[5+options.dwarf]\
+            +(R-1.)**2.*params[6+options.dwarf]\
+            +(R-1.)**3.*params[7+options.dwarf]
 
 def _vpec(params,vgal,R,options,l,theta):
     return vgal-_vc(params,R,options)*numpy.sin(l+theta)
