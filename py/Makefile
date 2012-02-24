@@ -7,7 +7,8 @@ NSAMPLES=1000
 	all_simpledrift_noro_cubic \
 	all_simpledrift_noro_vpec \
 	l180_simpledrift_noro \
-	fourth_simpledrift_noro
+	fourth_simpledrift_noro \
+	nomult_simpledrift_noro
 
 all_simple:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simple.sav
@@ -50,6 +51,13 @@ fourth_simpledrift_noro:
 	$(PYTHON) fitvc.py $(FITSDIR)fourth_simpledrift_noro_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)fourth_simpledrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift --downsample=4
+
+nomult_simpledrift_noro:
+	$(PYTHON) fitvc.py $(FITSDIR)nomult_simpledrift_noro.sav --noroprior \
+	--dfmodel=simplegaussiandrift --cutmultiples
+	$(PYTHON) fitvc.py $(FITSDIR)nomult_simpledrift_noro_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)nomult_simpledrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --cutmultiples
 
 all_simpledrift_noro_powerlaw:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_powerlaw.sav --noroprior \

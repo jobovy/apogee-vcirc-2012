@@ -67,6 +67,7 @@ def fitvc(parser):
                         lmin=options.lmin,
                         bmax=options.bmax,
                         ak=True,
+                        cutmultiples=options.cutmultiples,
                         jkmax=options.jkmax)
     if not options.location is None:
         data= data[(data['LOCATION'] == options.location)]
@@ -479,6 +480,10 @@ def get_options():
     parser.add_option("--downsample",dest='downsample',default=None,
                       type='float',
                       help="Factor with which to downsample the data")
+    parser.add_option("--cutmultiples",action="store_true", 
+                      dest="cutmultiples",
+                      default=False,
+                      help="readVclosData 'cutmultiples'")
     #Isochrone IMF
     parser.add_option("--imfmodel",dest='imfmodel',default='lognormalChabrier2001',
                       help="imfmodel for isochrone model")
