@@ -4,7 +4,10 @@ NSAMPLES=1000
 .PHONY: all_simple all_simple_dwarf all_simple_noro all_simpledrift_noro \
 	all_simpledrift_noro_powerlaw all_simpledrift_noro_linear \
 	all_simpledrift_noro_quadratic \
-	all_simpledrift_noro_cubic
+	all_simpledrift_noro_cubic \
+	all_simpledrift_noro_vpec \
+	l180_simpledrift_noro \
+	fourth_simpledrift_noro
 
 all_simple:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simple.sav
@@ -34,6 +37,20 @@ all_simpledrift_noro:
 #	--plottype=pvloslos -o ~/Desktop/test.png --nvlos=21 -m 4 \
 #	 --dfmodel=simplegaussiandrift
 
+l180_simpledrift_noro:
+	$(PYTHON) fitvc.py $(FITSDIR)l180_simpledrift_noro.sav --noroprior \
+	--dfmodel=simplegaussiandrift --location=4154
+	$(PYTHON) fitvc.py $(FITSDIR)l180_simpledrift_noro_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)l180_simpledrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --location=4154
+
+fourth_simpledrift_noro:
+	$(PYTHON) fitvc.py $(FITSDIR)fourth_simpledrift_noro.sav --noroprior \
+	--dfmodel=simplegaussiandrift --downsample=4
+	$(PYTHON) fitvc.py $(FITSDIR)fourth_simpledrift_noro_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)fourth_simpledrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --downsample=4
+
 all_simpledrift_noro_powerlaw:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_powerlaw.sav --noroprior \
 	--dfmodel=simplegaussiandrift --rotcurve=powerlaw
@@ -61,6 +78,13 @@ all_simpledrift_noro_cubic:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_cubic_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_cubic.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift --rotcurve=cubic
+
+all_simpledrift_noro_vpec:
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_vpec.sav --noroprior \
+	--dfmodel=simplegaussiandrift --fitvpec
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_vpec_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_vpec.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --fitvpec
 
 #simple analysis without errors
 ../fakedata/l30_500_d0.sav: create_fake_los.py

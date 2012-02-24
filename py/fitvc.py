@@ -70,6 +70,9 @@ def fitvc(parser):
                         jkmax=options.jkmax)
     if not options.location is None:
         data= data[(data['LOCATION'] == options.location)]
+    if not options.downsample is None:
+        indx= numpy.random.permutation(len(data))[0:int(math.floor(len(data)/options.downsample))]
+        data= data[indx]
     #data= data[(data['J0MAG']-data['K0MAG'] > 0.82)]
     #data= data[(data['GLON'] > 200.)*(data['GLON'] < 360.)*(data['LOGG'] < 3.)]
     print "Using %i data points ..." % len(data)
@@ -155,6 +158,14 @@ def _initialize_params(options):
                     [[0.,0.],[5./_REFR0,11./_REFR0],
                      [0.,0.],[0.,1.],[0.,0.],
                      [0.,1.]])
+        elif options.fitvpec:
+            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.],
+                    [[True,False],[True,True],[False,False],
+                     [True,True],[False,False],
+                     [False,False],[False,False]],
+                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                     [0.,0.],[0.,1.],[0.,0.],
+                     [0.,0.],[0.,0.]])
         else:
             return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.],
                     [[True,False],[True,True],[False,False],
@@ -403,7 +414,11 @@ def _vpec(params,vgal,R,options,l,theta):
     return vgal-_vc(params,R,options)*numpy.sin(l+theta)
 
 def _vgal(params,vhelio,l,b,options,sinl,cosl):
-    return vhelio-cosl*_VRSUN/params[0]/_REFV0+sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
+    if options.fitvpec:
+        return vhelio-params[5+options.dwarf]*cosl*_VRSUN/params[0]/_REFV0\
+            +params[6+options.dwarf]*sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
+    else:
+        return vhelio-cosl*_VRSUN/params[0]/_REFV0+sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
 
 def print_samples_qa(samples):
     print "Mean, standard devs, acor tau, acor mean, acor s ..."
@@ -426,6 +441,10 @@ def get_options():
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,
                       help="If set, do not apply an Ro prior")
+    #Sun's peculiar velocity
+    parser.add_option("--fitvpec",action="store_true", dest="fitvpec",
+                      default=False,
+                      help="If set, fit for the peculiar velocity of the Sun as well, CURRENTLY ASSUMES flat rotation curve")
     #Velocity distribution model
     parser.add_option("--dfmodel",dest='dfmodel',default='simplegaussian',
                       help="DF model to use")
@@ -457,6 +476,9 @@ def get_options():
                       help="readVclosData 'jkmax'")
     parser.add_option("--location",dest='location',default=None,type='int',
                       help="location id when looking at single los")
+    parser.add_option("--downsample",dest='downsample',default=None,
+                      type='float',
+                      help="Factor with which to downsample the data")
     #Isochrone IMF
     parser.add_option("--imfmodel",dest='imfmodel',default='lognormalChabrier2001',
                       help="imfmodel for isochrone model")
@@ -484,4 +506,5 @@ def get_options():
     return parser
 
 if __name__ == '__main__':
+    numpy.random.seed(1) #We need to seed to get, e.g., the same permutation when downsampling
     fitvc(get_options())

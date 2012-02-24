@@ -92,6 +92,10 @@ def get_options():
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,
                       help="If set, do not apply an Ro prior")
+    #Sun's peculiar velocity
+    parser.add_option("--fitvpec",action="store_true", dest="fitvpec",
+                      default=False,
+                      help="If set, fit for the peculiar velocity of the Sun as well, CURRENTLY ASSUMES flat rotation curve")
     #Velocity distribution model
     parser.add_option("--dfmodel",dest='dfmodel',default='simplegaussian',
                       help="DF model to use")
