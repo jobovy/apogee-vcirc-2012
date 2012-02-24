@@ -2,7 +2,9 @@ import numpy
 import fitsio
 import apogee
 def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
-                  meanb=0.,meanb_tol=0.5,jkmax=1.2,ak=True):
+                  meanb=0.,meanb_tol=0.5,jkmax=1.2,ak=True,
+                  specprimary=True,
+                  cutmultiples=False):
     """
     NAME:
        readVclosData
@@ -19,14 +21,17 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
        meanb_tol= (default:0.5) tolerance on meanb
        ak= (default: True) only use objects for which dereddened mags exist
        jkmax - maximum (J-K)_0 (only in conjunction with ak=True)
+       specprimary= (default= True) select only primary objects
+       cutmultiples= (default: False) cut objects suspected to be in multiples (repeated Vlos std dev > 1 km/s) ONLY WORKS WITH SPECPRIMARY=True
     OUTPUT:
     HISTORY:
        2012-01-25 - Written - Bovy (IAS)
     """
     datafile= apogee.tools.apallPath()
     data= fitsio.read(datafile,1)
-    #Primary data only
-    data= data[(data['SPECPRIMARY'] == 1)]
+    if specprimary and not cutmultiples: #If cutmultiples we will cut to primary later
+        #Primary data only
+        data= data[(data['SPECPRIMARY'] == 1)]
     #data cuts
     data=data[(numpy.fabs(data['GLAT']) < bmax)*(data['GLON'] > lmin)\
                   *(data['GLON'] < (360.-lmin))]
@@ -58,4 +63,18 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
         mb= numpy.mean(data[(data['PLATE'] == plates[ii])]['GLAT'])
         if (mb-meanb)**2./meanb_tol**2. > 1.:
             data= data[(data['PLATE'] != plates[ii])]
+    if cutmultiples:
+        #Build repeats
+        primarydata= data[(data['SPECPRIMARY'] ==  1)]
+        ndata= len(primarydata)
+        keepindx= numpy.zeros(ndata,dtype='bool')
+        keepindx[:]= False
+        for ii in range(ndata):
+            thesedata= data[(data['UNIQID'] == primarydata['SPECID'][ii])]
+            indx= (thesedata['VRADERR'] != 0.)
+            if numpy.sum(indx) < 2:
+                continue
+            thesedata= thesedata[indx]
+            if numpy.std(thesedata['VRAD']) <= 1.: keepindx[ii]= True
+        data= primarydata[keepindx]
     return data
