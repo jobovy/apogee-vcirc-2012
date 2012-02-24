@@ -127,6 +127,10 @@ def get_options():
                       help="readVclosData 'jkmax'")
     parser.add_option("--location",dest='location',default=4318,type='int',
                       help="location id when looking at single los")
+    parser.add_option("--cutmultiples",action="store_true", 
+                      dest="cutmultiples",
+                      default=False,
+                      help="readVclosData 'cutmultiples'")
     #Isochrone IMF
     parser.add_option("--imfmodel",dest='imfmodel',default='lognormalChabrier2001',
                       help="imfmodel for isochrone model")
