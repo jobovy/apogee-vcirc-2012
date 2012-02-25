@@ -512,7 +512,7 @@ def _vc(params,R,options,vcf):
             +(R-1.)**2.*params[6+options.dwarf]\
             +(R-1.)**3.*params[7+options.dwarf]
     elif options.rotcurve.lower() == 'gp':
-        return 1.+vcf(R*params[1]*_REFR0) #interpolation of GP f
+        return 1.+vcf(R*params[1]*_REFR0)/params[0] #interpolation of GP f
 
 def _vpec(params,vgal,R,options,l,theta,vcf):
     return vgal-_vc(params,R,options,vcf)*numpy.sin(l+theta)
