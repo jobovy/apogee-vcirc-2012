@@ -138,9 +138,12 @@ def fitvc(parser):
     elif options.rotcurve.lower() == 'gp':
         #In this case we only sample, and we do it in a special way
         #Set up GP
-        init_f= numpy.random.normal(size=options.gpnr)*0.05
         gprs= numpy.linspace(options.gprmin,options.gprmax,options.gpnr)
         init_hyper= [numpy.log(20./_REFV0),numpy.log(1./_REFR0)]
+        #cov= _calc_covar(gprs,init_hyper,options)
+        #chol= flexgp.fast_cholesky.fast_cholesky(cov)[0]
+        #init_f= numpy.dot(chol,numpy.random.normal(size=options.gpnr))
+        init_f= gprs**-0.1-1.
         #Slice steps
         if options.dwarf:
             raise NotImplementedError("'-dwarf' w/ rotcurve=GP not implemented")
@@ -159,15 +162,16 @@ def fitvc(parser):
         these_hyper= numpy.array(init_hyper)
         totalnsamples= int(math.ceil(1.15*options.nsamples))
         for ii in range(totalnsamples):
+            print ii, totalnsamples
             #Sample in three times
             #Slice sample the hyper-parameters
             new_hyper= bovy_mcmc.slice(these_hyper,
                                        hyper_step,
                                        hyperloglike,
                                        (these_f,gprs,options),
-                                       isDomainFinite=[[True,False],
-                                                       [True,False]],
-                                       domain=[[-4.,0.],[-4.,0.]],
+                                       isDomainFinite=[[True,True],
+                                                       [True,True]],
+                                       domain=[[-4.,2.],[-4.,2.5]],
                                        nsamples=1)
             hyper_samples.append(new_hyper)
             these_hyper= copy.copy(new_hyper)
@@ -190,7 +194,7 @@ def fitvc(parser):
                 these_params= copy.copy(thesesamples)
             #Elliptical slice sample the node-values, first calculate the cov
             cov= _calc_covar(gprs,these_hyper,options)
-            chol= numpy.linalg.cholesky(cov)
+            chol= flexgp.fast_cholesky.fast_cholesky(cov)[0]
             new_f, lnp= bovy_mcmc.elliptical_slice.elliptical_slice(these_f,
                                                                     chol,
                                                                     floglike,
@@ -241,7 +245,7 @@ def floglike(f,gprs,params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
 
 def _calc_covar(rs,hyper_params,options):
     """GP covariance function"""
-    l2= numpy.exp(2.*hyper_params[1])*_REFR0
+    l2= numpy.exp(2.*hyper_params[1])*_REFR0**2.
     out= numpy.zeros((len(rs),len(rs)))
     for ii in range(len(rs)):
         out[ii,:]= numpy.exp(2.*hyper_params[0]-0.5*(rs-rs[ii])**2./l2)
