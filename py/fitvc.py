@@ -17,14 +17,16 @@
 import sys
 import os, os.path
 import cPickle as pickle
+import copy
 from optparse import OptionParser
 import math
 import numpy
-from scipy import integrate, optimize
+from scipy import integrate, optimize, interpolate
 from scipy.maxentropy import logsumexp
 from scipy.stats import norm
 import acor
-import bovy_mcmc
+import bovy_mcmc, bovy_mcmc.elliptical_slice
+import flexgp.fast_cholesky
 from galpy.util import save_pickles
 from readVclosData import readVclosData
 import isomodel
@@ -129,10 +131,85 @@ def fitvc(parser):
                                      args=(data['VHELIO'],
                                            l,b,jk,h,df,options,
                                            sinl,cosl,cosb,sinb,
-                                           logpiso,logpisodwarf,False),
+                                           logpiso,logpisodwarf,False,None),
                                      callback=cb)
         print params
         save_pickles(args[0],params)       
+    elif options.rotcurve.lower() == 'gp':
+        #In this case we only sample, and we do it in a special way
+        #Set up GP
+        init_f= numpy.random.normal(size=options.gpnr)*0.05
+        gprs= numpy.linspace(options.gprmin,options.gprmax,options.gpnr)
+        init_hyper= [numpy.log(20./_REFV0),numpy.log(1./_REFR0)]
+        #Slice steps
+        if options.dwarf:
+            raise NotImplementedError("'-dwarf' w/ rotcurve=GP not implemented")
+        else:
+            one_step= [0.03,0.03,0.03,0.02,0.05]
+        if options.fitvpec:
+            one_step.extend([0.03,0.03])
+        hyper_step= [0.05,0.05]
+        #Set up samples
+        samples= []
+        f_samples= []
+        hyper_samples= []
+        lnps= []
+        these_params= numpy.array(init_params)
+        these_f= init_f
+        these_hyper= numpy.array(init_hyper)
+        totalnsamples= int(math.ceil(1.15*options.nsamples))
+        for ii in range(totalnsamples):
+            #Sample in three times
+            #Slice sample the hyper-parameters
+            new_hyper= bovy_mcmc.slice(these_hyper,
+                                       hyper_step,
+                                       hyperloglike,
+                                       (these_f,gprs,options),
+                                       isDomainFinite=[[True,False],
+                                                       [True,False]],
+                                       domain=[[-4.,0.],[-4.,0.]],
+                                       nsamples=1)
+            hyper_samples.append(new_hyper)
+            these_hyper= copy.copy(new_hyper)
+            print these_hyper
+            if ii > 0.05*options.nsamples: #Let the GP burn-in on its own
+                #regular parameters
+                #Spline interpolation of these_f
+                vcf= interpolate.InterpolatedUnivariateSpline(gprs,these_f)
+                thesesamples= bovy_mcmc.slice(these_params,
+                                              one_step,
+                                              loglike,
+                                              (data['VHELIO'],
+                                               l,b,jk,h,df,options,
+                                               sinl,cosl,cosb,sinb,
+                                               logpiso,logpisodwarf,vcf),
+                                              isDomainFinite=isDomainFinite,
+                                              domain=domain,
+                                              nsamples=1)
+                samples.append(thesesamples)
+                these_params= copy.copy(thesesamples)
+            #Elliptical slice sample the node-values, first calculate the cov
+            cov= _calc_covar(gprs,these_hyper,options)
+            chol= numpy.linalg.cholesky(cov)
+            new_f, lnp= bovy_mcmc.elliptical_slice.elliptical_slice(these_f,
+                                                                    chol,
+                                                                    floglike,
+                                                                    pdf_params=(gprs,these_params,data['VHELIO'],
+                                                                                l,b,jk,h,df,options,
+                                                                                sinl,cosl,cosb,sinb,
+                                                                                logpiso,logpisodwarf),)
+            f_samples.append(new_f)
+            these_f= copy.copy(new_f)
+            lnps.append(lnp)
+            print numpy.mean(these_f), these_f
+        #Save
+        samples= samples[len(samples)-options.nsamples:len(samples)]
+        f_samples= f_samples[len(f_samples)-options.nsamples:len(f_samples)]
+        hyper_samples= hyper_samples[len(hyper_samples)-options.nsamples:len(hyper_samples)]
+        save_pickles(args[0],samples,f_samples,hyper_samples,lnps)
+        print_samples_qa(f_samples)
+        print_samples_qa(samples)
+        print_samples_qa(hyper_samples)
     else:
         samples= bovy_mcmc.markovpy(init_params,
                                     0.01,
@@ -140,7 +217,7 @@ def fitvc(parser):
                                     (data['VHELIO'],
                                      l,b,jk,h,df,options,
                                      sinl,cosl,cosb,sinb,
-                                     logpiso,logpisodwarf),
+                                     logpiso,logpisodwarf,None),
                                     isDomainFinite=isDomainFinite,
                                     domain=domain,
                                     nsamples=options.nsamples,
@@ -150,8 +227,28 @@ def fitvc(parser):
         save_pickles(args[0],samples)
     return None
 
+def hyperloglike(hyper_params,f,gprs,options):
+    #Just the Gaussian
+    cov= _calc_covar(gprs,hyper_params,options)
+    covinv, detcov= flexgp.fast_cholesky.fast_cholesky_invert(cov,logdet=True)
+    return -0.5*numpy.dot(f,numpy.dot(covinv,f))-0.5*detcov
+
+def floglike(f,gprs,params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
+            logpiso,logpisodwarf):
+    vcf= interpolate.InterpolatedUnivariateSpline(gprs,f)
+    return loglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
+                   logpiso,logpisodwarf,vcf)
+
+def _calc_covar(rs,hyper_params,options):
+    """GP covariance function"""
+    l2= numpy.exp(2.*hyper_params[1])*_REFR0
+    out= numpy.zeros((len(rs),len(rs)))
+    for ii in range(len(rs)):
+        out[ii,:]= numpy.exp(2.*hyper_params[0]-0.5*(rs-rs[ii])**2./l2)
+    return out
+
 def _initialize_params(options):
-    if options.rotcurve.lower() == 'flat' and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
+    if (options.rotcurve.lower() == 'flat' or options.rotcurve.lower() == 'gp')and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
         if options.dwarf:
             return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2],
                     [[True,False],[True,True],[False,False],
@@ -222,11 +319,11 @@ def _initialize_params(options):
 def cb(x): print x
 
 def loglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
-            logpiso,logpisodwarf):
+            logpiso,logpisodwarf,vcf):
     return -mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
-                     logpiso,logpisodwarf,False)
+                     logpiso,logpisodwarf,False,vcf)
 def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
-             logpiso,logpisodwarf,arrout):
+             logpiso,logpisodwarf,arrout,vcf):
     """minus log likelihood Eqn (1),
     params= [vc(ro),ro,sigmar]"""
     #Boundaries
@@ -282,13 +379,13 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                                                             params,vhelio/params[0]/_REFV0,
                                                             l,b,jk,h,df,options,
                                                             sinl,cosl,cosb,sinb,
-                                                            True,logpiso[:,ii])
+                                                            True,logpiso[:,ii],vcf)
             if options.dwarf:
                 thisxtraout[:,ii], logpddwarf[:,ii]= _mloglikedIntegrand(dwarfds[ii],
                                                                          params,vhelio/params[0]/_REFV0,
                                                                          l,b,jk,h,df,options,
                                                                          sinl,cosl,cosb,sinb,
-                                                                         True,logpisodwarf[:,ii])
+                                                                         True,logpisodwarf[:,ii],vcf)
         #Sum each one
         if arrout:
             out= numpy.zeros(len(vhelio))
@@ -324,7 +421,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         return out+(params[1]*_REFR0-8.2)**2./0.5#+(params[0]*_REFV0+2.25*math.exp(2.*params[2])*_REFV0/params[0]+12.24-_PMSGRA*params[1]*_REFR0)**2./200. #params[1]=Ro, SBD10 Solar motion
 
 def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
-                        df,options,sinl,cosl,cosb,sinb,returnlog,logpiso):
+                        df,options,sinl,cosl,cosb,sinb,returnlog,logpiso,vcf):
     #All positions are /ro, all velocities are /vo (d and vhelio have this already
     #Calculate coordinates, distances are /Ro (/params[1])
     #
@@ -347,9 +444,9 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
         else:
             theta= numpy.arcsin(d/R*sinl)
     vgal= _vgal(params,vhelio,l,b,options,sinl,cosl)
-    vpec= _vpec(params,vgal,R,options,l,theta)
+    vpec= _vpec(params,vgal,R,options,l,theta,vcf)
     #Calculate probabilities
-    logpvlos= _logdf(params,vpec,R,options,df,l,theta)+numpy.log(1.-params[3])
+    logpvlos= _logdf(params,vpec,R,options,df,l,theta,vcf)+numpy.log(1.-params[3])
     logpvlos_outlier= _logoutlierdf(params,vgal)+numpy.log(params[3])
     c= numpy.amax(numpy.array([logpvlos,logpvlos_outlier]),axis=0)
     logpvlos= numpy.log(numpy.exp(logpvlos-c)
@@ -373,7 +470,7 @@ def _dm(d):
     """Distance modulus w/ d in kpc"""
     return 5.*numpy.log10(d)+10.
 
-def _logdf(params,vpec,R,options,df,l,theta):
+def _logdf(params,vpec,R,options,df,l,theta,vcf):
     sinlt= numpy.sin(l+theta)
     if options.dfmodel.lower() == 'simplegaussian':
         slos= numpy.exp(params[2])/params[0]\
@@ -384,7 +481,7 @@ def _logdf(params,vpec,R,options,df,l,theta):
         va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],
                                     hR=options.hr/params[1]/_REFR0,
                                     hs=options.hs/params[1]/_REFR0,
-                                    vc=_vc(params,R,options))*sinlt 
+                                    vc=_vc(params,R,options,vcf))*sinlt 
         #va= vc- <v>
         slos= numpy.exp(params[2])/params[0]\
             *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
@@ -395,7 +492,7 @@ def _logoutlierdf(params,vgal):
     t= (vgal*params[0]-params[4])*_REFV0/200.
     return norm.logpdf(t)-numpy.log(200.)
 
-def _vc(params,R,options):
+def _vc(params,R,options,vcf):
     """Circular velocity at R for different models"""
     if options.rotcurve.lower() == 'flat':
         return 1. #vc/vo
@@ -410,9 +507,11 @@ def _vc(params,R,options):
         return 1.+(R-1.)*params[5+options.dwarf]\
             +(R-1.)**2.*params[6+options.dwarf]\
             +(R-1.)**3.*params[7+options.dwarf]
+    elif options.rotcurve.lower() == 'gp':
+        return 1.+vcf(R*params[1]*_REFR0) #interpolation of GP f
 
-def _vpec(params,vgal,R,options,l,theta):
-    return vgal-_vc(params,R,options)*numpy.sin(l+theta)
+def _vpec(params,vgal,R,options,l,theta,vcf):
+    return vgal-_vc(params,R,options,vcf)*numpy.sin(l+theta)
 
 def _vgal(params,vhelio,l,b,options,sinl,cosl):
     if options.fitvpec:
@@ -438,6 +537,12 @@ def get_options():
     #Rotation curve parameters/model
     parser.add_option("--rotcurve",dest='rotcurve',default='flat',
                       help="Rotation curve model to fit")
+    parser.add_option("--gpnr",dest='gpnr',default=101,type='int',
+                      help="If using a GP for the rotcurve, this is the number of nodes")
+    parser.add_option("--gprmin",dest='gprmin',default=5.,type='float',
+                      help="If using a GP for the rotcurve, this is minimum R")
+    parser.add_option("--gprmax",dest='gprmax',default=18.,type='float',
+                      help="If using a GP for the rotcurve, this is maximum R")
     #Ro prior
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,

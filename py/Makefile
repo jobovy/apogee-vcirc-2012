@@ -8,7 +8,8 @@ NSAMPLES=1000
 	all_simpledrift_noro_vpec \
 	l180_simpledrift_noro \
 	fourth_simpledrift_noro \
-	nomult_simpledrift_noro
+	nomult_simpledrift_noro \
+	all_simpledrift_noro_gp
 
 all_simple:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simple.sav
@@ -65,6 +66,11 @@ all_simpledrift_noro_powerlaw:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_powerlaw_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_powerlaw.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift --rotcurve=powerlaw
+
+all_simpledrift_noro_gp:
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_gp_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --rotcurve=gp
 
 all_simpledrift_noro_linear:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_linear.sav --noroprior \
