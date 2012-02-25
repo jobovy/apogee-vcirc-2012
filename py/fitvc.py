@@ -176,7 +176,7 @@ def fitvc(parser):
             hyper_samples.append(new_hyper)
             these_hyper= copy.copy(new_hyper)
             print these_hyper
-            if ii > 0.05*options.nsamples: #Let the GP burn-in on its own
+            if ii > 0.0*options.nsamples: #Let the GP burn-in on its own NOT SET
                 #regular parameters
                 #Spline interpolation of these_f
                 vcf= interpolate.InterpolatedUnivariateSpline(gprs,these_f)
@@ -233,6 +233,7 @@ def fitvc(parser):
 
 def hyperloglike(hyper_params,f,gprs,options):
     #Just the Gaussian
+    #print hyper_params
     cov= _calc_covar(gprs,hyper_params,options)
     covinv, detcov= flexgp.fast_cholesky.fast_cholesky_invert(cov,logdet=True)
     return -0.5*numpy.dot(f,numpy.dot(covinv,f))-0.5*detcov
@@ -248,8 +249,8 @@ def _calc_covar(rs,hyper_params,options):
     l2= numpy.exp(2.*hyper_params[1])*_REFR0**2.
     out= numpy.zeros((len(rs),len(rs)))
     for ii in range(len(rs)):
-        out[ii,:]= numpy.exp(2.*hyper_params[0]-0.5*(rs-rs[ii])**2./l2)
-    return out
+        out[ii,:]= numpy.exp(-0.5*(rs-rs[ii])**2./l2)
+    return numpy.exp(2.*hyper_params[0])*out
 
 def _initialize_params(options):
     if (options.rotcurve.lower() == 'flat' or options.rotcurve.lower() == 'gp')and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
