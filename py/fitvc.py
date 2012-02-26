@@ -136,104 +136,142 @@ def fitvc(parser):
         print params
         save_pickles(args[0],params)       
     elif options.rotcurve.lower() == 'gp':
-        #In this case we only sample, and we do it in a special way
-        #Set up GP
-        gprs= numpy.linspace(options.gprmin,options.gprmax,options.gpnr)
-        if options.gpfixtau is None:
-            init_hyper= [numpy.log(20./_REFV0),numpy.log(1./_REFR0)]
-        else:
-            init_hyper= [numpy.log(20./_REFV0)]
-        #cov= _calc_covar(gprs,init_hyper,options)
-        #chol= flexgp.fast_cholesky.fast_cholesky(cov)[0]
-        #init_f= numpy.dot(chol,numpy.random.normal(size=options.gpnr))
-        init_f= gprs**-0.1-1.
-        #Slice steps
-        if options.dwarf:
-            raise NotImplementedError("'-dwarf' w/ rotcurve=GP not implemented")
-        else:
-            one_step= [0.03,0.03,0.03,0.02,0.05]
-        if options.fitvpec:
-            one_step.extend([0.03,0.03])
-        if options.gpfixtau is None:
-            hyper_step= [0.05,0.05]
-        else:
-            hyper_step= 0.05
-        #Set up samples
-        samples= []
-        f_samples= []
-        hyper_samples= []
-        lnps= []
-        these_params= numpy.array(init_params)
-        these_f= init_f
-        these_hyper= numpy.array(init_hyper)
-        totalnsamples= int(math.ceil(1.15*options.nsamples))
-        for ii in range(totalnsamples):
-            print ii, totalnsamples
-            #Sample in three times
-            #Slice sample the hyper-parameters
+        if options.gpemcee:
+            #Set up GP
+            gprs= numpy.linspace(options.gprmin,options.gprmax,options.gpnr)
             if options.gpfixtau is None:
-                new_hyper= bovy_mcmc.slice(these_hyper,
-                                           hyper_step,
-                                           hyperloglike,
-                                           (these_f,gprs,options),
-                                           isDomainFinite=[[True,True],
-                                                           [True,True]],
-                                           domain=[[-4.,2.],[-4.,2.5]],
-                                           nsamples=1)
+                init_hyper= [numpy.log(20./_REFV0),numpy.log(1./_REFR0)]
             else:
-                new_hyper= bovy_mcmc.slice(these_hyper,
-                                           hyper_step,
-                                           hyperloglike_fixtau,
-                                           (these_f,gprs,options,
-                                            numpy.log(options.gpfixtau/_REFR0)),
-                                           isDomainFinite=[True,True],
-                                           domain=[-4.,2.],
-                                           nsamples=1)
-            hyper_samples.append(new_hyper)
-            these_hyper= copy.copy(new_hyper)
-            print these_hyper
-            if ii > 0.0*options.nsamples: #Let the GP burn-in on its own NOT SET
-                #regular parameters
-                #Spline interpolation of these_f
-                vcf= interpolate.InterpolatedUnivariateSpline(gprs,these_f)
-                thesesamples= bovy_mcmc.slice(these_params,
-                                              one_step,
-                                              loglike,
-                                              (data['VHELIO'],
-                                               l,b,jk,h,df,options,
-                                               sinl,cosl,cosb,sinb,
-                                               logpiso,logpisodwarf,vcf),
-                                              isDomainFinite=isDomainFinite,
-                                              domain=domain,
-                                              nsamples=1)
-                samples.append(thesesamples)
-                these_params= copy.copy(thesesamples)
-            #Elliptical slice sample the node-values, first calculate the cov
+                init_hyper= [numpy.log(20./_REFV0)]
+            init_f= (gprs/_REFR0)**-0.1-1.
+            #Add the hyper-parameters and the GP parameters
+            init_params= list(init_params)
+            init_params.extend(init_hyper)
+            init_params.extend(init_f)
+            init_params= numpy.array(init_params)
             if options.gpfixtau is None:
-                cov= _calc_covar(gprs,these_hyper,options)
+                isDomainFinite.extend([[True,True],[True,True]])
+                domain.extend([[-4.,2.],[-4.,2.5]])
             else:
-                cov= _calc_covar(gprs,[these_hyper,numpy.log(options.gpfixtau/_REFR0)],
-                                 options)
-            chol= flexgp.fast_cholesky.fast_cholesky(cov)[0]
-            new_f, lnp= bovy_mcmc.elliptical_slice.elliptical_slice(these_f,
-                                                                    chol,
-                                                                    floglike,
-                                                                    pdf_params=(gprs,these_params,data['VHELIO'],
-                                                                                l,b,jk,h,df,options,
-                                                                                sinl,cosl,cosb,sinb,
-                                                                                logpiso,logpisodwarf),)
-            f_samples.append(new_f)
-            these_f= copy.copy(new_f)
-            lnps.append(lnp)
-            print numpy.mean(these_f), these_f
-        #Save
-        samples= samples[len(samples)-options.nsamples:len(samples)]
-        f_samples= f_samples[len(f_samples)-options.nsamples:len(f_samples)]
-        hyper_samples= hyper_samples[len(hyper_samples)-options.nsamples:len(hyper_samples)]
-        save_pickles(args[0],samples,f_samples,hyper_samples,lnps)
-        print_samples_qa(f_samples)
-        print_samples_qa(samples)
-        print_samples_qa(hyper_samples)
+                isDomainFinite.extend([[True,True]])
+                domain.extend([[-4.,2.]])
+            for ii in range(options.gpnr):
+                isDomainFinite.append([False,False])
+                domain.append([0.,0.])
+            #Now sample
+            samples= bovy_mcmc.markovpy(init_params,
+                                        0.01,
+                                        loglike_gpemcee,
+                                        (data['VHELIO'],
+                                         l,b,jk,h,df,options,
+                                         sinl,cosl,cosb,sinb,
+                                         logpiso,logpisodwarf,gprs),
+                                        isDomainFinite=isDomainFinite,
+                                        domain=domain,
+                                        nsamples=options.nsamples,
+                                        nwalkers=4*len(init_params),
+                                        threads=options.multi)
+            print_samples_qa(samples)
+            save_pickles(args[0],samples)           
+        else:
+            #In this case we only sample, and we do it in a special way
+            #Set up GP
+            gprs= numpy.linspace(options.gprmin,options.gprmax,options.gpnr)
+            if options.gpfixtau is None:
+                init_hyper= [numpy.log(20./_REFV0),numpy.log(1./_REFR0)]
+            else:
+                init_hyper= [numpy.log(20./_REFV0)]
+            #cov= _calc_covar(gprs,init_hyper,options)
+            #chol= flexgp.fast_cholesky.fast_cholesky(cov)[0]
+            #init_f= numpy.dot(chol,numpy.random.normal(size=options.gpnr))
+            init_f= (gprs/_REFR0)**-0.1-1.
+            #Slice steps
+            if options.dwarf:
+                raise NotImplementedError("'-dwarf' w/ rotcurve=GP not implemented")
+            else:
+                one_step= [0.03,0.03,0.03,0.02,0.05]
+            if options.fitvpec:
+                one_step.extend([0.03,0.03])
+            if options.gpfixtau is None:
+                hyper_step= [0.05,0.05]
+            else:
+                hyper_step= 0.05
+            #Set up samples
+            samples= []
+            f_samples= []
+            hyper_samples= []
+            lnps= []
+            these_params= numpy.array(init_params)
+            these_f= init_f
+            these_hyper= numpy.array(init_hyper)
+            totalnsamples= int(math.ceil(1.15*options.nsamples))
+            for ii in range(totalnsamples):
+                print ii, totalnsamples
+                #Sample in three times
+                #Slice sample the hyper-parameters
+                if options.gpfixtau is None:
+                    new_hyper= bovy_mcmc.slice(these_hyper,
+                                               hyper_step,
+                                               hyperloglike,
+                                               (these_f,gprs,options),
+                                               isDomainFinite=[[True,True],
+                                                               [True,True]],
+                                               domain=[[-4.,2.],[-4.,2.5]],
+                                               nsamples=1)
+                else:
+                    new_hyper= bovy_mcmc.slice(these_hyper,
+                                               hyper_step,
+                                               hyperloglike_fixtau,
+                                               (these_f,gprs,options,
+                                                numpy.log(options.gpfixtau/_REFR0)),
+                                               isDomainFinite=[True,True],
+                                               domain=[-4.,2.],
+                                               nsamples=1)
+                hyper_samples.append(new_hyper)
+                these_hyper= copy.copy(new_hyper)
+                print these_hyper
+                if ii > 0.0*options.nsamples: #Let the GP burn-in on its own NOT SET
+                    #regular parameters
+                    #Spline interpolation of these_f
+                    vcf= interpolate.InterpolatedUnivariateSpline(gprs,these_f)
+                    thesesamples= bovy_mcmc.slice(these_params,
+                                                  one_step,
+                                                  loglike,
+                                                  (data['VHELIO'],
+                                                   l,b,jk,h,df,options,
+                                                   sinl,cosl,cosb,sinb,
+                                                   logpiso,logpisodwarf,vcf),
+                                                  isDomainFinite=isDomainFinite,
+                                                  domain=domain,
+                                                  nsamples=1)
+                    samples.append(thesesamples)
+                    these_params= copy.copy(thesesamples)
+                #Elliptical slice sample the node-values, first calculate the cov
+                if options.gpfixtau is None:
+                    cov= _calc_covar(gprs,these_hyper,options)
+                else:
+                    cov= _calc_covar(gprs,[these_hyper,numpy.log(options.gpfixtau/_REFR0)],
+                                     options)
+                chol= flexgp.fast_cholesky.fast_cholesky(cov)[0]
+                new_f, lnp= bovy_mcmc.elliptical_slice.elliptical_slice(these_f,
+                                                                        chol,
+                                                                        floglike,
+                                                                        pdf_params=(gprs,these_params,data['VHELIO'],
+                                                                                    l,b,jk,h,df,options,
+                                                                                    sinl,cosl,cosb,sinb,
+                                                                                    logpiso,logpisodwarf),)
+                f_samples.append(new_f)
+                these_f= copy.copy(new_f)
+                lnps.append(lnp)
+                print numpy.mean(these_f), these_f
+            #Save
+            samples= samples[len(samples)-options.nsamples:len(samples)]
+            f_samples= f_samples[len(f_samples)-options.nsamples:len(f_samples)]
+            hyper_samples= hyper_samples[len(hyper_samples)-options.nsamples:len(hyper_samples)]
+            save_pickles(args[0],samples,f_samples,hyper_samples,lnps)
+            print_samples_qa(f_samples)
+            print_samples_qa(samples)
+            print_samples_qa(hyper_samples)
     else:
         samples= bovy_mcmc.markovpy(init_params,
                                     0.01,
@@ -250,6 +288,24 @@ def fitvc(parser):
         print_samples_qa(samples)
         save_pickles(args[0],samples)
     return None
+
+def loglike_gpemcee(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
+                    logpiso,logpisodwarf,gprs):
+    #Break up params into 1) basic params, 2) hyper-params, 3) f
+    f= params[len(params)-options.gpnr:len(params)]
+    if options.gpfixtau is None:
+        hyper_params= params[len(params)-options.gpnr-2:len(params)-options.gpnr]
+        hyperlnl= hyperloglike(hyper_params,f,gprs,options)
+        basicparams= params[0:len(params)-options.gpnr-2]
+    else:
+        hyper_params= params[len(params)-options.gpnr-1:len(params)-options.gpnr]
+        hyperlnl= hyperloglike_fixtau(hyper_params,f,gprs,options,
+                                      numpy.log(options.gpfixtau/_REFR0))
+        basicparams= params[0:len(params)-options.gpnr-1]
+    print numpy.mean(f), f
+    return floglike(f,gprs,
+                    basicparams,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
+                    logpiso,logpisodwarf)+hyperlnl
 
 def hyperloglike(hyper_params,f,gprs,options):
     #Just the Gaussian
@@ -577,6 +633,9 @@ def get_options():
                       help="If using a GP for the rotcurve, this is maximum R")
     parser.add_option("--gpfixtau",dest='gpfixtau',default=None,type='float',
                       help="If using a GP for the rotcurve and this is set, fix tau (correlation length) to this value in kpc")
+    parser.add_option("--gpemcee",action="store_true", dest="gpemcee",
+                      default=False,
+                      help="If set, use emcee for GP indeed")
     #Ro prior
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,

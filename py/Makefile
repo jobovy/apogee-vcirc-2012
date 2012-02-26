@@ -10,6 +10,7 @@ NSAMPLES=1000
 	fourth_simpledrift_noro \
 	nomult_simpledrift_noro \
 	all_simpledrift_noro_gp \
+	all_simpledrift_noro_gpemcee \
 	all_simpledrift_noro_gp_fixtau0.5
 
 all_simple:
@@ -77,6 +78,12 @@ all_simpledrift_noro_gp_fixtau0.5:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_gp_fixtau0.5_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift --rotcurve=gp --gpfixtau=0.5
+
+all_simpledrift_noro_gpemcee:
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_gpemcee_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --rotcurve=gp --gpemcee \
+	--gpnr=21
 
 all_simpledrift_noro_linear:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_linear.sav --noroprior \
