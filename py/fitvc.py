@@ -139,7 +139,10 @@ def fitvc(parser):
         #In this case we only sample, and we do it in a special way
         #Set up GP
         gprs= numpy.linspace(options.gprmin,options.gprmax,options.gpnr)
-        init_hyper= [numpy.log(20./_REFV0),numpy.log(1./_REFR0)]
+        if options.gpfixtau is None:
+            init_hyper= [numpy.log(20./_REFV0),numpy.log(1./_REFR0)]
+        else:
+            init_hyper= [numpy.log(20./_REFV0)]
         #cov= _calc_covar(gprs,init_hyper,options)
         #chol= flexgp.fast_cholesky.fast_cholesky(cov)[0]
         #init_f= numpy.dot(chol,numpy.random.normal(size=options.gpnr))
@@ -151,7 +154,10 @@ def fitvc(parser):
             one_step= [0.03,0.03,0.03,0.02,0.05]
         if options.fitvpec:
             one_step.extend([0.03,0.03])
-        hyper_step= [0.05,0.05]
+        if options.gpfixtau is None:
+            hyper_step= [0.05,0.05]
+        else:
+            hyper_step= 0.05
         #Set up samples
         samples= []
         f_samples= []
@@ -165,14 +171,24 @@ def fitvc(parser):
             print ii, totalnsamples
             #Sample in three times
             #Slice sample the hyper-parameters
-            new_hyper= bovy_mcmc.slice(these_hyper,
-                                       hyper_step,
-                                       hyperloglike,
-                                       (these_f,gprs,options),
-                                       isDomainFinite=[[True,True],
-                                                       [True,True]],
-                                       domain=[[-4.,2.],[-4.,2.5]],
-                                       nsamples=1)
+            if options.gpfixtau is None:
+                new_hyper= bovy_mcmc.slice(these_hyper,
+                                           hyper_step,
+                                           hyperloglike,
+                                           (these_f,gprs,options),
+                                           isDomainFinite=[[True,True],
+                                                           [True,True]],
+                                           domain=[[-4.,2.],[-4.,2.5]],
+                                           nsamples=1)
+            else:
+                new_hyper= bovy_mcmc.slice(these_hyper,
+                                           hyper_step,
+                                           hyperloglike_fixtau,
+                                           (these_f,gprs,options,
+                                            numpy.log(options.gpfixtau/_REFR0)),
+                                           isDomainFinite=[True,True],
+                                           domain=[-4.,2.],
+                                           nsamples=1)
             hyper_samples.append(new_hyper)
             these_hyper= copy.copy(new_hyper)
             print these_hyper
@@ -193,7 +209,11 @@ def fitvc(parser):
                 samples.append(thesesamples)
                 these_params= copy.copy(thesesamples)
             #Elliptical slice sample the node-values, first calculate the cov
-            cov= _calc_covar(gprs,these_hyper,options)
+            if options.gpfixtau is None:
+                cov= _calc_covar(gprs,these_hyper,options)
+            else:
+                cov= _calc_covar(gprs,[these_hyper,numpy.log(options.gpfixtau/_REFR0)],
+                                 options)
             chol= flexgp.fast_cholesky.fast_cholesky(cov)[0]
             new_f, lnp= bovy_mcmc.elliptical_slice.elliptical_slice(these_f,
                                                                     chol,
@@ -235,6 +255,13 @@ def hyperloglike(hyper_params,f,gprs,options):
     #Just the Gaussian
     #print hyper_params
     cov= _calc_covar(gprs,hyper_params,options)
+    covinv, detcov= flexgp.fast_cholesky.fast_cholesky_invert(cov,logdet=True)
+    return -0.5*numpy.dot(f,numpy.dot(covinv,f))-0.5*detcov
+
+def hyperloglike_fixtau(hyper_params,f,gprs,options,logtau):
+    #Just the Gaussian
+    #print hyper_params
+    cov= _calc_covar(gprs,[hyper_params,logtau],options)
     covinv, detcov= flexgp.fast_cholesky.fast_cholesky_invert(cov,logdet=True)
     return -0.5*numpy.dot(f,numpy.dot(covinv,f))-0.5*detcov
 
@@ -548,6 +575,8 @@ def get_options():
                       help="If using a GP for the rotcurve, this is minimum R")
     parser.add_option("--gprmax",dest='gprmax',default=18.,type='float',
                       help="If using a GP for the rotcurve, this is maximum R")
+    parser.add_option("--gpfixtau",dest='gpfixtau',default=None,type='float',
+                      help="If using a GP for the rotcurve and this is set, fix tau (correlation length) to this value in kpc")
     #Ro prior
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,
