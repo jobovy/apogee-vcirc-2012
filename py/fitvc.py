@@ -160,7 +160,7 @@ def fitvc(parser):
                 domain.append([0.,0.])
             #Now sample
             samples= bovy_mcmc.markovpy(init_params,
-                                        0.01,
+                                        0.05,
                                         loglike_gpemcee,
                                         (data['VHELIO'],
                                          l,b,jk,h,df,options,
@@ -169,7 +169,7 @@ def fitvc(parser):
                                         isDomainFinite=isDomainFinite,
                                         domain=domain,
                                         nsamples=options.nsamples,
-                                        nwalkers=4*len(init_params),
+                                        nwalkers=2*len(init_params),
                                         threads=options.multi)
             print_samples_qa(samples)
             save_pickles(args[0],samples)           
@@ -302,6 +302,7 @@ def loglike_gpemcee(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         hyperlnl= hyperloglike_fixtau(hyper_params,f,gprs,options,
                                       numpy.log(options.gpfixtau/_REFR0))
         basicparams= params[0:len(params)-options.gpnr-1]
+    print hyper_params
     print numpy.mean(f), f
     return floglike(f,gprs,
                     basicparams,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
