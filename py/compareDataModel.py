@@ -53,7 +53,7 @@ def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf):
                    cosb,
                    sinb,
                    logpiso,
-                   logpisodwarf,True)
+                   logpisodwarf,True,None)
     #indx= (out == 0.)
     #print l[indx], b[indx], jk[indx], h[indx]
     return logsumexp(out)

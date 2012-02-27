@@ -597,8 +597,8 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
         return norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
 
 def _logoutlierdf(params,vgal):
-    t= (vgal*params[0]-params[4])*_REFV0/200.
-    return norm.logpdf(t)-numpy.log(200.)
+    t= (vgal*params[0]-params[4])*_REFV0/100.
+    return norm.logpdf(t)-numpy.log(100.)
 
 def _vc(params,R,options,vcf):
     """Circular velocity at R for different models"""
