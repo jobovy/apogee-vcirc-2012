@@ -20,7 +20,7 @@ vaInterp= interpolate.InterpolatedUnivariateSpline(rs,vas)
 hR_fid= 1./3.
 hs_fid= 1.
 def dlnnusR2dlnR(hr,hs):
-    return -1./hr-1./hs
+    return -1./hr-2./hs
 dlnnusR2dlnR_fid= dlnnusR2dlnR(hR_fid,hs_fid)
 def va(R,sigmaR,vc=1.,hR=1./3.,hs=1.):
     """
@@ -41,4 +41,5 @@ def va(R,sigmaR,vc=1.,hR=1./3.,hs=1.):
     """
     dlnnusR2dlnR_correct= dlnnusR2dlnR_fid-dlnnusR2dlnR(hR,hs)
     va= vaInterp(R)
-    return sigmaR**2./vc*(va+0.5*dlnnusR2dlnR_correct*numpy.exp(-2.*(R-1.)))
+    return sigmaR**2./vc*numpy.exp(-2.*(R-1.)/hs+2.*(R-1)/hs_fid)\
+        *(va+0.5*R*dlnnusR2dlnR_correct*numpy.exp(-2.*(R-1.)))
