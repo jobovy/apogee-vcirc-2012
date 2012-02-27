@@ -6,6 +6,7 @@ NSAMPLES=1000
 	all_simpledrift_noro_quadratic \
 	all_simpledrift_noro_cubic \
 	all_simpledrift_noro_vpec \
+	all_simpledrift_noro_vpec_sratio \
 	l180_simpledrift_noro \
 	fourth_simpledrift_noro \
 	nomult_simpledrift_noro \
@@ -112,6 +113,13 @@ all_simpledrift_noro_vpec:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_vpec_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_vpec.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift --fitvpec
+
+all_simpledrift_noro_vpec_sratio:
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_vpec_sratio.sav --noroprior \
+	--dfmodel=simplegaussiandrift --fitvpec --fitsratio
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_vpec_sratio_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_vpec_sratio.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --fitvpec --fitsratio
 
 #simple analysis without errors
 ../fakedata/l30_500_d0.sav: create_fake_los.py

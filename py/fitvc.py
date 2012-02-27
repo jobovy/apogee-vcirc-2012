@@ -346,13 +346,22 @@ def _initialize_params(options):
                      [0.,0.],[0.,1.],[0.,0.],
                      [0.,1.]])
         elif options.fitvpec:
-            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.],
-                    [[True,False],[True,True],[False,False],
-                     [True,True],[False,False],
-                     [False,False],[False,False]],
-                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                     [0.,0.],[0.,1.],[0.,0.],
-                     [0.,0.],[0.,0.]])
+            if options.fitsratio:
+                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.,0.5],
+                        [[True,False],[True,True],[False,False],
+                         [True,True],[False,False],
+                         [False,False],[False,False],[True,False]],
+                        [[0.,0.],[5./_REFR0,11./_REFR0],
+                         [0.,0.],[0.,1.],[0.,0.],
+                         [0.,0.],[0.,0.],[0.,0.]])
+            else:
+                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.],
+                        [[True,False],[True,True],[False,False],
+                         [True,True],[False,False],
+                         [False,False],[False,False]],
+                        [[0.,0.],[5./_REFR0,11./_REFR0],
+                         [0.,0.],[0.,1.],[0.,0.],
+                         [0.,0.],[0.,0.]])
         else:
             return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.],
                     [[True,False],[True,True],[False,False],
@@ -423,6 +432,8 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
     if params[3] < 0. or params[3] > 1.:
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     if options.dwarf and (params[5] < 0. or params[5] > 1.):
+        return numpy.finfo(numpy.dtype(numpy.float64)).max
+    if options.fitsratio and params[5+2*options.fitvpec+options.dwarf] < 0.:
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     #For each star, marginalize over distance
     if options.dontbintegrate:
@@ -562,8 +573,12 @@ def _dm(d):
 def _logdf(params,vpec,R,options,df,l,theta,vcf):
     sinlt= numpy.sin(l+theta)
     if options.dfmodel.lower() == 'simplegaussian':
-        slos= numpy.exp(params[2])/params[0]\
-            *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
+        if options.fitsratio:
+            slos= numpy.exp(params[2])/params[0]\
+                *numpy.sqrt(1.+sinlt**2.*(params[5+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
+        else:
+            slos= numpy.exp(params[2])/params[0]\
+                *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
         t= vpec/slos
         return norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
     elif options.dfmodel.lower() == 'simplegaussiandrift':
@@ -572,8 +587,12 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
                                     hs=options.hs/params[1]/_REFR0,
                                     vc=_vc(params,R,options,vcf))*sinlt 
         #va= vc- <v>
-        slos= numpy.exp(params[2])/params[0]\
-            *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
+        if options.fitsratio:
+            slos= numpy.exp(params[2])/params[0]\
+                *numpy.sqrt(1.+sinlt**2.*(params[5+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)          
+        else:
+            slos= numpy.exp(params[2])/params[0]\
+                *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
         t= (vpec+va)/slos
         return norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
 
@@ -648,6 +667,9 @@ def get_options():
     #Velocity distribution model
     parser.add_option("--dfmodel",dest='dfmodel',default='simplegaussian',
                       help="DF model to use")
+    parser.add_option("--fitsratio",action="store_true", dest="fitsratio",
+                      default=False,
+                      help="If set, fit for the ration squared of tangential to radial dispersion")
     #Density model
     parser.add_option("--densmodel",dest='densmodel',default='expdisk',
                       help="Density model to use")
