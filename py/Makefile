@@ -6,6 +6,7 @@ NSAMPLES=1000
 	all_simpledrift_noro_quadratic \
 	all_simpledrift_noro_cubic \
 	all_simpledrift_noro_vpec \
+	all_simpledrift_noro_vpec_nods \
 	all_simpledrift_noro_vpec_sratio \
 	l180_simpledrift_noro \
 	fourth_simpledrift_noro \
@@ -113,6 +114,13 @@ all_simpledrift_noro_vpec:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_vpec_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_vpec.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift --fitvpec
+
+all_simpledrift_noro_vpec_nods:
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_vpec_nods.sav --noroprior \
+	--dfmodel=simplegaussiandrift --fitvpec --nods
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_vpec_nods_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_vpec_nods.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --fitvpec --nods
 
 all_simpledrift_noro_vpec_sratio:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_vpec_sratio.sav --noroprior \

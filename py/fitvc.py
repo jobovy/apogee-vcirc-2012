@@ -45,6 +45,8 @@ _BINTEGRATEDMIN_DWARF= 0.001 #kpc
 _BINTEGRATEDMAX_DWARF= .1 #kpc
 _DEGTORAD= math.pi/180.
 _ERASESTR= "                                                                                "
+def dummyIso(jk,h):
+    return 0. #Log
 def fitvc(parser):
     (options,args)= parser.parse_args()
     if len(args) == 0:
@@ -91,7 +93,12 @@ def fitvc(parser):
     h= data['H0MAG']
     #Set up the isochrone
     print "Setting up the isochrone model ..."
-    iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z)
+    if options.nods:
+        iso= dummyIso
+        global _BINTEGRATEDMAX
+        _BINTEGRATEDMAX= 10. #kpc
+    else:
+        iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z)
     if options.dwarf:
         iso= [iso,
               isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,dwarf=True)]
@@ -710,6 +717,10 @@ def get_options():
                       help="imfmodel for isochrone model")
     parser.add_option("--Z",dest='Z',default=.019,type='float',
                       help="Metallicity of isochrone")
+    parser.add_option("--nods",action="store_true", 
+                      dest="nods",
+                      default=False,
+                      help="setting this assumes no distance information from isochrones, NOT SUPPORTED WITH DWARF")
     #Add dwarf part?
     parser.add_option("--dwarf",action="store_true", 
                       dest="dwarf",
