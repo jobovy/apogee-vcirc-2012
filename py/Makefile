@@ -45,8 +45,9 @@ all_simpledrift_noro:
 #	 --dfmodel=simplegaussiandrift
 
 all_skeweddrift_noro:
-	$(PYTHON) fitvc.py $(FITSDIR)all_skeweddrift_noro.sav --noroprior \
-	--dfmodel=simpleskeweddrift
+	$(PYTHON) -W ignore fitvc.py $(FITSDIR)all_skeweddrift_noro.sav \
+	--noroprior \
+	--dfmodel=simpleskeweddrift --multi=16
 	$(PYTHON) fitvc.py $(FITSDIR)all_skeweddrift_noro_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_skeweddrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simpleskeweddrift

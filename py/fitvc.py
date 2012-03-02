@@ -24,6 +24,8 @@ import numpy
 from scipy import integrate, optimize, interpolate
 from scipy.maxentropy import logsumexp
 from scipy.stats import norm
+import multi
+import multiprocessing
 import acor
 import bovy_mcmc, bovy_mcmc.elliptical_slice
 import flexgp.fast_cholesky
@@ -39,7 +41,8 @@ _VRSUN= -11.1
 _REFV0= 235. #km/s
 _REFR0= 8. #kpc
 #Integration parameters when bintegrating
-_BINTEGRATENBINS= 1001
+_BINTEGRATENBINS= 501
+_BINTEGRATEVNBINS= 1001
 _BINTEGRATEDMIN= 0.001 #kpc
 _BINTEGRATEDMAX= 30. #kpc
 _BINTEGRATEDMIN_DWARF= 0.001 #kpc
@@ -363,7 +366,7 @@ def _initialize_params(options):
                          [0.,0.],[0.,1.],[0.,0.],
                          [0.,0.],[0.,0.],[0.,0.]])
             if options.dfmodel.lower() == 'simpleskeweddrift':
-                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.,0.5,0.],
+                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.,0.5,-2.],
                         [[True,False],[True,True],[False,False],
                          [True,True],[False,False],
                          [False,False],[False,False],[True,False],[False,False]],
@@ -379,7 +382,7 @@ def _initialize_params(options):
                          [0.,0.],[0.,1.],[0.,0.],
                          [0.,0.],[0.,0.]])
         elif options.dfmodel.lower() == 'simpleskeweddrift':
-                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.],
+                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,-2.],
                         [[True,False],[True,True],[False,False],
                          [True,True],[False,False],
                          [False,False]],
@@ -498,18 +501,34 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
             logpddwarf= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
             dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
                                     _BINTEGRATENBINS)/params[1]/_REFR0
-        for ii in range(_BINTEGRATENBINS):
-            thisout[:,ii], logpd[:,ii]= _mloglikedIntegrand(ds[ii],
-                                                            params,vhelio/params[0]/_REFV0,
-                                                            l,b,jk,h,df,options,
-                                                            sinl,cosl,cosb,sinb,
-                                                            True,logpiso[:,ii],vcf)
-            if options.dwarf:
-                thisxtraout[:,ii], logpddwarf[:,ii]= _mloglikedIntegrand(dwarfds[ii],
-                                                                         params,vhelio/params[0]/_REFV0,
-                                                                         l,b,jk,h,df,options,
-                                                                         sinl,cosl,cosb,sinb,
-                                                                         True,logpisodwarf[:,ii],vcf)
+        if options.multi >= 1:
+            thisout= numpy.zeros((len(vhelio),_BINTEGRATENBINS,2))
+            thisout= multi.parallel_map((lambda x: _mloglikedIntegrand(ds[x],
+                                                                       params,vhelio/params[0]/_REFV0,
+                                                                       l,b,jk,h,df,options,
+                                                                       sinl,cosl,cosb,sinb,
+                                                                       True,logpiso[:,x],vcf,True)),
+                                               range(len(ds)),
+                                        numcores=numpy.amin([len(ds),multiprocessing.cpu_count(),options.multi]))
+            #thisout is list of len(vhelio)
+            out= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
+            for ii in range(_BINTEGRATENBINS):
+                out[:,ii]= thisout[ii][:,0]
+                logpd[:,ii]= thisout[ii][:,1]
+            thisout= out
+        else:
+            for ii in range(_BINTEGRATENBINS):
+                thisout[:,ii], logpd[:,ii]= _mloglikedIntegrand(ds[ii],
+                                                                params,vhelio/params[0]/_REFV0,
+                                                                l,b,jk,h,df,options,
+                                                                sinl,cosl,cosb,sinb,
+                                                                True,logpiso[:,ii],vcf)
+                if options.dwarf:
+                    thisxtraout[:,ii], logpddwarf[:,ii]= _mloglikedIntegrand(dwarfds[ii],
+                                                                             params,vhelio/params[0]/_REFV0,
+                                                                             l,b,jk,h,df,options,
+                                                                             sinl,cosl,cosb,sinb,
+                                                                             True,logpisodwarf[:,ii],vcf)
         #Sum each one
         if arrout:
             out= numpy.zeros(len(vhelio))
@@ -545,7 +564,8 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         return out+(params[1]*_REFR0-8.2)**2./0.5#+(params[0]*_REFV0+2.25*math.exp(2.*params[2])*_REFV0/params[0]+12.24-_PMSGRA*params[1]*_REFR0)**2./200. #params[1]=Ro, SBD10 Solar motion
 
 def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
-                        df,options,sinl,cosl,cosb,sinb,returnlog,logpiso,vcf):
+                        df,options,sinl,cosl,cosb,sinb,returnlog,logpiso,vcf,
+                        pdinout=False):
     #All positions are /ro, all velocities are /vo (d and vhelio have this already
     #Calculate coordinates, distances are /Ro (/params[1])
     #
@@ -576,8 +596,18 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
     logpvlos= numpy.log(numpy.exp(logpvlos-c)
                         +numpy.exp(logpvlos_outlier-c))+c
     logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
-    if returnlog: return (logpvlos+logpd,logpd)
-    else: return (numpy.exp(logpvlos+logpd),numpy.exp(logpd))
+    if pdinout:
+        out= numpy.empty((logpvlos.shape[0],2))
+        if returnlog:
+            out[:,0]= logpvlos+logpd
+            out[:,1]= logpd
+        else:
+            out[:,0]= numpy.exp(logpvlos+logpd)
+            out[:,1]= numpy.exp(logpd)
+        return out
+    else:
+        if returnlog: return (logpvlos+logpd,logpd)
+        else: return (numpy.exp(logpvlos+logpd),numpy.exp(logpd))
 
 def _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso):
     logpddf= _logpddf(params,d,l,b,R,theta,cosb,sinb,options)
@@ -620,6 +650,7 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
         t= (vpec+va)/slos
         return norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
     elif options.dfmodel.lower() == 'simpleskeweddrift':
+        coslt= numpy.cos(l+theta)
         va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],
                                     hR=options.hr/params[1]/_REFR0,
                                     hs=options.hs/params[1]/_REFR0,
@@ -635,26 +666,30 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
             sigmaT2= 0.5*sigmaR2
         omega= numpy.sqrt(sigmaT2/(1.-2.*delta**2./math.pi))
         xi= -va-omega*delta*math.sqrt(2./math.pi)
-        out= numpy.zeros(len(vpec))
-        for ii in range(len(vpec)):
-            out[ii]= numpy.log(evalSkeweddf(vpec[ii],sinlt[ii],sigmaR[ii],
-                                            xi[ii],omega[ii],alphaskew))
-            
-        va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],
-                                    hR=options.hr/params[1]/_REFR0,
-                                    hs=options.hs/params[1]/_REFR0,
-                                    vc=_vc(params,R,options,vcf))*sinlt 
+        #out= numpy.zeros(len(vpec))
+        #for ii in range(len(vpec)):
+        #    out[ii]= numpy.log(evalSkeweddf(vpec[ii],sinlt[ii],coslt[ii],
+        #                                    sigmaR[ii],
+        #                                    xi[ii],omega[ii],alphaskew))
+         
+        out= numpy.log(evalSkeweddf(vpec,sinlt,coslt,sigmaR,xi,omega,alphaskew))
+   
+        #va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],
+        #                            hR=options.hr/params[1]/_REFR0,
+        #                            hs=options.hs/params[1]/_REFR0,
+        #                            vc=_vc(params,R,options,vcf))*sinlt 
         #va= vc- <v>
-        if options.fitsratio:
-            slos= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.+sinlt**2.*(params[5+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)          
-        else:
-            slos= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
-        t= (vpec+va)/slos
-        diff=(norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0))/(\
-            out-numpy.log(_REFV0)) #For comparison
-        print numpy.mean(diff), numpy.std(diff)
+        #if options.fitsratio:
+        #    slos= numpy.exp(params[2])/params[0]\
+        #        *numpy.sqrt(1.+sinlt**2.*(params[5+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)          
+        #else:
+        #    slos= numpy.exp(params[2])/params[0]\
+        #        *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
+        #t= (vpec+va)/slos
+        #diff=(norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0))/(\
+        #    out-numpy.log(_REFV0)) #For comparison
+        #for ii in range(len(vpec)): print diff[ii], vpec[ii], sinlt[ii]
+        #print numpy.mean(diff), numpy.std(diff)
 
         return out-numpy.log(_REFV0) #For comparison
 
@@ -690,30 +725,54 @@ def _vgal(params,vhelio,l,b,options,sinl,cosl):
     else:
         return vhelio-cosl*_VRSUN/params[0]/_REFV0+sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
 
-def evalSkeweddf(vpec,sinlt,sigmaR,xi,omega,alphaskew):
+def evalSkeweddf(vpec,sinlt,coslt,sigmaR,xi,omega,alphaskew):
     """Evaluate the skewed df by integrating over the tangential velocity"""
+    if isinstance(vpec,numpy.ndarray):
+        #Integrate by binning
+        vs= numpy.linspace(-5.,5.,_BINTEGRATEVNBINS)
+        out= numpy.zeros((len(vpec),_BINTEGRATEVNBINS))
+        cotlt= coslt/sinlt
+        tanlt= sinlt/coslt
+        for ii in range(len(vpec)):
+            if sinlt[ii]**2. > 0.5:
+                out[ii,:]= sigmaR[ii]/numpy.fabs(sinlt[ii])\
+                *evalSkeweddfIntegrandLargelt(vs,cotlt[ii],
+                                              sinlt[ii],
+                                              vpec[ii],sigmaR[ii],
+                                              xi[ii],omega[ii],alphaskew)
+            else:
+                out[ii,:]= sigmaR[ii]/numpy.fabs(coslt[ii])\
+                    *evalSkeweddfIntegrandSmalllt(vs,tanlt[ii],
+                                              coslt[ii],
+                                              vpec[ii],sigmaR[ii],
+                                              xi[ii],omega[ii],
+                                              alphaskew)
+        return numpy.sum(out,axis=1)*(vs[1]-vs[0])
     if sinlt**2. > 0.5:
+        cotlt= coslt/sinlt
         return sigmaR/numpy.fabs(sinlt)*integrate.quadrature(evalSkeweddfIntegrandLargelt,
                                                              -5.,5., #5 sigma
-                                                        args=(numpy.sqrt(1./sinlt**2.-1.),
-                                                         sinlt,vpec,sigmaR,
-                                                         xi,omega,alphaskew))[0]
+                                                        args=(cotlt,
+                                                              sinlt,vpec,sigmaR,
+                                                              xi,omega,alphaskew))[0]
     else:
-        coslt= numpy.sqrt(1.-sinlt**2.)
+        tanlt= sinlt/coslt
         return sigmaR/numpy.fabs(coslt)*integrate.quadrature(evalSkeweddfIntegrandSmalllt,
                                                              -5.,5., #5 sigma
-                                                             args=(1./numpy.sqrt(1./sinlt**2.-1.),
-                                                              coslt,
-                                                              vpec,sigmaR,
+                                                             args=(tanlt,
+                                                                   coslt,
+                                                                   vpec,sigmaR,
                                                               xi,omega,
                                                               alphaskew))[0]
 
 def evalSkeweddfIntegrandLargelt(vR,cotlt,sinlt,vlos,
                                  sigmaR,xi,omega,alphaskew):
+    #Not sure about the cotlt sign
     return skeweddf(vR*sigmaR,cotlt*vR*sigmaR+vlos/sinlt,
                     sigmaR,xi,omega,alphaskew)
 def evalSkeweddfIntegrandSmalllt(vT,tanlt,coslt,vlos,
                                  sigmaR,xi,omega,alphaskew):
+    #Definitely okay
     return skeweddf(-tanlt*vT*sigmaR+vlos/coslt,
                     vT*sigmaR,
                     sigmaR,xi,omega,alphaskew)
@@ -833,7 +892,7 @@ def get_options():
                       help="Number of MCMC samples to obtain")
     #Multiprocessing?
     parser.add_option("-m","--multi",dest='multi',default=1,type='int',
-                      help="number of cpus to use for sampling")
+                      help="number of cpus to use for sampling or evaluation")
     return parser
 
 if __name__ == '__main__':
