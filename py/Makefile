@@ -14,7 +14,8 @@ NSAMPLES=1000
 	all_simpledrift_noro_gp \
 	all_simpledrift_noro_gpemcee \
 	all_simpledrift_noro_gp_fixtau0.5 \
-	all_skeweddrift_noro
+	all_skeweddrift_noro \
+	all_dehnen_noro
 
 all_simple:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simple.sav
@@ -51,6 +52,14 @@ all_skeweddrift_noro:
 	$(PYTHON) fitvc.py $(FITSDIR)all_skeweddrift_noro_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_skeweddrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simpleskeweddrift
+
+all_dehnen_noro:
+	$(PYTHON) -W ignore fitvc.py $(FITSDIR)all_dehnen_noro.sav \
+	--noroprior \
+	--dfmodel=dehnen --multi=16
+	$(PYTHON) fitvc.py $(FITSDIR)all_dehnen_noro_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_dehnen_noro.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=dehnen --multi=16
 
 l180_simpledrift_noro:
 	$(PYTHON) fitvc.py $(FITSDIR)l180_simpledrift_noro.sav --noroprior \

@@ -30,6 +30,7 @@ import acor
 import bovy_mcmc, bovy_mcmc.elliptical_slice
 import flexgp.fast_cholesky
 from galpy.util import save_pickles
+from galpy.df import dehnendf
 from readVclosData import readVclosData
 import isomodel
 import asymmetricDriftModel
@@ -348,7 +349,7 @@ def _calc_covar(rs,hyper_params,options):
     return numpy.exp(2.*hyper_params[0])*out
 
 def _initialize_params(options):
-    if (options.rotcurve.lower() == 'flat' or options.rotcurve.lower() == 'gp')and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift' or options.dfmodel.lower() == 'simpleskeweddrift'):
+    if (options.rotcurve.lower() == 'flat' or options.rotcurve.lower() == 'gp')and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift' or options.dfmodel.lower() == 'simpleskeweddrift' or options.dfmodel.lower() == 'dehnen'):
         if options.dwarf:
             return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2],
                     [[True,False],[True,True],[False,False],
@@ -492,6 +493,12 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         sys.stdout.flush()
         print out, params
     else: #Calculate the integral by binning
+        #If we are fitting a dehnendf, set it up
+        if options.dfmodel.lower() == 'dehnen':
+            #BOVY: Only works for flat rotation curve currently
+            df= dehnendf(correct=False,profileParams=(options.hr/_REFR0/params[1],
+                                                      options.hs/_REFR0/params[1],
+                                                      numpy.exp(params[2])/params[0]))
         thisout= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
         logpd= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
         ds= numpy.linspace(_BINTEGRATEDMIN,_BINTEGRATEDMAX,
@@ -501,7 +508,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
             logpddwarf= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
             dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
                                     _BINTEGRATENBINS)/params[1]/_REFR0
-        if options.multi >= 1:
+        if options.multi > 1:
             thisout= numpy.zeros((len(vhelio),_BINTEGRATENBINS,2))
             thisout= multi.parallel_map((lambda x: _mloglikedIntegrand(ds[x],
                                                                        params,vhelio/params[0]/_REFV0,
@@ -666,31 +673,13 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
             sigmaT2= 0.5*sigmaR2
         omega= numpy.sqrt(sigmaT2/(1.-2.*delta**2./math.pi))
         xi= -va-omega*delta*math.sqrt(2./math.pi)
-        #out= numpy.zeros(len(vpec))
-        #for ii in range(len(vpec)):
-        #    out[ii]= numpy.log(evalSkeweddf(vpec[ii],sinlt[ii],coslt[ii],
-        #                                    sigmaR[ii],
-        #                                    xi[ii],omega[ii],alphaskew))
-         
         out= numpy.log(evalSkeweddf(vpec,sinlt,coslt,sigmaR,xi,omega,alphaskew))
-   
-        #va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],
-        #                            hR=options.hr/params[1]/_REFR0,
-        #                            hs=options.hs/params[1]/_REFR0,
-        #                            vc=_vc(params,R,options,vcf))*sinlt 
-        #va= vc- <v>
-        #if options.fitsratio:
-        #    slos= numpy.exp(params[2])/params[0]\
-        #        *numpy.sqrt(1.+sinlt**2.*(params[5+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)          
-        #else:
-        #    slos= numpy.exp(params[2])/params[0]\
-        #        *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
-        #t= (vpec+va)/slos
-        #diff=(norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0))/(\
-        #    out-numpy.log(_REFV0)) #For comparison
-        #for ii in range(len(vpec)): print diff[ii], vpec[ii], sinlt[ii]
-        #print numpy.mean(diff), numpy.std(diff)
-
+        return out-numpy.log(_REFV0) #For comparison
+    elif options.dfmodel.lower() == 'dehnen':
+        coslt= numpy.cos(l+theta)
+        sigmaR= numpy.exp(params[2])/params[0]*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
+        out= numpy.log(evaldehnendf(vpec,sinlt,coslt,df,R,sigmaR,options,
+                                    params))
         return out-numpy.log(_REFV0) #For comparison
 
 def _logoutlierdf(params,vgal):
@@ -724,6 +713,43 @@ def _vgal(params,vhelio,l,b,options,sinl,cosl):
             +params[6+options.dwarf]*sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
     else:
         return vhelio-cosl*_VRSUN/params[0]/_REFV0+sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
+
+def evaldehnendf(vpec,sinlt,coslt,df,R,sigmaR,options,params):
+    """Evaluate the dehnen df by integrating over the tangential velocity"""
+    if isinstance(vpec,numpy.ndarray):
+        #Integrate by binning
+        vs= numpy.linspace(-5.,5.,_BINTEGRATEVNBINS)
+        out= numpy.zeros((len(vpec),_BINTEGRATEVNBINS))
+        cotlt= coslt/sinlt
+        tanlt= sinlt/coslt
+        for ii in range(len(vpec)):
+            if sinlt[ii]**2. > 0.5:
+                out[ii,:]= sigmaR[ii]/numpy.fabs(sinlt[ii])\
+                    *evaldehnendfIntegrandLargelt(vs,cotlt[ii],
+                                              sinlt[ii],
+                                              vpec[ii],df,R[ii],sigmaR[ii])
+            else:
+                out[ii,:]= sigmaR[ii]/numpy.fabs(coslt[ii])\
+                    *evaldehnendfIntegrandSmalllt(vs,tanlt[ii],
+                                                  coslt[ii],
+                                                  vpec[ii],df,R[ii],sigmaR[ii])
+        return numpy.sum(out,axis=1)*(vs[1]-vs[0])/numpy.exp(-R/options.hr*params[1]*_REFR0) #This last factor corrects for the normalization in python (-ish since the uncorrected surface-mass density isn't quite exponential)
+
+def evaldehnendfIntegrandLargelt(vR,cotlt,sinlt,vlos,df,R,sigmaR):
+    #Create input for evaluation
+    dfin= numpy.zeros((3,len(vR)))
+    dfin[0,:]= R
+    dfin[1,:]= vR*sigmaR
+    dfin[2,:]= 1.+cotlt*vR*sigmaR+vlos/sinlt
+    return df(dfin)
+              
+def evaldehnendfIntegrandSmalllt(vT,tanlt,coslt,vlos,df,R,sigmaR):
+    #Create input for evaluation
+    dfin= numpy.zeros((3,len(vT)))
+    dfin[0,:]= R
+    dfin[1,:]= tanlt*vT*sigmaR-vlos/coslt
+    dfin[2,:]= vT*sigmaR+1.
+    return df(dfin)
 
 def evalSkeweddf(vpec,sinlt,coslt,sigmaR,xi,omega,alphaskew):
     """Evaluate the skewed df by integrating over the tangential velocity"""
@@ -767,13 +793,12 @@ def evalSkeweddf(vpec,sinlt,coslt,sigmaR,xi,omega,alphaskew):
 
 def evalSkeweddfIntegrandLargelt(vR,cotlt,sinlt,vlos,
                                  sigmaR,xi,omega,alphaskew):
-    #Not sure about the cotlt sign
     return skeweddf(vR*sigmaR,cotlt*vR*sigmaR+vlos/sinlt,
                     sigmaR,xi,omega,alphaskew)
 def evalSkeweddfIntegrandSmalllt(vT,tanlt,coslt,vlos,
                                  sigmaR,xi,omega,alphaskew):
     #Definitely okay
-    return skeweddf(-tanlt*vT*sigmaR+vlos/coslt,
+    return skeweddf(tanlt*vT*sigmaR-vlos/coslt,
                     vT*sigmaR,
                     sigmaR,xi,omega,alphaskew)
 
