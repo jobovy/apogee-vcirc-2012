@@ -733,7 +733,7 @@ def evaldehnendf(vpec,sinlt,coslt,df,R,sigmaR,options,params):
                     *evaldehnendfIntegrandSmalllt(vs,tanlt[ii],
                                                   coslt[ii],
                                                   vpec[ii],df,R[ii],sigmaR[ii])
-        return numpy.sum(out,axis=1)*(vs[1]-vs[0])/numpy.exp(-R/options.hr*params[1]*_REFR0) #This last factor corrects for the normalization in python (-ish since the uncorrected surface-mass density isn't quite exponential)
+        return numpy.sum(out,axis=1)*(vs[1]-vs[0])/numpy.exp(-R/options.hr*params[1]*_REFR0) #This last factor corrects for the normalization in galpy (-ish since the uncorrected surface-mass density isn't quite exponential)
 
 def evaldehnendfIntegrandLargelt(vR,cotlt,sinlt,vlos,df,R,sigmaR):
     #Create input for evaluation
