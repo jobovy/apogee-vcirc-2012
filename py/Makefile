@@ -13,7 +13,8 @@ NSAMPLES=1000
 	nomult_simpledrift_noro \
 	all_simpledrift_noro_gp \
 	all_simpledrift_noro_gpemcee \
-	all_simpledrift_noro_gp_fixtau0.5
+	all_simpledrift_noro_gp_fixtau0.5 \
+	all_skeweddrift_noro
 
 all_simple:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simple.sav
@@ -42,6 +43,13 @@ all_simpledrift_noro:
 #	--init=$(FITSDIR)all_simpledrift_noro.sav \
 #	--plottype=pvloslos -o ~/Desktop/test.png --nvlos=21 -m 4 \
 #	 --dfmodel=simplegaussiandrift
+
+all_skeweddrift_noro:
+	$(PYTHON) fitvc.py $(FITSDIR)all_skeweddrift_noro.sav --noroprior \
+	--dfmodel=simpleskeweddrift
+	$(PYTHON) fitvc.py $(FITSDIR)all_skeweddrift_noro_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_skeweddrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simpleskeweddrift
 
 l180_simpledrift_noro:
 	$(PYTHON) fitvc.py $(FITSDIR)l180_simpledrift_noro.sav --noroprior \

@@ -31,6 +31,7 @@ from galpy.util import save_pickles
 from readVclosData import readVclosData
 import isomodel
 import asymmetricDriftModel
+import skewnormal
 _PMSGRA= 30.24 #km/s/kpc
 _PMSGRA_ERR= 0.12 #km/s/kpc
 _VRSUN= -11.1
@@ -344,7 +345,7 @@ def _calc_covar(rs,hyper_params,options):
     return numpy.exp(2.*hyper_params[0])*out
 
 def _initialize_params(options):
-    if (options.rotcurve.lower() == 'flat' or options.rotcurve.lower() == 'gp')and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
+    if (options.rotcurve.lower() == 'flat' or options.rotcurve.lower() == 'gp')and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift' or options.dfmodel.lower() == 'simpleskeweddrift'):
         if options.dwarf:
             return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2],
                     [[True,False],[True,True],[False,False],
@@ -361,6 +362,14 @@ def _initialize_params(options):
                         [[0.,0.],[5./_REFR0,11./_REFR0],
                          [0.,0.],[0.,1.],[0.,0.],
                          [0.,0.],[0.,0.],[0.,0.]])
+            if options.dfmodel.lower() == 'simpleskeweddrift':
+                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.,0.5,0.],
+                        [[True,False],[True,True],[False,False],
+                         [True,True],[False,False],
+                         [False,False],[False,False],[True,False],[False,False]],
+                        [[0.,0.],[5./_REFR0,11./_REFR0],
+                         [0.,0.],[0.,1.],[0.,0.],
+                         [0.,0.],[0.,0.],[0.,0.],[0.,0.]])
             else:
                 return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.],
                         [[True,False],[True,True],[False,False],
@@ -369,6 +378,14 @@ def _initialize_params(options):
                         [[0.,0.],[5./_REFR0,11./_REFR0],
                          [0.,0.],[0.,1.],[0.,0.],
                          [0.,0.],[0.,0.]])
+        elif options.dfmodel.lower() == 'simpleskeweddrift':
+                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.],
+                        [[True,False],[True,True],[False,False],
+                         [True,True],[False,False],
+                         [False,False]],
+                        [[0.,0.],[5./_REFR0,11./_REFR0],
+                         [0.,0.],[0.,1.],[0.,0.],
+                         [0.,0.]])
         else:
             return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.],
                     [[True,False],[True,True],[False,False],
@@ -602,6 +619,44 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
                 *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
         t= (vpec+va)/slos
         return norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
+    elif options.dfmodel.lower() == 'simpleskeweddrift':
+        va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],
+                                    hR=options.hr/params[1]/_REFR0,
+                                    hs=options.hs/params[1]/_REFR0,
+                                    vc=_vc(params,R,options,vcf))#no sinlt
+        #va= vc- <v>
+        alphaskew= params[5+2*options.fitvpec+options.dwarf+options.fitsratio]
+        delta= alphaskew/math.sqrt(1.+alphaskew**2.)
+        sigmaR2= numpy.exp(2.*params[2])/params[0]**2.*numpy.exp(-2.*(R-1.)/options.hs*params[1]*_REFR0)
+        sigmaR= numpy.sqrt(sigmaR2)
+        if options.fitsratio:
+            sigmaT2= params[5+2*options.fitvpec+options.dwarf]*sigmaR2
+        else:
+            sigmaT2= 0.5*sigmaR2
+        omega= numpy.sqrt(sigmaT2/(1.-2.*delta**2./math.pi))
+        xi= -va-omega*delta*math.sqrt(2./math.pi)
+        out= numpy.zeros(len(vpec))
+        for ii in range(len(vpec)):
+            out[ii]= numpy.log(evalSkeweddf(vpec[ii],sinlt[ii],sigmaR[ii],
+                                            xi[ii],omega[ii],alphaskew))
+            
+        va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],
+                                    hR=options.hr/params[1]/_REFR0,
+                                    hs=options.hs/params[1]/_REFR0,
+                                    vc=_vc(params,R,options,vcf))*sinlt 
+        #va= vc- <v>
+        if options.fitsratio:
+            slos= numpy.exp(params[2])/params[0]\
+                *numpy.sqrt(1.+sinlt**2.*(params[5+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)          
+        else:
+            slos= numpy.exp(params[2])/params[0]\
+                *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
+        t= (vpec+va)/slos
+        diff=(norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0))/(\
+            out-numpy.log(_REFV0)) #For comparison
+        print numpy.mean(diff), numpy.std(diff)
+
+        return out-numpy.log(_REFV0) #For comparison
 
 def _logoutlierdf(params,vgal):
     t= (vgal*params[0]-params[4])*_REFV0/100.
@@ -634,6 +689,45 @@ def _vgal(params,vhelio,l,b,options,sinl,cosl):
             +params[6+options.dwarf]*sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
     else:
         return vhelio-cosl*_VRSUN/params[0]/_REFV0+sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
+
+def evalSkeweddf(vpec,sinlt,sigmaR,xi,omega,alphaskew):
+    """Evaluate the skewed df by integrating over the tangential velocity"""
+    if sinlt**2. > 0.5:
+        return sigmaR/numpy.fabs(sinlt)*integrate.quadrature(evalSkeweddfIntegrandLargelt,
+                                                             -5.,5., #5 sigma
+                                                        args=(numpy.sqrt(1./sinlt**2.-1.),
+                                                         sinlt,vpec,sigmaR,
+                                                         xi,omega,alphaskew))[0]
+    else:
+        coslt= numpy.sqrt(1.-sinlt**2.)
+        return sigmaR/numpy.fabs(coslt)*integrate.quadrature(evalSkeweddfIntegrandSmalllt,
+                                                             -5.,5., #5 sigma
+                                                             args=(1./numpy.sqrt(1./sinlt**2.-1.),
+                                                              coslt,
+                                                              vpec,sigmaR,
+                                                              xi,omega,
+                                                              alphaskew))[0]
+
+def evalSkeweddfIntegrandLargelt(vR,cotlt,sinlt,vlos,
+                                 sigmaR,xi,omega,alphaskew):
+    return skeweddf(vR*sigmaR,cotlt*vR*sigmaR+vlos/sinlt,
+                    sigmaR,xi,omega,alphaskew)
+def evalSkeweddfIntegrandSmalllt(vT,tanlt,coslt,vlos,
+                                 sigmaR,xi,omega,alphaskew):
+    return skeweddf(-tanlt*vT*sigmaR+vlos/coslt,
+                    vT*sigmaR,
+                    sigmaR,xi,omega,alphaskew)
+
+def skeweddf(vR,vT,sigmaR,xi,omega,alphaskew):
+    """skewed df= Gaussian in vR, Skew normal in vT
+    vR,vT
+    sigmaR = radial dispersion
+    xi - xi parameter of skew normal 'mean'
+    omega - omega parameter of skew normal 'variance'
+    alphaskew= skew normal alpha parameter"""
+    #First calculate the skew normal's parameters
+    return norm.pdf(vR/sigmaR)/sigmaR\
+        *skewnormal.skewnormal(vT,m=xi,s=omega,a=alphaskew)
 
 def print_samples_qa(samples):
     print "Mean, standard devs, acor tau, acor mean, acor s ..."
