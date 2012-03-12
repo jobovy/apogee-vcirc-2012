@@ -2,7 +2,9 @@ FITSDIR=../fits/
 NSAMPLES=1000
 
 .PHONY: all_simple all_simple_dwarf all_simple_noro all_simpledrift_noro \
+	lgtr90_simpledrift_noro \
 	all_simpledrift_noro_dwarf \
+	all_simpledrift_noro_hs16 \
 	all_simpledrift_noro_powerlaw all_simpledrift_noro_linear \
 	all_simpledrift_noro_quadratic \
 	all_simpledrift_noro_cubic \
@@ -53,6 +55,13 @@ all_simpledrift_noro_dwarf:
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift --dwarf
 
+all_simpledrift_noro_hs16:
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_hs16.sav --noroprior \
+	--dfmodel=simplegaussiandrift --hs=16.
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_hs16_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_hs16.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --hs=16.
+
 all_skeweddrift_noro:
 	$(PYTHON) -W ignore fitvc.py $(FITSDIR)all_skeweddrift_noro.sav \
 	--noroprior \
@@ -68,6 +77,13 @@ all_dehnen_noro:
 	$(PYTHON) fitvc.py $(FITSDIR)all_dehnen_noro_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_dehnen_noro.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=dehnen --multi=16
+
+lgtr90_simpledrift_noro:
+	$(PYTHON) fitvc.py $(FITSDIR)lgtr90_simpledrift_noro.sav --noroprior \
+	--dfmodel=simplegaussiandrift --lmin=90.
+	$(PYTHON) fitvc.py $(FITSDIR)lgtr90_simpledrift_noro_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)lgtr90_simpledrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --lmin=90.
 
 l180_nomult_simpledrift_noro:
 	$(PYTHON) fitvc.py $(FITSDIR)l180_nomult_simpledrift_noro.sav \
