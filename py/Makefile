@@ -61,12 +61,13 @@ all_dehnen_noro:
 	--init=$(FITSDIR)all_dehnen_noro.sav --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=dehnen --multi=16
 
-l180_simpledrift_noro:
-	$(PYTHON) fitvc.py $(FITSDIR)l180_simpledrift_noro.sav --noroprior \
-	--dfmodel=simplegaussiandrift --location=4154
-	$(PYTHON) fitvc.py $(FITSDIR)l180_simpledrift_noro_$(NSAMPLES)samples.sav \
-	--init=$(FITSDIR)l180_simpledrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
-	--noroprior --dfmodel=simplegaussiandrift --location=4154
+l180_nomult_simpledrift_noro:
+	$(PYTHON) fitvc.py $(FITSDIR)l180_nomult_simpledrift_noro.sav \
+	--noroprior \
+	--dfmodel=simplegaussiandrift --location=4154 --cutmultiples
+	$(PYTHON) fitvc.py $(FITSDIR)l180_nomult_simpledrift_noro_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)l180_nomult_simpledrift_noro.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --location=4154 --cutmultiples
 
 fourth_simpledrift_noro:
 	$(PYTHON) fitvc.py $(FITSDIR)fourth_simpledrift_noro.sav --noroprior \
