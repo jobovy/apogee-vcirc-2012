@@ -3,3 +3,7 @@
 e.g., 
 
 python createFakeData.py --dfmodel=simplegaussiandrift ../fits/all_simpledrift_noro.sav -o ../fake/fake_simpledrift_noro.fits --nvlos=201
+
+w/ Dehnen
+
+python createFakeData.py --dfmodel=dehnen ../fits/all_simpledrift_noro.sav -o ../fake/fake_simpledrift-dehnen_noro.fits --nvlos=201
