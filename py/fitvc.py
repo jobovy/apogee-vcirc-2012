@@ -573,7 +573,7 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
     #
     #Returns the loglike and the p(d) factor
     R= numpy.sqrt(1.+d**2.-2.*d*cosl)
-    if isinstance(vhelio,numpy.ndarray):
+    if isinstance(vhelio,numpy.ndarray) and len(vhelio) > 1:
         indx= (R == 0.)
         R[indx]+= 0.0001
     else:

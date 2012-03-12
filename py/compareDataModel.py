@@ -40,7 +40,10 @@ def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf):
     sinb= numpy.sin(b)
     cosb= numpy.cos(b)
     jk= data['J0MAG']-data['K0MAG']
-    jk[(jk < 0.5)]= 0.5 #BOVY: FIX THIS HACK BY EMAILING GAIL
+    try:
+        jk[(jk < 0.5)]= 0.5 #BOVY: FIX THIS HACK BY EMAILING GAIL
+    except TypeError:
+        pass #HACK
     h= data['H0MAG']
     options.multi= 1 #To avoid conflict
     out= -mloglike(params,numpy.zeros(len(data))+vhelio,
@@ -109,6 +112,9 @@ def get_options():
                       help="scale height in kpc")
     parser.add_option("--hs",dest='hs',default=8.,type='float',
                       help="dispersion scale length in kpc")
+    parser.add_option("--fitsratio",action="store_true", dest="fitsratio",
+                      default=False,
+                      help="If set, fit for the ration squared of tangential to radial dispersion")
     #Data options
     parser.add_option("--lmin",dest='lmin',default=35.,type='float',
                       help="readVclosData 'lmin'")
