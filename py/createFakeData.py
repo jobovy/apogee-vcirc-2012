@@ -29,7 +29,6 @@ def createFakeData(parser):
     #HACK
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
-    data= data[0:100]
     #Set up the isochrone
     print "Setting up the isochrone model ..."
     iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z)
@@ -70,20 +69,11 @@ def createFakeData(parser):
         thislogpisodwarf= logpisodwarf[ii,:]
     else:
         thislogpisodwarf= None
-    if not options.multi is None:
-        pvlos= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
-                                                        data[[ii]],
-                                                        df,options,
-                                                        (logpiso[ii,:]).reshape((1,_BINTEGRATENBINS)),
-                                                        thislogpisodwarf)),
-                                  range(options.nvlos),
-                                  numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
-    else:
-        for jj in range(options.nvlos):
-            pvlos[:,jj]= pvlosplate(params,vlos[jj],data,
-                                    df,options,
-                                    logpiso,
-                                    thislogpisodwarf)
+    for jj in range(options.nvlos):
+        pvlos[:,jj]= pvlosplate(params,vlos[jj],data,
+                                df,options,
+                                logpiso,
+                                thislogpisodwarf)
     for ii in range(len(data)):
         pvlos[ii,:]-= logsumexp(pvlos[ii,:])
         pvlos[ii,:]= numpy.exp(pvlos[ii,:])
@@ -96,7 +86,7 @@ def createFakeData(parser):
             kk+= 1
         data['VHELIO'][ii]= vlos[kk]
     #Dump raw
-    fitsio.write(options.plotfilename,data,clobber=True)
+    fitsio.write(options.plotfile,data,clobber=True)
 
 if __name__ == '__main__':
     createFakeData(get_options())
