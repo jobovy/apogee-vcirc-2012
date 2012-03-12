@@ -42,6 +42,7 @@ def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf):
     jk= data['J0MAG']-data['K0MAG']
     jk[(jk < 0.5)]= 0.5 #BOVY: FIX THIS HACK BY EMAILING GAIL
     h= data['H0MAG']
+    options.multi= 1 #To avoid conflict
     out= -mloglike(params,numpy.zeros(len(data))+vhelio,
                    l,
                    b,
