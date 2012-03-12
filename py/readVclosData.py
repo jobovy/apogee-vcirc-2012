@@ -4,7 +4,8 @@ import apogee
 def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                   meanb=0.,meanb_tol=0.5,jkmax=1.2,ak=True,
                   specprimary=True,
-                  cutmultiples=False):
+                  cutmultiples=False,
+                  datafilename=None):
     """
     NAME:
        readVclosData
@@ -23,11 +24,15 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
        jkmax - maximum (J-K)_0 (only in conjunction with ak=True)
        specprimary= (default= True) select only primary objects
        cutmultiples= (default: False) cut objects suspected to be in multiples (repeated Vlos std dev > 1 km/s) ONLY WORKS WITH SPECPRIMARY=True
+       datafilename= if set, use this data file (useful for fake data)
     OUTPUT:
     HISTORY:
        2012-01-25 - Written - Bovy (IAS)
     """
-    datafile= apogee.tools.apallPath()
+    if not datafilename is None:
+        datafile= apogee.tools.apallPath()
+    else:
+        datafile= datafilename
     data= fitsio.read(datafile,1)
     if specprimary and not cutmultiples: #If cutmultiples we will cut to primary later
         #Primary data only
