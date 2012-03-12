@@ -62,6 +62,16 @@ def createFakeData(parser):
     savefile= open(args[0],'rb')
     params= pickle.load(savefile)
     savefile.close()
+    #Prep data
+    l= data['GLON']*_DEGTORAD
+    b= data['GLAT']*_DEGTORAD
+    sinl= numpy.sin(l)
+    cosl= numpy.cos(l)
+    sinb= numpy.sin(b)
+    cosb= numpy.cos(b)
+    jk= data['J0MAG']-data['K0MAG']
+    jk[(jk < 0.5)]= 0.5 #BOVY: FIX THIS HACK BY EMAILING GAIL
+    h= data['H0MAG']
     #Re-sample
     vlos= numpy.linspace(-200.,200.,options.nvlos)
     pvlos= numpy.zeros((len(data),options.nvlos))
@@ -70,10 +80,18 @@ def createFakeData(parser):
     else:
         thislogpisodwarf= None
     for jj in range(options.nvlos):
-        pvlos[:,jj]= pvlosplate(params,vlos[jj],data,
-                                df,options,
-                                logpiso,
-                                thislogpisodwarf)
+        pvlos[:,jj]= -mloglike(params,numpy.zeros(len(data))+vlos[jj],
+                               l,
+                               b,
+                               jk,
+                               h,
+                               df,options,
+                               sinl,
+                               cosl,
+                               cosb,
+                               sinb,
+                               logpiso,
+                               thislogpisodwarf,True,None)
     for ii in range(len(data)):
         pvlos[ii,:]-= logsumexp(pvlos[ii,:])
         pvlos[ii,:]= numpy.exp(pvlos[ii,:])
