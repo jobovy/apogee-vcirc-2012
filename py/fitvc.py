@@ -531,11 +531,12 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                                                                 sinl,cosl,cosb,sinb,
                                                                 True,logpiso[:,ii],vcf)
                 if options.dwarf:
+                    if ii > 0: continue #HACK
                     thisxtraout[:,ii], logpddwarf[:,ii]= _mloglikedIntegrand(dwarfds[ii],
                                                                              params,vhelio/params[0]/_REFV0,
                                                                              l,b,jk,h,df,options,
                                                                              sinl,cosl,cosb,sinb,
-                                                                             True,logpisodwarf[:,ii],vcf)
+                                                                             True,logpisodwarf[:,ii],vcf,dwarf=True)
         #Sum each one
         if arrout:
             out= numpy.zeros(len(vhelio))
@@ -544,20 +545,14 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         for ii in range(len(vhelio)):
             if options.dwarf: #Combine
                 tmpthisout= logsumexp(thisout[ii,:])+numpy.log(1.-params[5])-logsumexp(logpd[ii,:])
-                thislogpdwarf= logsumexp(logpddwarf[ii,:])
-                if thislogpdwarf == -numpy.finfo(numpy.dtype(numpy.float64)).max:
-                    if arrout:
-                        out[ii]= -tmpthisout
-                    else:
-                        out-= tmpthisout
+                thislogpdwarf= logpddwarf[ii,0]
+                tmpthisxtraout= thisxtraout[ii,0]+numpy.log(params[5])-thislogpdwarf
+                #print tmpthisout, tmpthisxtraout, thisxtraout[ii,0]
+                c= numpy.amax([tmpthisout,tmpthisxtraout])
+                if arrout:
+                    out[ii]= -(numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c)
                 else:
-                    tmpthisxtraout= logsumexp(thisxtraout[ii,:])+numpy.log(params[5])-thislogpdwarf
-                    #print tmpthisout, tmpthisxtraout, -logsumexp(logpddwarf[ii,:])
-                    c= numpy.amax([tmpthisout,tmpthisxtraout])
-                    if arrout:
-                        out[ii]= -(numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c)
-                    else:
-                        out-= numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c
+                    out-= numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c
             else:
                 if arrout:
                     out[ii]= -logsumexp(thisout[ii,:])+logsumexp(logpd[ii,:]) #so we can compare to the +dwarf case
@@ -572,7 +567,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
 
 def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
                         df,options,sinl,cosl,cosb,sinb,returnlog,logpiso,vcf,
-                        pdinout=False):
+                        dwarf=False,pdinout=False):
     #All positions are /ro, all velocities are /vo (d and vhelio have this already
     #Calculate coordinates, distances are /Ro (/params[1])
     #
@@ -597,12 +592,18 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
     vgal= _vgal(params,vhelio,l,b,options,sinl,cosl)
     vpec= _vpec(params,vgal,R,options,l,theta,vcf)
     #Calculate probabilities
-    logpvlos= _logdf(params,vpec,R,options,df,l,theta,vcf)+numpy.log(1.-params[3])
+    if dwarf: #assume R=1, theta=0
+        logpvlos= _logdf(params,vpec,1.,options,df,l,0.,vcf)+numpy.log(1.-params[3])
+    else:
+        logpvlos= _logdf(params,vpec,R,options,df,l,theta,vcf)+numpy.log(1.-params[3])
     logpvlos_outlier= _logoutlierdf(params,vgal)+numpy.log(params[3])
     c= numpy.amax(numpy.array([logpvlos,logpvlos_outlier]),axis=0)
     logpvlos= numpy.log(numpy.exp(logpvlos-c)
                         +numpy.exp(logpvlos_outlier-c))+c
-    logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
+    if dwarf:
+        logpd= 0.
+    else:
+        logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
     if pdinout:
         out= numpy.empty((logpvlos.shape[0],2))
         if returnlog:

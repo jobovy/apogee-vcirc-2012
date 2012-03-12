@@ -2,6 +2,7 @@ FITSDIR=../fits/
 NSAMPLES=1000
 
 .PHONY: all_simple all_simple_dwarf all_simple_noro all_simpledrift_noro \
+	all_simpledrift_noro_dwarf \
 	all_simpledrift_noro_powerlaw all_simpledrift_noro_linear \
 	all_simpledrift_noro_quadratic \
 	all_simpledrift_noro_cubic \
@@ -44,6 +45,13 @@ all_simpledrift_noro:
 #	--init=$(FITSDIR)all_simpledrift_noro.sav \
 #	--plottype=pvloslos -o ~/Desktop/test.png --nvlos=21 -m 4 \
 #	 --dfmodel=simplegaussiandrift
+
+all_simpledrift_noro_dwarf:
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_dwarf.sav --noroprior \
+	--dfmodel=simplegaussiandrift --dwarf
+	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_dwarf_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_dwarf.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --dwarf
 
 all_skeweddrift_noro:
 	$(PYTHON) -W ignore fitvc.py $(FITSDIR)all_skeweddrift_noro.sav \
