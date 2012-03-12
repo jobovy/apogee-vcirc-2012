@@ -593,6 +593,7 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
     vpec= _vpec(params,vgal,R,options,l,theta,vcf)
     #Calculate probabilities
     if dwarf: #assume R=1, theta=0
+        vpec= _vpec(params,vgal,1.,options,l,0.,vcf)
         logpvlos= _logdf(params,vpec,1.,options,df,l,0.,vcf)+numpy.log(1.-params[3])
     else:
         logpvlos= _logdf(params,vpec,R,options,df,l,theta,vcf)+numpy.log(1.-params[3])
