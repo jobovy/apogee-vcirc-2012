@@ -252,6 +252,8 @@ def get_options():
                       dest="cutmultiples",
                       default=False,
                       help="readVclosData 'cutmultiples'")
+    parser.add_option("-f",dest='fakedata',default=None,
+                      help="Name of the fake data filename")
     #Isochrone IMF
     parser.add_option("--imfmodel",dest='imfmodel',default='lognormalChabrier2001',
                       help="imfmodel for isochrone model")
