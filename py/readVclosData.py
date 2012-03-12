@@ -29,7 +29,7 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
     HISTORY:
        2012-01-25 - Written - Bovy (IAS)
     """
-    if not datafilename is None:
+    if datafilename is None:
         datafile= apogee.tools.apallPath()
     else:
         datafile= datafilename
