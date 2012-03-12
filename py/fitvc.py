@@ -568,7 +568,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
 
 def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
                         df,options,sinl,cosl,cosb,sinb,returnlog,logpiso,vcf,
-                        dwarf=False,pdinout=False):
+                        pdinout=False,dwarf=False):
     #All positions are /ro, all velocities are /vo (d and vhelio have this already
     #Calculate coordinates, distances are /Ro (/params[1])
     #

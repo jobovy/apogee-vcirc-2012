@@ -76,7 +76,7 @@ def createFakeData(parser):
     vlos= numpy.linspace(-200.,200.,options.nvlos)
     pvlos= numpy.zeros((len(data),options.nvlos))
     if options.dwarf:
-        thislogpisodwarf= logpisodwarf[ii,:]
+        thislogpisodwarf= logpisodwarf
     else:
         thislogpisodwarf= None
     for jj in range(options.nvlos):
