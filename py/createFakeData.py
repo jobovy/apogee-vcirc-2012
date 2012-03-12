@@ -64,39 +64,37 @@ def createFakeData(parser):
     params= pickle.load(savefile)
     savefile.close()
     #Re-sample
+    vlos= numpy.linspace(-200.,200.,options.nvlos)
+    pvlos= numpy.zeros((len(data),options.nvlos))
+    if options.dwarf:
+        thislogpisodwarf= logpisodwarf[ii,:]
+    else:
+        thislogpisodwarf= None
+    if not options.multi is None:
+        pvlos= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
+                                                        data[[ii]],
+                                                        df,options,
+                                                        (logpiso[ii,:]).reshape((1,_BINTEGRATENBINS)),
+                                                        thislogpisodwarf)),
+                                  range(options.nvlos),
+                                  numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
+    else:
+        for jj in range(options.nvlos):
+            pvlos[:,jj]= pvlosplate(params,vlos[jj],data,
+                                    df,options,
+                                    logpiso,
+                                    thislogpisodwarf)
     for ii in range(len(data)):
-        print "Working on %i" % ii
-        vlos= numpy.linspace(-200.,200.,options.nvlos)
-        pvlos= numpy.zeros(options.nvlos)
-        if options.dwarf:
-            thislogpisodwarf= (logpisodwarf[ii,:]).reshape((1,_BINTEGRATENBINS))
-        else:
-            thislogpisodwarf= None
-        if not options.multi is None:
-            pvlos= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
-                                                            data[[ii]],
-                                                            df,options,
-                                                            (logpiso[ii,:]).reshape((1,_BINTEGRATENBINS)),
-                                                            thislogpisodwarf)),
-                                      range(options.nvlos),
-                                      numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
-        else:
-            for jj in range(options.nvlos):
-                pvlos[jj]= pvlosplate(params,vlos[jj],data[[ii]],df,options,
-                                      logpiso[ii,:].reshape((1,_BINTEGRATENBINS)),
-                                      thislogpisodwarf)
-        pvlos-= logsumexp(pvlos)
-        pvlos= numpy.exp(pvlos)
-        pvlos= numpy.cumsum(pvlos)
-        pvlos/= pvlos[-1]
+        pvlos[ii,:]-= logsumexp(pvlos[ii,:])
+        pvlos[ii,:]= numpy.exp(pvlos[ii,:])
+        pvlos[ii,:]= numpy.cumsum(pvlos[ii,:])
+        pvlos[ii,:]/= pvlos[ii,-1]
         #Draw
         randindx= numpy.random.uniform()
         kk= 0
-        while pvlos[kk] < randindx:
+        while pvlos[ii,kk] < randindx:
             kk+= 1
-        print data[ii]['VHELIO']
         data['VHELIO'][ii]= vlos[kk]
-        print data[ii]['VHELIO']
     #Dump raw
     fitsio.write(options.plotfilename,data,clobber=True)
 
