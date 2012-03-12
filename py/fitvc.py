@@ -77,7 +77,8 @@ def fitvc(parser):
                         bmax=options.bmax,
                         ak=True,
                         cutmultiples=options.cutmultiples,
-                        jkmax=options.jkmax)
+                        jkmax=options.jkmax,
+                        datafilename=options.fakedata)
     if not options.location is None:
         data= data[(data['LOCATION'] == options.location)]
     if not options.downsample is None:
@@ -892,6 +893,8 @@ def get_options():
                       dest="cutmultiples",
                       default=False,
                       help="readVclosData 'cutmultiples'")
+    parser.add_option("-f",dest='fakedata',default=None,
+                      help="Name of the fake data filename")
     #Isochrone IMF
     parser.add_option("--imfmodel",dest='imfmodel',default='lognormalChabrier2001',
                       help="imfmodel for isochrone model")
