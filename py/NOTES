@@ -7,3 +7,8 @@ python createFakeData.py --dfmodel=simplegaussiandrift ../fits/all_simpledrift_n
 w/ Dehnen
 
 python createFakeData.py --dfmodel=dehnen ../fits/all_simpledrift_noro.sav -o ../fake/fake_simpledrift-dehnen_noro.fits --nvlos=201
+
+
+###LOCATION PLOTS
+
+python compareDataModel.py --dfmodel=simplegaussiandrift --init=../fits/all_simpledrift_noro.sav -o ../tex/locations/all_simpledrift_noro --nvlos=201 -m 15 --location=0

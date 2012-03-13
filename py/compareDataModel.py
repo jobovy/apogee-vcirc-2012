@@ -57,30 +57,7 @@ def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf):
                    cosb,
                    sinb,
                    logpiso,
-                   logpisodwarf,True,None)
-    #indx= (out == 0.)
-    #print l[indx], b[indx], jk[indx], h[indx]
-    return logsumexp(out)
-    
-
-    out= numpy.zeros(len(data))
-    for ii in range(len(out)):
-        if options.dwarf:
-            pisodwarf= logpisodwarf[ii,:].reshape((1,logpiso.shape[1])),
-        else:
-            pisodwarf= None
-        out[ii]= -mloglike(params,numpy.array([vhelio]),
-                           numpy.array([l[ii]]),
-                           numpy.array([b[ii]]),
-                           numpy.array([jk[ii]]),
-                           numpy.array([h[ii]]),
-                           df,options,
-                           numpy.array([sinl[ii]]),
-                           numpy.array([cosl[ii]]),
-                           numpy.array([cosb[ii]]),
-                           numpy.array([sinb[ii]]),
-                           logpiso[ii,:].reshape((1,logpiso.shape[1])),
-                           pisodwarf)
+                   logpisodwarf,True,None,None) #None iso for now
     return logsumexp(out)
 
 def get_options():
@@ -133,7 +110,7 @@ def get_options():
     parser.add_option("--jkmax",dest='jkmax',default=1.2,type='float',
                       help="readVclosData 'jkmax'")
     parser.add_option("--location",dest='location',default=4318,type='int',
-                      help="location id when looking at single los")
+                      help="location id when looking at single los (if 0, all los)")
     parser.add_option("--cutmultiples",action="store_true", 
                       dest="cutmultiples",
                       default=False,
@@ -148,7 +125,7 @@ def get_options():
     parser.add_option("--fitdm",action="store_true", dest="fitdm",
                       default=False,
                       help="If set, fit for a distance modulus offset")
-    parser.add_option("--fitah",action="store_true", dest="fitah0",
+    parser.add_option("--fitah",action="store_true", dest="fitah",
                       default=False,
                       help="If set, fit for an extinction-correction offset")
     #Add dwarf part?
@@ -185,6 +162,10 @@ if __name__ == '__main__':
                         bmax=options.bmax,
                         ak=True,
                         jkmax=options.jkmax)
+    if options.location == 0:
+        locations= list(set(data['LOCATION']))
+    else:
+        locations= [options.location]
     #HACK
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
@@ -219,53 +200,56 @@ if __name__ == '__main__':
         logpisodwarf= None
     #test
     if options.plottype.lower() == 'pvloslos':
-        print set(list(data['LOCATION']))
-        indx= (data['LOCATION'] == options.location)
-        data= data[indx]
-        logpiso= logpiso[indx,:]
-        if options.dwarf:
-            logpisodwarf= logpisodwarf[indx,:]
-        #Fit parameters
-        if options.dwarf:
-            params= [270./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.025,0.5,1.]
-        else:
-            params= [270./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.025,0.5]
-        if not options.init is None:
-            #Load initial parameters from file
-            savefile= open(options.init,'rb')
-            params= pickle.load(savefile)
-            savefile.close()
-        #Calculate vlos | los
-        vlos= numpy.linspace(-200.,200.,options.nvlos)
-        pvlos= numpy.zeros(options.nvlos)
-        if not options.multi is None:
-            pvlos= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
-                                                            data,df,options,
-                                                            logpiso,
-                                                            logpisodwarf)),
-                                      range(options.nvlos),
-                                      numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
-        else:
-            for ii in range(options.nvlos):
-                print ii
-                pvlos[ii]= pvlosplate(params,vlos[ii],data,df,options,
-                                      logpiso,logpisodwarf)
-        pvlos-= logsumexp(pvlos)
-        pvlos= numpy.exp(pvlos)
-        #Plot data
-        bovy_plot.bovy_print()
-        hist, xvec, p= bovy_plot.bovy_hist(data['VHELIO'],range=[-200.,200.],
-                                           bins=31,
-                                           histtype='step',color='k',
-                                           xlabel=r'$\mathrm{heliocentric}\ v_{\mathrm{los}}\ [\mathrm{km\ s}^{-1}]$')
-        #Normalize prediction
-        data_int= numpy.sum(hist)*(xvec[1]-xvec[0])
-        pvlos*= data_int/numpy.sum(pvlos)/(vlos[1]-vlos[0])
-        bovy_plot.bovy_plot(vlos,pvlos,'-',color='0.65',overplot=True)
-        #Add text
-        bovy_plot.bovy_text(r'$\mathrm{location}\ =\ %i$' % options.location
-                            +'\n'
-                            +r'$l\ \approx\ %.0f^\circ$' % numpy.mean(data['GLON']),
-                            top_right=True,size=14.)
-        bovy_plot.bovy_end_print(options.plotfile)
+        for location in locations:
+            indx= (data['LOCATION'] == location)
+            thesedata= data[indx]
+            thislogpiso= logpiso[indx,:]
+            if options.dwarf:
+                thislogpisodwarf= logpisodwarf[indx,:]
+            else:
+                thislogpisodwarf= None
+            #Fit parameters
+            if options.dwarf:
+                params= [270./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.025,0.5,1.]
+            else:
+                params= [270./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.025,0.5]
+            if not options.init is None:
+                #Load initial parameters from file
+                savefile= open(options.init,'rb')
+                params= pickle.load(savefile)
+                savefile.close()
+            #Calculate vlos | los
+            vlos= numpy.linspace(-200.,200.,options.nvlos)
+            pvlos= numpy.zeros(options.nvlos)
+            if not options.multi is None:
+                pvlos= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
+                                                                thesedata,df,options,
+                                                                thislogpiso,
+                                                                thislogpisodwarf)),
+                                          range(options.nvlos),
+                                          numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
+            else:
+                for ii in range(options.nvlos):
+                    print ii
+                    pvlos[ii]= pvlosplate(params,vlos[ii],thesedata,df,options,
+                                          thislogpiso,thislogpisodwarf)
+            pvlos-= logsumexp(pvlos)
+            pvlos= numpy.exp(pvlos)
+            #Plot data
+            bovy_plot.bovy_print()
+            hist, xvec, p= bovy_plot.bovy_hist(thesedata['VHELIO'],
+                                               range=[-200.,200.],
+                                               bins=31,
+                                               histtype='step',color='k',
+                                               xlabel=r'$\mathrm{heliocentric}\ v_{\mathrm{los}}\ [\mathrm{km\ s}^{-1}]$')
+            #Normalize prediction
+            data_int= numpy.sum(hist)*(xvec[1]-xvec[0])
+            pvlos*= data_int/numpy.sum(pvlos)/(vlos[1]-vlos[0])
+            bovy_plot.bovy_plot(vlos,pvlos,'-',color='0.65',overplot=True)
+            #Add text
+            bovy_plot.bovy_text(r'$\mathrm{location}\ =\ %i$' % location
+                                +'\n'
+                                +r'$l\ \approx\ %.0f^\circ$' % numpy.mean(data['GLON']),
+                                top_right=True,size=14.)
+            bovy_plot.bovy_end_print(options.plotfile+'_%i.png' % location)
 

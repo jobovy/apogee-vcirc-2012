@@ -262,7 +262,7 @@ def get_options():
     parser.add_option("--fitdm",action="store_true", dest="fitdm",
                       default=False,
                       help="If set, fit for a distance modulus offset")
-    parser.add_option("--fitah",action="store_true", dest="fitah0",
+    parser.add_option("--fitah",action="store_true", dest="fitah",
                       default=False,
                       help="If set, fit for an extinction-correction offset")
     #Add dwarf part?
