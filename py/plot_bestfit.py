@@ -259,6 +259,12 @@ def get_options():
                       help="imfmodel for isochrone model")
     parser.add_option("--Z",dest='Z',default=.019,type='float',
                       help="Metallicity of isochrone")
+    parser.add_option("--fitdm",action="store_true", dest="fitdm",
+                      default=False,
+                      help="If set, fit for a distance modulus offset")
+    parser.add_option("--fitah",action="store_true", dest="fitah0",
+                      default=False,
+                      help="If set, fit for an extinction-correction offset")
     #Add dwarf part?
     parser.add_option("--dwarf",action="store_true", 
                       dest="dwarf",

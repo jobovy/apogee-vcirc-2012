@@ -144,7 +144,8 @@ def fitvc(parser):
                                      args=(data['VHELIO'],
                                            l,b,jk,h,df,options,
                                            sinl,cosl,cosb,sinb,
-                                           logpiso,logpisodwarf,False,None),
+                                           logpiso,logpisodwarf,False,None,
+                                           iso),
                                      callback=cb)
         print params
         save_pickles(args[0],params)       
@@ -292,7 +293,7 @@ def fitvc(parser):
                                     (data['VHELIO'],
                                      l,b,jk,h,df,options,
                                      sinl,cosl,cosb,sinb,
-                                     logpiso,logpisodwarf,None),
+                                     logpiso,logpisodwarf,None,iso),
                                     isDomainFinite=isDomainFinite,
                                     domain=domain,
                                     nsamples=options.nsamples,
@@ -391,6 +392,22 @@ def _initialize_params(options):
                         [[0.,0.],[5./_REFR0,11./_REFR0],
                          [0.,0.],[0.,1.],[0.,0.],
                          [0.,0.]])
+        elif options.fitdm:
+                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,-0.1],
+                        [[True,False],[True,True],[False,False],
+                         [True,True],[False,False],
+                         [False,False],[False,False]],
+                        [[0.,0.],[5./_REFR0,11./_REFR0],
+                         [0.,0.],[0.,1.],[0.,0.],
+                         [0.,0.],[0.,0.]])           
+        elif options.fitah:
+                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,-0.1],
+                        [[True,False],[True,True],[False,False],
+                         [True,True],[False,False],
+                         [False,False],[False,False]],
+                        [[0.,0.],[5./_REFR0,11./_REFR0],
+                         [0.,0.],[0.,1.],[0.,0.],
+                         [0.,0.],[0.,0.]])           
         else:
             return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.],
                     [[True,False],[True,True],[False,False],
@@ -446,11 +463,11 @@ def _initialize_params(options):
 def cb(x): print x
 
 def loglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
-            logpiso,logpisodwarf,vcf):
+            logpiso,logpisodwarf,vcf,iso):
     return -mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
-                     logpiso,logpisodwarf,False,vcf)
+                     logpiso,logpisodwarf,False,vcf,iso)
 def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
-             logpiso,logpisodwarf,arrout,vcf):
+             logpiso,logpisodwarf,arrout,vcf,iso):
     """minus log likelihood Eqn (1),
     params= [vc(ro),ro,sigmar]"""
     #Boundaries
@@ -476,7 +493,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                                             args=(params,vhelio[ii]/params[0]/_REFV0,
                                                   l[ii],b[ii],jk[ii],h[ii],
                                                   iso[0],df,options,
-                                                  sinl[ii],cosl[ii],cosb[ii],sinb[ii],
+                                                  sinl[ii],cosl[ii],cosb[ii],sinb[ii],iso,
                                                   False))[0]
             if options.dwarf:
                 thisout= (1.-params[5])*thisout\
@@ -515,7 +532,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                                                                        params,vhelio/params[0]/_REFV0,
                                                                        l,b,jk,h,df,options,
                                                                        sinl,cosl,cosb,sinb,
-                                                                       True,logpiso[:,x],vcf,True)),
+                                                                       True,logpiso[:,x],vcf,iso,True)),
                                                range(len(ds)),
                                         numcores=numpy.amin([len(ds),multiprocessing.cpu_count(),options.multi]))
             #thisout is list of len(vhelio)
@@ -530,14 +547,14 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                                                                 params,vhelio/params[0]/_REFV0,
                                                                 l,b,jk,h,df,options,
                                                                 sinl,cosl,cosb,sinb,
-                                                                True,logpiso[:,ii],vcf)
+                                                                True,logpiso[:,ii],vcf,iso)
                 if options.dwarf:
                     if ii > 0: continue #HACK
                     thisxtraout[:,ii], logpddwarf[:,ii]= _mloglikedIntegrand(dwarfds[ii],
                                                                              params,vhelio/params[0]/_REFV0,
                                                                              l,b,jk,h,df,options,
                                                                              sinl,cosl,cosb,sinb,
-                                                                             True,logpisodwarf[:,ii],vcf,dwarf=True)
+                                                                             True,logpisodwarf[:,ii],vcf,iso,dwarf=True)
         #Sum each one
         if arrout:
             out= numpy.zeros(len(vhelio))
@@ -568,6 +585,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
 
 def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
                         df,options,sinl,cosl,cosb,sinb,returnlog,logpiso,vcf,
+                        iso,
                         pdinout=False,dwarf=False):
     #All positions are /ro, all velocities are /vo (d and vhelio have this already
     #Calculate coordinates, distances are /Ro (/params[1])
@@ -604,6 +622,20 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
                         +numpy.exp(logpvlos_outlier-c))+c
     if dwarf:
         logpd= 0.
+    elif options.fitdm: # and not (params[5+2*options.fitvpec+options.dwarf+options.fitsratio] == 0.):
+        dm= _dm(d*params[1]*_REFR0)\
+            -params[5+2*options.fitvpec+options.dwarf+options.fitsratio]
+        for ii in range(len(vhelio)):
+            mh= h[ii]-dm
+            logpiso[ii]= iso[0](jk[ii],mh)
+        logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
+    elif options.fitah:
+        ah= params[5+2*options.fitvpec+options.dwarf+options.fitsratio]
+        dm= _dm(d*params[1]*_REFR0)
+        for ii in range(len(vhelio)):
+            mh= h[ii]-dm+ah
+            logpiso[ii]= iso[0](jk[ii]+1.5/1.55*ah,mh) #Accounts for red. law
+        logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
     else:
         logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
     if pdinout:
@@ -904,6 +936,12 @@ def get_options():
                       dest="nods",
                       default=False,
                       help="setting this assumes no distance information from isochrones, NOT SUPPORTED WITH DWARF")
+    parser.add_option("--fitdm",action="store_true", dest="fitdm",
+                      default=False,
+                      help="If set, fit for a distance modulus offset")
+    parser.add_option("--fitah",action="store_true", dest="fitah",
+                      default=False,
+                      help="If set, fit for an extinction-correction offset")
     #Add dwarf part?
     parser.add_option("--dwarf",action="store_true", 
                       dest="dwarf",
