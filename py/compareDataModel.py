@@ -251,5 +251,5 @@ if __name__ == '__main__':
                                 +'\n'
                                 +r'$l\ \approx\ %.0f^\circ$' % numpy.mean(thesedata['GLON']),
                                 top_right=True,size=14.)
-            bovy_plot.bovy_end_print(options.plotfile+'_%i.png' % location)
+            bovy_plot.bovy_end_print(options.plotfile+'_%i.ps' % location)
 

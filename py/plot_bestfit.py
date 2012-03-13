@@ -68,15 +68,15 @@ def plot_bestfit(parser):
         logpisodwarf= None
     #Calculate data means etc.
     #Calculate means
-    plates= list(set(data['PLATE']))
-    nplates= len(plates)
-    l_plate= numpy.zeros(nplates)
-    avg_plate= numpy.zeros(nplates)
-    sig_plate= numpy.zeros(nplates)
-    siga_plate= numpy.zeros(nplates)
-    sigerr_plate= numpy.zeros(nplates)
-    for ii in range(nplates):
-        indx= (data['PLATE'] == plates[ii])
+    locations= list(set(data['LOCATION']))
+    nlocs= len(locations)
+    l_plate= numpy.zeros(nlocs)
+    avg_plate= numpy.zeros(nlocs)
+    sig_plate= numpy.zeros(nlocs)
+    siga_plate= numpy.zeros(nlocs)
+    sigerr_plate= numpy.zeros(nlocs)
+    for ii in range(nlocs):
+        indx= (data['LOCATION'] == locations[ii])
         l_plate[ii]= numpy.mean(data['GLON'][indx])
         avg_plate[ii]= numpy.mean(data['VHELIO'][indx])
         sig_plate[ii]= numpy.std(data['VHELIO'][indx])
@@ -87,11 +87,11 @@ def plot_bestfit(parser):
     savefile= open(args[0],'rb')
     params= pickle.load(savefile)
     savefile.close()
-    avg_plate_model= numpy.zeros(nplates)
-    sig_plate_model= numpy.zeros(nplates)
-    for ii in range(nplates):
+    avg_plate_model= numpy.zeros(nlocs)
+    sig_plate_model= numpy.zeros(nlocs)
+    for ii in range(nlocs):
         #Calculate vlos | los
-        indx= (data['PLATE'] == plates[ii])
+        indx= (data['LOCATION'] == locations[ii])
         thesedata= data[indx]
         thislogpiso= logpiso[indx,:]
         if options.dwarf:
@@ -120,12 +120,12 @@ def plot_bestfit(parser):
         sig_plate_model[ii]= numpy.sqrt(numpy.sum(vlos**2.*pvlos)\
                                             -avg_plate_model[ii]**2.)
     #Plot everything
-    left, bottom, width, height= 0.1, 0.5, 0.8, 0.4
+    left, bottom, width, height= 0.1, 0.4, 0.8, 0.5
     axTop= pyplot.axes([left,bottom,width,height])
-    left, bottom, width, height= 0.1, 0.3, 0.8, 0.2
+    left, bottom, width, height= 0.1, 0.1, 0.8, 0.3
     axMean= pyplot.axes([left,bottom,width,height])
-    left, bottom, width, height= 0.1, 0.1, 0.8, 0.2
-    axSig= pyplot.axes([left,bottom,width,height])
+    #left, bottom, width, height= 0.1, 0.1, 0.8, 0.2
+    #axSig= pyplot.axes([left,bottom,width,height])
     fig= pyplot.gcf()
     fig.sca(axTop)
     pyplot.ylabel(r'$\mathrm{Heliocentric\ velocity}\ [\mathrm{km\ s}^{-1}]$')
@@ -145,6 +145,14 @@ def plot_bestfit(parser):
     bovy_plot.bovy_plot(l_plate,
                         avg_plate_model,
                         'x',overplot=True,ms=10.,mew=1.5,color='0.7')
+    #Legend
+    bovy_plot.bovy_plot([260.],[150.],'k,',overplot=True)
+    bovy_plot.bovy_plot([260.],[120.],'o',mfc='0.5',mec='none',overplot=True)
+    bovy_plot.bovy_plot([260.],[90.],'x',ms=10.,mew=1.5,color='0.7',
+                        overplot=True)
+    bovy_plot.bovy_text(270.,145.,r'$\mathrm{data}$')
+    bovy_plot.bovy_text(270.,115.,r'$\mathrm{data\ mean}$')
+    bovy_plot.bovy_text(270.,85.,r'$\mathrm{model\ mean}$')
     bovy_plot._add_ticks()
     #Now plot the difference
     fig.sca(axMean)
@@ -158,7 +166,13 @@ def plot_bestfit(parser):
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
-    axMean.xaxis.set_major_formatter(nullfmt)
+    #axMean.xaxis.set_major_formatter(nullfmt)
+    pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
+    pyplot.xlim(0.,360.)
+    bovy_plot._add_ticks()
+    #Save
+    bovy_plot.bovy_end_print(options.plotfilename)
+    return None
     #Sigma
     fig.sca(axSig)
     pyplot.plot([0.,360.],[1.,1.],'-',color='0.5')
@@ -169,12 +183,7 @@ def plot_bestfit(parser):
                     yerr=sigerr_plate/sig_plate_model,
                     marker='o',color='k',linestyle='none',elinestyle='-')
     pyplot.ylabel(r'$\sigma_{\mathrm{los}}^{\mathrm{data}}/ \sigma_{\mathrm{los}}^{\mathrm{model}}$')
-    pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
     pyplot.ylim(0.5,1.5)
-    pyplot.xlim(0.,360.)
-    bovy_plot._add_ticks()
-    #Save
-    bovy_plot.bovy_end_print(options.plotfilename)
 
 def bootstrap_sigerr(v):
     nboot= 301
