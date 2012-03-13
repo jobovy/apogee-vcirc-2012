@@ -2,6 +2,7 @@
 import sys
 import os, os.path
 import copy
+import math
 import numpy
 from optparse import OptionParser
 import isodist
@@ -66,6 +67,16 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.):
                           xlabel=r'$(J-K_s)_0\ [\mathrm{mag}]$',
                           ylabel=r'$M_H\ [\mathrm{mag}]$',
                           interpolation='nearest')
+    #Add extinction arrow
+    djk= 0.4
+    dh= 1.55/1.5*djk
+    from matplotlib.patches import FancyArrowPatch
+    ax=pyplot.gca()
+    ax.add_patch(FancyArrowPatch((1.,-2.),(1+djk,-2+dh),
+                                 arrowstyle='->',mutation_scale=20,fill=True,
+                                 lw=1.25))
+    bovy_plot.bovy_text(1.06,-2.,r'$\mathrm{extinction}$',
+                        rotation=-math.atan(1.5/1.55*1.3/13.)/math.pi*180.)
     #Add twin y axis
     ax= pyplot.gca()
     def my_formatter(x, pos):
