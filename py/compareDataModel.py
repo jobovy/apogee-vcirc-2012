@@ -249,7 +249,7 @@ if __name__ == '__main__':
             #Add text
             bovy_plot.bovy_text(r'$\mathrm{location}\ =\ %i$' % location
                                 +'\n'
-                                +r'$l\ \approx\ %.0f^\circ$' % numpy.mean(data['GLON']),
+                                +r'$l\ \approx\ %.0f^\circ$' % numpy.mean(thesedata['GLON']),
                                 top_right=True,size=14.)
             bovy_plot.bovy_end_print(options.plotfile+'_%i.png' % location)
 

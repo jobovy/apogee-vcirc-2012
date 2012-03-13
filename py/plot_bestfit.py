@@ -35,6 +35,8 @@ def plot_bestfit(parser):
     #HACK
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
+    #Cut outliers
+    #data= data[(data['VHELIO'] < 200.)*(data['VHELIO'] > -200.)]
     #Set up the isochrone
     print "Setting up the isochrone model ..."
     iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z)
