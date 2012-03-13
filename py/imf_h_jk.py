@@ -32,7 +32,7 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.):
             for ii in range(1,len(thisiso['M_ini'])-1):
                 JK= thisiso['J'][ii]-thisiso['Ks'][ii]
                 H= thisiso['H'][ii]
-                if JK < 0.5: # or thisiso['logg'][ii] > 3.5:
+                if JK < 0.: # or thisiso['logg'][ii] > 3.5:
                     continue
                 if dmpm[ii] > 0.: 
                     sample.append([thisiso['J'][ii]-thisiso['Ks'][ii],
@@ -46,10 +46,10 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.):
     #Histogram
     if dwarf:
         hist, edges= numpy.histogramdd(sample,weights=weights,bins=51,
-                                       range=[[0.5,1.6],[2.,9.]])
+                                       range=[[0.,1.6],[2.,9.]])
     else:
-        hist, edges= numpy.histogramdd(sample,weights=weights,bins=41,
-                                       range=[[0.5,1.6],[-11.,2]])
+        hist, edges= numpy.histogramdd(sample,weights=weights,bins=49,
+                                       range=[[0.3,1.6],[-11.,2]])
     #Normalize each J-K
     for ii in range(len(hist[:,0])):
         hist[ii,:]/= numpy.nanmax(hist[ii,:])/numpy.nanmax(hist)

@@ -60,7 +60,7 @@ class isomodel:
                 for ii in range(1,len(thisiso.int_IMF)-1):
                     JK= thisiso.J[ii]-thisiso.Ks[ii]
                     H= thisiso.H[ii]
-                    if JK < 0.5: # or thisiso['logg'][ii] > 3.:
+                    if JK < 0.3: # or thisiso['logg'][ii] > 3.:
                         continue
                     if dN[ii] > 0.: 
                         sample.append([JK,H])
@@ -71,13 +71,13 @@ class isomodel:
         sample= numpy.array(sample)
         weights= numpy.array(weights)
         #Histogram
-        self._jkmin, self._jkmax= 0.5,1.6
+        self._jkmin, self._jkmax= 0.3,1.6
         if dwarf:
             self._hmin, self._hmax= 2.,9.
             self._nbins= 51
         else: 
             self._hmin, self._hmax= -11.,2.
-            self._nbins= 41
+            self._nbins= 49
         self._djk= (self._jkmax-self._jkmin)/float(self._nbins)
         self._dh= (self._hmax-self._hmin)/float(self._nbins)
         self._hist, self._edges= numpy.histogramdd(sample,weights=weights,

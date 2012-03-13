@@ -481,6 +481,10 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     if options.fitsratio and params[5+2*options.fitvpec+options.dwarf] < 0.:
         return numpy.finfo(numpy.dtype(numpy.float64)).max
+    if options.fitdm and (params[5+2*options.fitvpec+options.dwarf+options.fitsratio] > 1. or params[5+2*options.fitvpec+options.dwarf+options.fitsratio] < -1.):
+        return numpy.finfo(numpy.dtype(numpy.float64)).max
+    if options.fitah and (params[5+2*options.fitvpec+options.dwarf+options.fitsratio] < -0.2 or params[5+2*options.fitvpec+options.dwarf+options.fitsratio] > 0.4):
+        return numpy.finfo(numpy.dtype(numpy.float64)).max
     #For each star, marginalize over distance
     if options.dontbintegrate:
         out= 0.
