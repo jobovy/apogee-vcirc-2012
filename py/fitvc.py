@@ -48,6 +48,11 @@ _BINTEGRATEDMIN= 0.001 #kpc
 _BINTEGRATEDMAX= 30. #kpc
 _BINTEGRATEDMIN_DWARF= 0.001 #kpc
 _BINTEGRATEDMAX_DWARF= .1 #kpc
+_NMULTIPLEPOPS= 20
+_TAU1= 0.1
+_TAUM= 10.
+_TAUBETA= 0.38
+_TAU0= 8.
 _DEGTORAD= math.pi/180.
 _ERASESTR= "                                                                                "
 def dummyIso(jk,h):
@@ -353,7 +358,7 @@ def _calc_covar(rs,hyper_params,options):
     return numpy.exp(2.*hyper_params[0])*out
 
 def _initialize_params(options):
-    if (options.rotcurve.lower() == 'flat' or options.rotcurve.lower() == 'gp')and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift' or options.dfmodel.lower() == 'simpleskeweddrift' or options.dfmodel.lower() == 'dehnen'):
+    if (options.rotcurve.lower() == 'flat' or options.rotcurve.lower() == 'gp')and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift' or options.dfmodel.lower() == 'simpleskeweddrift' or options.dfmodel.lower() == 'dehnen' or options.dfmodel.lower() == 'multiplepops'):
         if options.dwarf:
             return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2],
                     [[True,False],[True,True],[False,False],
@@ -697,6 +702,31 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
                 *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
         t= (vpec+va)/slos
         return norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
+    elif options.dfmodel.lower() == 'multiplepops':
+        out= numpy.zeros((len(vpec),_NMULTIPLEPOPS))
+        taupops= numpy.linspace(1.,10.,_NMULTIPLEPOPS)
+        lognorm= logsumexp(taupops/_TAU0)
+        sigmapops= ((taupops+_TAU1)/(_TAUM+_TAU1))**_TAUBETA
+        for ii in range(_NMULTIPLEPOPS):
+            va= asymmetricDriftModel.va(R,
+                                        numpy.exp(params[2])/params[0]*sigmapops[ii],
+                                        hR=options.hr/params[1]/_REFR0,
+                                        hs=options.hs/params[1]/_REFR0,
+                                        vc=_vc(params,R,options,vcf))*sinlt 
+            #va= vc- <v>
+            if options.fitsratio:
+                slos= numpy.exp(params[2])/params[0]\
+                    *numpy.sqrt(1.+sinlt**2.*(params[5+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)*sigmapops[ii]
+            else:
+                slos= numpy.exp(params[2])/params[0]\
+                    *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)*sigmapops[ii]
+            t= (vpec+va)/slos
+            out[:,ii]= taupops[ii]/_TAU0-lognorm\
+                +norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
+        #Sum
+        retval= numpy.zeros(len(vpec))
+        for ii in range(len(vpec)): out[ii,0]= logsumexp(out[ii,:])
+        return out[:,0]
     elif options.dfmodel.lower() == 'simpleskeweddrift':
         coslt= numpy.cos(l+theta)
         va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],

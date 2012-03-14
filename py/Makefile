@@ -2,6 +2,7 @@ FITSDIR=../fits/
 NSAMPLES=1000
 
 .PHONY: all_simple all_simple_dwarf all_simple_noro all_simpledrift_noro \
+	all_multiplepops_noro \
 	all_simpledrift_noro_dm \
 	all_simpledrift_noro_ah \
 	fake_simpledrift_noro \
@@ -51,6 +52,13 @@ all_simpledrift_noro:
 #	--init=$(FITSDIR)all_simpledrift_noro.sav \
 #	--plottype=pvloslos -o ~/Desktop/test.png --nvlos=21 -m 4 \
 #	 --dfmodel=simplegaussiandrift
+
+all_multiplepops_noro:
+	$(PYTHON) fitvc.py $(FITSDIR)all_multiplepops_noro.sav --noroprior \
+	--dfmodel=multiplepops
+	$(PYTHON) fitvc.py $(FITSDIR)all_multiplepops_noro_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_multiplepops_noro.sav --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=multiplepops
 
 all_simpledrift_noro_dm:
 	$(PYTHON) fitvc.py $(FITSDIR)all_simpledrift_noro_dm.sav --noroprior \
