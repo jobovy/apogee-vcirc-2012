@@ -39,6 +39,7 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.):
                     sample.append([thisiso['J'][ii]-thisiso['Ks'][ii],
                                    thisiso['H'][ii]])
                     weights.append(dmpm[ii]*10**(logage-7.))
+                    #weights.append(dmpm[ii]*10**(logage-7.)*numpy.exp((10.**(logage-7.))/800.))
                 else: 
                     continue #no use in continuing here
     #Form array
