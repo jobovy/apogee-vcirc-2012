@@ -14,7 +14,7 @@ except ImportError:
 class isomodel:
     """isomodel: isochrone model for the distribution in (J-Ks,M_H)"""
     def __init__(self,dwarf=False,imfmodel='lognormalChabrier2001',Z=None,
-                 interpolate=False):
+                 interpolate=False,expsfh=False):
         """
         NAME:
            __init__
@@ -64,7 +64,10 @@ class isomodel:
                         continue
                     if dN[ii] > 0.: 
                         sample.append([JK,H])
-                        weights.append(dN[ii]*10**(logage-7.))
+                        if expsfh:
+                            weights.append(dN[ii]*10**(logage-7.)*numpy.exp((10.**(logage-7.))/800.)) #e.g., Binney (2010)
+                        else:
+                            weights.append(dN[ii]*10**(logage-7.))
                     else: 
                         continue #no use in continuing here   
         #Form array

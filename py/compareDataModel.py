@@ -128,6 +128,9 @@ def get_options():
     parser.add_option("--fitah",action="store_true", dest="fitah",
                       default=False,
                       help="If set, fit for an extinction-correction offset")
+    parser.add_option("--expsfh",action="store_true", dest="expsfh",
+                      default=False,
+                      help="If set, use an exponentially declining SFH")
     #Add dwarf part?
     parser.add_option("--dwarf",action="store_true", 
                       dest="dwarf",
@@ -171,10 +174,11 @@ if __name__ == '__main__':
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
     #Set up the isochrone
     print "Setting up the isochrone model ..."
-    iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z)
+    iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,expsfh=options.expsfh)
     if options.dwarf:
         iso= [iso, 
-              isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,dwarf=True)]
+              isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
+                                dwarf=True,expsfh=options.expsfh)]
     else:
         iso= [iso]
     df= None

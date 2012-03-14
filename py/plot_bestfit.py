@@ -39,10 +39,12 @@ def plot_bestfit(parser):
     #data= data[(data['VHELIO'] < 200.)*(data['VHELIO'] > -200.)]
     #Set up the isochrone
     print "Setting up the isochrone model ..."
-    iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z)
+    iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
+                           expsfh=options.expsfh)
     if options.dwarf:
         iso= [iso, 
-              isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,dwarf=True)]
+              isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
+                                dwarf=True,expsfh=options.expsfh)]
     else:
         iso= [iso]
     df= None
@@ -276,6 +278,9 @@ def get_options():
     parser.add_option("--fitah",action="store_true", dest="fitah",
                       default=False,
                       help="If set, fit for an extinction-correction offset")
+    parser.add_option("--expsfh",action="store_true", dest="expsfh",
+                      default=False,
+                      help="If set, use an exponentially declining SFH")
     #Add dwarf part?
     parser.add_option("--dwarf",action="store_true", 
                       dest="dwarf",
