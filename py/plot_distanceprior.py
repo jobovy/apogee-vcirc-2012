@@ -54,6 +54,7 @@ def plot_distanceprior(parser):
                               ygrid[-1]+(ygrid[1]-ygrid[0])/2.,
                               len(ygrid)+1)
     plotthis= numpy.zeros((2*res,res,len(data)))-numpy.finfo(numpy.dtype(numpy.float64)).max
+    #_BINTEGRATENBINS= 31
     ds= numpy.linspace(_BINTEGRATEDMIN,_BINTEGRATEDMAX,_BINTEGRATENBINS)
     logpiso= numpy.zeros((len(data),_BINTEGRATENBINS))
     dm= _dm(ds)
@@ -61,7 +62,7 @@ def plot_distanceprior(parser):
         mh= h[ii]-dm
         logpiso[ii,:]= iso(numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
     for jj in range(_BINTEGRATENBINS):
-        d= ds[jj]
+        d= ds[jj]/_REFR0
         R= numpy.sqrt(1.+d**2.-2.*d*cosl)
         indx= (R == 0.)
         R[indx]+= 0.0001
@@ -80,9 +81,9 @@ def plot_distanceprior(parser):
         Rbin[indx]= 0
         thisout[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
         indx= (thetabin >= 2*res)
-        thetabin[indx]= 0
-        Rbin[indx]= 0
-        thisout[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
+        thetabin[indx]= 0 #Has to be
+        #Rbin[indx]= 0
+        #thisout[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
         indx= (Rbin < 0)
         thetabin[indx]= 0
         Rbin[indx]= 0
