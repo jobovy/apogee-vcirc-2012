@@ -128,7 +128,7 @@ def plot_distanceprior(parser):
         indx= (1./numpy.cos(l_plate[ii]*_DEGTORAD) < lds)*(numpy.cos(l_plate[ii]*_DEGTORAD) > 0.)
         lt[indx]= numpy.pi-lt[indx]
         ax.plot(lt,lr,
-               ls='-',color='w',zorder=3)      
+               ls='--',color='w',zorder=3)      
     from matplotlib.patches import Arrow, FancyArrowPatch
     arr= FancyArrowPatch(posA=(-math.pi/2.,1.8),
                          posB=(-math.pi/4.,1.8),
