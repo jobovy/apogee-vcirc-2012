@@ -73,9 +73,10 @@ def plot_lb():
     ys= numpy.linspace(-1.5,1.5,1001)
     pdf= numpy.sqrt(1.5**2.-ys**2.)
     pdf*= float(ndata)/(ndata+nmdata+npdata)/numpy.sum(pdf)/(ys[1]-ys[0])
-    axHisty.plot(pdf,ys,'-',color='0.65',lw=2.,zorder=-2)
+    axHisty.plot(pdf,ys,'k-',zorder=-2)
     constpdf= pdf
     #Center, exponential disk
+    """
     dfc= dehnendf(beta=0.,correct=True,niter=20)
     pdf= numpy.zeros(len(ys))
     plates= list(set(data['PLATE']))
@@ -92,9 +93,11 @@ def plot_lb():
     pdf*= float(ndata)/(ndata+nmdata+npdata)/numpy.sum(pdf)/(ys[1]-ys[0])
     axHisty.plot(pdf,ys,'-',color='0.',lw=1.,zorder=-1.)
     #axHisty.plot(.8*pdf+.2*constpdf,ys,'-',color='0.',lw=1.,zorder=-1.)
+    """
     #positive b, constant
     constpdf*= float(npdata)/ndata
-    axHisty.plot(constpdf,ys+4.,'-',color='0.65',lw=2.,zorder=-2)
+    axHisty.plot(constpdf,ys+4.,'k-',zorder=-2)
+    """
     #Positive, exponential disk
     pdfp= numpy.zeros(len(ys))
     plates= list(set(otherdata2['PLATE']))
@@ -112,9 +115,11 @@ def plot_lb():
     pdfp*= float(npdata)/(ndata+nmdata+npdata)/numpy.sum(pdfp)/(ys[1]-ys[0])
     axHisty.plot(pdfp,4.+ys,'-',color='0.',lw=1.,zorder=-1)
     #axHisty.plot(.8*pdfp+.2*constpdf,4.+ys,'-',color='0.',lw=1.,zorder=-1)
+    """
     #negative b, constant
     constpdf*= nmdata/float(npdata)
-    axHisty.plot(constpdf,ys-4.,'-',color='0.65',lw=2,zorder=-2.)
+    axHisty.plot(constpdf,ys-4.,'k-',zorder=-2.)
+    """
     #Negative, exponential disk
     pdfm= numpy.zeros(len(ys))
     plates= list(set(otherdata['PLATE']))
@@ -132,6 +137,7 @@ def plot_lb():
     pdfm*= float(nmdata)/(ndata+nmdata+npdata)/numpy.sum(pdfm)/(ys[1]-ys[0])
     axHisty.plot(pdfm,-4.+ys,'-',color='0.',lw=1.,zorder=-1)
     #axHisty.plot(.8*pdfm+.2*constpdf,-4.+ys,'-',color='0.',lw=1.,zorder=-1)
+    """
     axHisty.set_ylim(yrange[0],yrange[1])
     axHisty.set_xlim( 0, 1.2*numpy.amax(histy))
     pyplot.sca(axHisty)
