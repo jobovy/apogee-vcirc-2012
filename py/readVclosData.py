@@ -2,7 +2,7 @@ import numpy
 import fitsio
 import apogee
 def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
-                  meanb=0.,meanb_tol=0.5,jkmax=1.2,ak=True,
+                  meanb=0.,meanb_tol=0.5,jkmax=1.3,ak=True,
                   specprimary=True,
                   cutmultiples=False,
                   datafilename=None):
@@ -41,6 +41,7 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
     data=data[(numpy.fabs(data['GLAT']) < bmax)*(data['GLON'] > lmin)\
                   *(data['GLON'] < (360.-lmin))]
     data= data[((data['APOGEE_TARGET1'] & 2**9) == 0)] #no probable cluster members
+    data= data[((data['APOGEE_TARGET1'] & 2**17) == 0)] #no ancillary
     indx= numpy.array(['STAR' in data['OBJTYPE'][ii] for ii in range(len(data))],dtype='bool')
     data= data[indx]
     #Remove anything with vraderr= 0.
@@ -58,8 +59,8 @@ def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
             data= data[((data['APOGEE_TARGET1'] & 2L**13) != 0)]           
     if ak:
         data= data[(data['AK'] != -9999.9999)]
-        if not jkmax is None:
-            data= data[(data['J0MAG']-data['K0MAG'] < jkmax)]
+    if not jkmax is None:
+        data= data[(data['J0MAG']-data['K0MAG'] < jkmax)]
     #For every plate, calculate meanb, then cut on it
     plates= list(set(data['PLATE']))
     nplates= len(plates)
