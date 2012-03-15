@@ -161,7 +161,8 @@ def plot_internalcomparison(parser):
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True)
+    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,
+                        zorder=-1)
     bovy_plot.bovy_plot(l_plate,
                         avg_plate-avg_plate_model_fid,
                         'o',overplot=True,color='0.6')
@@ -194,7 +195,7 @@ def plot_internalcomparison(parser):
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True)
+    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
     bovy_plot.bovy_plot(l_plate,
                         avg_plate-avg_plate_model_fid,
                         'o',overplot=True,color='0.6')
@@ -226,7 +227,7 @@ def plot_internalcomparison(parser):
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True)
+    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
     bovy_plot.bovy_plot(l_plate,
                         avg_plate-avg_plate_model_fid,
                         'o',overplot=True,color='0.6')
@@ -259,7 +260,7 @@ def plot_internalcomparison(parser):
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True)
+    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
     bovy_plot.bovy_plot(l_plate,
                         avg_plate-avg_plate_model_fid,
                         'o',overplot=True,color='0.6')
@@ -293,7 +294,7 @@ def plot_internalcomparison(parser):
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True)
+    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
     bovy_plot.bovy_plot(l_plate,
                         avg_plate-avg_plate_model_fid,
                         'o',overplot=True,color='0.6')
@@ -373,7 +374,7 @@ def plot_internalcomparison(parser):
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True)
+    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
     bovy_plot.bovy_plot(l_plate_fid,
                         avg_plate_fid-avg_plate_model_fid,
                         'o',overplot=True,color='0.6')
@@ -451,7 +452,7 @@ def plot_internalcomparison(parser):
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True)
+    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
     bovy_plot.bovy_plot(l_plate_fid,
                         avg_plate_fid-avg_plate_model_fid,
                         'o',overplot=True,color='0.6')
@@ -527,7 +528,7 @@ def plot_internalcomparison(parser):
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True)
+    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
     bovy_plot.bovy_plot(l_plate_fid,
                         avg_plate_fid-avg_plate_model_fid,
                         'o',overplot=True,color='0.6')
