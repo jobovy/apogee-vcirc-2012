@@ -5,6 +5,10 @@ import math
 import numpy
 from scipy import special
 from galpy.util import bovy_plot
+from matplotlib import pyplot
+from matplotlib.ticker import NullFormatter
+from galpy.orbit import Orbit
+from galpy.potential import EllipticalDiskPotential, LogarithmicHaloPotential
 from fitvc import _REFV0, _REFR0, _PMSGRA, _VRSUN
 def plot_vpecvo(filename,plotfilename):
     if not os.path.exists(filename):
@@ -43,6 +47,31 @@ def plot_vpecvo(filename,plotfilename):
     #                    '--',color='0.5',overplot=True)
     #axHistx.plot([_PMSGRA,_PMSGRA],[0.,100.],'--',color='0.5')
     #bovy_plot.bovy_text(29.4,5.,r'$\mathrm{RB04}$')
+
+    #Inset, closed orbit at the Sun
+    lp= LogarithmicHaloPotential(normalize=1.)
+    ep= EllipticalDiskPotential(phib=numpy.pi/2.,p=0.,tform=-100.,tsteady=-100.,twophio=0.045)
+    o= Orbit([1.,0.,1.+10./220.,0.])
+    oc= Orbit([1.,0.,1.,0.])
+    ts= numpy.linspace(0.,4.*numpy.pi,1001)
+    o.integrate(ts,[lp,ep])
+    oc.integrate(ts,lp)
+    left, bottom, width, height= 0.45, 0.45, 0.25, 0.25
+    axInset= pyplot.axes([left,bottom,width,height])
+    pyplot.sca(axInset)
+    pyplot.plot(o._orb.orbit[:,0]*numpy.cos(o._orb.orbit[:,3]),
+                o._orb.orbit[:,0]*numpy.sin(o._orb.orbit[:,3]),
+                'k-')
+    pyplot.plot(oc._orb.orbit[:,0]*numpy.cos(oc._orb.orbit[:,3]),
+                oc._orb.orbit[:,0]*numpy.sin(oc._orb.orbit[:,3]),
+                '--',color='0.6')
+    pyplot.xlim(-1.5,1.5)
+    pyplot.ylim(-1.5,1.5)
+    #pyplot.xlabel(r'$x / R_0$')
+    #pyplot.ylabel(r'$y / R_0$')
+    nullfmt   = NullFormatter()         # no labels
+    axInset.xaxis.set_major_formatter(nullfmt)
+    axInset.yaxis.set_major_formatter(nullfmt)
     bovy_plot.bovy_end_print(plotfilename)
 
 if __name__ == '__main__':
