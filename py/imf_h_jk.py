@@ -76,8 +76,16 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.):
     ax.add_patch(FancyArrowPatch((1.,-2.),(1+djk,-2+dh),
                                  arrowstyle='->',mutation_scale=20,fill=True,
                                  lw=1.25))
-    bovy_plot.bovy_text(1.06,-2.,r'$\mathrm{extinction}$',
-                        rotation=-math.atan(1.5/1.55*1.3/13.)/math.pi*180.)
+    bovy_plot.bovy_text(1.03,-2.05,r'$\mathrm{extinction}$',
+                        rotation=-math.atan(1.5/1.55*1.3/13.)/math.pi*180.,
+                        size=14.)
+    #Add color cut
+    bovy_plot.bovy_plot([0.5,0.5],[-20.,20.],'--',color='0.6',overplot=True)
+    ax.add_patch(FancyArrowPatch((0.5,-6.),(0.7,-6.),
+                                 arrowstyle='->',mutation_scale=20,fill=True,
+                                 lw=1.25,ls='dashed',color='0.6'))
+    bovy_plot.bovy_text(0.43,-8.,r'$\mathrm{APOGEE\ color\ cut}$',rotation=90.,
+                        size=14.)
     #Add twin y axis
     ax= pyplot.gca()
     def my_formatter(x, pos):
