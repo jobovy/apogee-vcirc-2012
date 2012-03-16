@@ -227,7 +227,7 @@ if __name__ == '__main__':
                 savefile= open(options.init,'rb')
                 params= pickle.load(savefile)
                 savefile.close()
-            #params[2]= numpy.log(20./235.)
+            #params[2]= -2#numpy.log(20./235.)
             #Calculate vlos | los
             vlos= numpy.linspace(-200.,200.,options.nvlos)
             pvlos= numpy.zeros(options.nvlos)
