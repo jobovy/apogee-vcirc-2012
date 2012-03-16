@@ -80,7 +80,6 @@ def plot_bestfit(parser):
     for ii in range(nlocs):
         indx= (data['LOCATION'] == locations[ii])
         l_plate[ii]= numpy.mean(data['GLON'][indx])
-        if l_plate[ii] == 90.: l_plate[ii]= 90.1
         avg_plate[ii]= numpy.mean(data['VHELIO'][indx])
         sig_plate[ii]= numpy.std(data['VHELIO'][indx])
         siga_plate[ii]= numpy.std(data['VHELIO'][indx])/numpy.sqrt(numpy.sum(indx))

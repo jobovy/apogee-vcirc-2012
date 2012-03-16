@@ -58,6 +58,8 @@ def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf):
                    sinb,
                    logpiso,
                    logpisodwarf,True,None,None) #None iso for now
+    indx= (out == 0.)
+    out[indx]= -numpy.finfo(numpy.dtype(numpy.float64)).max
     return logsumexp(out)
 
 def get_options():
