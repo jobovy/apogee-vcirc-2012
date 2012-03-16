@@ -718,13 +718,13 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                 c= numpy.amax([tmpthisout,tmpthisxtraout])
                 if arrout:
                     out[ii]= -(numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c)
-                    if out[ii] == 0.: out[ii]= numpy.finfo(numpy.dtype(numpy.float64)).max #means all distances were zero prob
+                    if numpy.log10(numpy.fabs(out[ii])) <=-2. : out[ii]= numpy.finfo(numpy.dtype(numpy.float64)).max #means all distances were zero prob
                 else:
                     out-= numpy.log(numpy.exp(tmpthisout-c)+numpy.exp(tmpthisxtraout-c))+c
             else:
                 if arrout:
                     out[ii]= -logsumexp(thisout[ii,:])+logsumexp(logpd[ii,:]) #so we can compare to the +dwarf case
-                    if out[ii] == 0.: out[ii]= numpy.finfo(numpy.dtype(numpy.float64)).max #means all distances were zero prob
+                    if numpy.log10(numpy.fabs(out[ii])) <=-2. : out[ii]= numpy.finfo(numpy.dtype(numpy.float64)).max #means all distances were zero prob
                 else:
                     out+= -logsumexp(thisout[ii,:])+logsumexp(logpd[ii,:]) #so we can compare to the +dwarf case
         print out, params

@@ -58,6 +58,8 @@ def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf):
                    sinb,
                    logpiso,
                    logpisodwarf,True,None,None) #None iso for now
+    #indx= (out >= -0.1)*(out <= 0.1)
+    #print out[indx], jk[indx], h[indx]
     return logsumexp(out)
 
 def get_options():
