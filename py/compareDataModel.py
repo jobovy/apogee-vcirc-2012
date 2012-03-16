@@ -87,7 +87,7 @@ def get_options():
                       help="scale length in kpc")
     parser.add_option("--hz",dest='hz',default=0.25,type='float',
                       help="scale height in kpc")
-    parser.add_option("--hs",dest='hs',default=12.,type='float',
+    parser.add_option("--hs",dest='hs',default=16.,type='float',
                       help="dispersion scale length in kpc")
     parser.add_option("--fitsratio",action="store_true", dest="fitsratio",
                       default=False,
