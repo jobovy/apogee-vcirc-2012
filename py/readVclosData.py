@@ -1,7 +1,7 @@
 import numpy
 import fitsio
 import apogee
-def readVclosData(lmin=35.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
+def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                   meanb=0.,meanb_tol=0.5,jkmax=1.3,ak=True,
                   specprimary=True,
                   cutmultiples=False,

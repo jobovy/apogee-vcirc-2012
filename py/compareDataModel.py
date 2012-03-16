@@ -87,7 +87,7 @@ def get_options():
                       help="scale length in kpc")
     parser.add_option("--hz",dest='hz',default=0.25,type='float',
                       help="scale height in kpc")
-    parser.add_option("--hs",dest='hs',default=16.,type='float',
+    parser.add_option("--hs",dest='hs',default=8.,type='float',
                       help="dispersion scale length in kpc")
     parser.add_option("--fitsratio",action="store_true", dest="fitsratio",
                       default=False,
@@ -222,6 +222,7 @@ if __name__ == '__main__':
                 savefile= open(options.init,'rb')
                 params= pickle.load(savefile)
                 savefile.close()
+            #params[2]= numpy.log(20./235.)
             #Calculate vlos | los
             vlos= numpy.linspace(-200.,200.,options.nvlos)
             pvlos= numpy.zeros(options.nvlos)
