@@ -66,4 +66,4 @@ def _load_ak():
     
 
 if __name__ == '__main__':
-    add_ak(sys.argv[1],sys.argv[0])
+    add_ak(sys.argv[1],sys.argv[2])
