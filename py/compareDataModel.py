@@ -89,6 +89,9 @@ def get_options():
                       help="scale height in kpc")
     parser.add_option("--hs",dest='hs',default=8.,type='float',
                       help="dispersion scale length in kpc")
+    parser.add_option("--fiths",action="store_true", dest="fiths",
+                      default=False,
+                      help="If set, fit for a dispersion scale length offsett")
     parser.add_option("--fitsratio",action="store_true", dest="fitsratio",
                       default=False,
                       help="If set, fit for the ration squared of tangential to radial dispersion")
