@@ -358,14 +358,150 @@ def _calc_covar(rs,hyper_params,options):
     return numpy.exp(2.*hyper_params[0])*out
 
 def _initialize_params(options):
+    init_params= [235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.]
+    isDomainFinite= [[True,False],[True,True],[False,False],
+                     [True,True],[False,False]]
+    domain= [[0.,0.],[5./_REFR0,11./_REFR0],
+             [0.,0.],[0.,1.],[0.,0.]]
+    if options.dwarf:
+        init_params.append(0.1)
+        isDomainFinite.append([True,True])
+        domain.append([0.,1.])
+    if options.rotcurve.lower() == 'linear':
+        init_params.append(0.)
+        isDomainFinite.append([False,False])
+        domain.append([0.,0.])
+    if options.rotcurve.lower() == 'powerlaw':
+        init_params.append(0.)
+        isDomainFinite.append([False,False])
+        domain.append([0.,0.])
+    if options.rotcurve.lower() == 'quadratic':
+        init_params.append(0.)
+        init_params.append(0.)
+        isDomainFinite.append([False,False])
+        isDomainFinite.append([False,False])
+        domain.append([0.,0.])
+        domain.append([0.,0.])
+    if options.rotcurve.lower() == 'cubic':
+        init_params.append(0.)
+        init_params.append(0.)
+        init_params.append(0.)
+        isDomainFinite.append([False,False])
+        isDomainFinite.append([False,False])
+        isDomainFinite.append([False,False])
+        domain.append([0.,0.])
+        domain.append([0.,0.])
+        domain.append([0.,0.])
+    if options.fitvpec:
+        init_params.append(1.)
+        init_params.append(1.)
+        isDomainFinite.append([False,False])
+        isDomainFinite.append([False,False])
+        domain.append([0.,0.])
+        domain.append([0.,0.])
+    if options.fitsratio:
+        init_params.append(0.5)
+        isDomainFinite.append([True,False])
+        domain.append([0.,0.])
+    if options.fitdm:
+        init_params.append(-0.1)
+        isDomainFinite.append([False,False])
+        domain.append([0.,0.])
+    if options.fitah:
+        init_params.append(-0.05)
+        isDomainFinite.append([False,False])
+        domain.append([0.,0.])
+    if options.fiths:
+        init_params.append(1.)
+        isDomainFinite.append([True,False])
+        domain.append([0.,0.])
+    return (init_params,isDomainFinite,domain)
+
     if (options.rotcurve.lower() == 'flat' or options.rotcurve.lower() == 'gp')and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift' or options.dfmodel.lower() == 'simpleskeweddrift' or options.dfmodel.lower() == 'dehnen' or options.dfmodel.lower() == 'multiplepops'):
         if options.dwarf:
-            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2],
-                    [[True,False],[True,True],[False,False],
-                    [True,True],[False,False],[True,True]],
-                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                     [0.,0.],[0.,1.],[0.,0.],
-                     [0.,1.]])
+            if options.fitvpec:
+                if options.fitsratio:
+                    if options.fitdm:
+                        if options.fiths:
+                            return ([235./_REFV0,8./_REFR0,
+                                     numpy.log(35./_REFV0),0.1,0.,0.2,
+                                     1.,1.,0.5,-0.1,1.],
+                                    [[True,False],[True,True],[False,False],
+                                     [True,True],[False,False],[True,True],
+                                     [False,False],[False,False],[True,False],
+                                      [False,False],[True,False]],
+                [[0.,0.],[5./_REFR0,11./_REFR0],
+                                     [0.,0.],[0.,1.],[0.,0.],
+                                     [0.,1.],
+                                     [0.,0.],[0.,0.],[0.,0.],[0.,0.],[0.,0.]])
+                        else:
+                            return ([235./_REFV0,8./_REFR0,
+                                     numpy.log(35./_REFV0),0.1,0.,0.2,
+                                     1.,1.,0.5,-0.1],
+                                    [[True,False],[True,True],[False,False],
+                                     [True,True],[False,False],[True,True],
+                                     [False,False],[False,False],[True,False],
+                                      [False,False]],
+                                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                                     [0.,0.],[0.,1.],[0.,0.],
+                                     [0.,1.],
+                                     [0.,0.],[0.,0.],[0.,0.],[0.,0.]])
+                    elif options.fitah:
+                        if options.hs:
+                            return ([235./_REFV0,8./_REFR0,
+                                     numpy.log(35./_REFV0),0.1,0.,0.2,
+                                     1.,1.,0.5,-0.05,1.],
+                                    [[True,False],[True,True],[False,False],
+                                     [True,True],[False,False],[True,True],
+                                     [False,False],[False,False],[True,False],
+                                      [False,False],[True,False]],
+                                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                                     [0.,0.],[0.,1.],[0.,0.],
+                                     [0.,1.],
+                                     [0.,0.],[0.,0.],[0.,0.],[0.,0.],[0.,0.]])
+                        else:
+                            return ([235./_REFV0,8./_REFR0,
+                                     numpy.log(35./_REFV0),0.1,0.,0.2,
+                                     1.,1.,0.5,-0.05],
+                                    [[True,False],[True,True],[False,False],
+                                     [True,True],[False,False],[True,True],
+                                     [False,False],[False,False],[True,False],
+                                      [False,False]],
+                                    [[0.,0.],[5./_REFR0,11./_REFR0],
+                                     [0.,0.],[0.,1.],[0.,0.],
+                                     [0.,1.],
+                                     [0.,0.],[0.,0.],[0.,0.],[0.,0.]])
+                    else:
+                        return ([235./_REFV0,8./_REFR0,
+                                 numpy.log(35./_REFV0),0.1,0.,0.2,
+                                 1.,1.,0.5],
+                                [[True,False],[True,True],[False,False],
+                                 [True,True],[False,False],[True,True],
+                                 [False,False],[False,False],[True,False]],
+                                [[0.,0.],[5./_REFR0,11./_REFR0],
+                                 [0.,0.],[0.,1.],[0.,0.],
+                                 [0.,1.],
+                                 [0.,0.],[0.,0.],[0.,0.]])
+                else:
+                    return ([235./_REFV0,8./_REFR0,
+                                 numpy.log(35./_REFV0),0.1,0.,0.2,
+                                 1.,1.,0.5],
+                                [[True,False],[True,True],[False,False],
+                                 [True,True],[False,False],[True,True],
+                                 [False,False],[False,False],[True,False]],
+                                [[0.,0.],[5./_REFR0,11./_REFR0],
+                                 [0.,0.],[0.,1.],[0.,0.],
+                                 [0.,1.],
+                                 [0.,0.],[0.,0.],[0.,0.]])
+                    
+            
+            else:
+                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2],
+                        [[True,False],[True,True],[False,False],
+                         [True,True],[False,False],[True,True]],
+                        [[0.,0.],[5./_REFR0,11./_REFR0],
+                         [0.,0.],[0.,1.],[0.,0.],
+                         [0.,1.]])
         elif options.fitvpec:
             if options.fitsratio:
                 return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.,0.5],
@@ -486,11 +622,11 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     if options.dwarf and (params[5] < 0. or params[5] > 1.):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
-    if options.fitsratio and params[5+2*options.fitvpec+options.dwarf] < 0.:
+    if options.fitsratio and params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf] < 0.:
         return numpy.finfo(numpy.dtype(numpy.float64)).max
-    if options.fitdm and (params[5+2*options.fitvpec+options.dwarf+options.fitsratio] > 1. or params[5+2*options.fitvpec+options.dwarf+options.fitsratio] < -1.):
+    if options.fitdm and (params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio] > 1. or params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio] < -1.):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
-    if options.fitah and (params[5+2*options.fitvpec+options.dwarf+options.fitsratio] < -0.2 or params[5+2*options.fitvpec+options.dwarf+options.fitsratio] > 0.4):
+    if options.fitah and (params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio] < -0.2 or params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio] > 0.4):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     #For each star, marginalize over distance
     if options.dontbintegrate:
@@ -525,8 +661,10 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         #If we are fitting a dehnendf, set it up
         if options.dfmodel.lower() == 'dehnen':
             #BOVY: Only works for flat rotation curve currently
+            if options.fiths: thishs= options.hs*params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio]
+            else: thishs= options.hs
             df= dehnendf(correct=False,profileParams=(options.hr/_REFR0/params[1],
-                                                      options.hs/_REFR0/params[1],
+                                                      thishs/_REFR0/params[1],
                                                       numpy.exp(params[2])/params[0]))
         thisout= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
         logpd= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
@@ -637,13 +775,13 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
         logpd= 0.
     elif options.fitdm: # and not (params[5+2*options.fitvpec+options.dwarf+options.fitsratio] == 0.):
         dm= _dm(d*params[1]*_REFR0)\
-            -params[5+2*options.fitvpec+options.dwarf+options.fitsratio]
+            -params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio]
         for ii in range(len(vhelio)):
             mh= h[ii]-dm
             logpiso[ii]= iso[0](jk[ii],mh)
         logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
     elif options.fitah:
-        ah= params[5+2*options.fitvpec+options.dwarf+options.fitsratio]
+        ah= params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio]
         dm= _dm(d*params[1]*_REFR0)
         for ii in range(len(vhelio)):
             mh= h[ii]-dm+ah
@@ -681,27 +819,29 @@ def _dm(d):
 
 def _logdf(params,vpec,R,options,df,l,theta,vcf):
     sinlt= numpy.sin(l+theta)
+    thishs= options.hs
+    if options.fiths: thishs*params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio]
     if options.dfmodel.lower() == 'simplegaussian':
         if options.fitsratio:
             slos= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.+sinlt**2.*(params[5+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
+                *numpy.sqrt(1.+sinlt**2.*(params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)
         else:
             slos= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
+                *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)
         t= vpec/slos
         return norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
     elif options.dfmodel.lower() == 'simplegaussiandrift':
         va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],
                                     hR=options.hr/params[1]/_REFR0,
-                                    hs=options.hs/params[1]/_REFR0,
+                                    hs=thishs/params[1]/_REFR0,
                                     vc=_vc(params,R,options,vcf))*sinlt 
         #va= vc- <v>
         if options.fitsratio:
             slos= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.+sinlt**2.*(params[5+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)          
+                *numpy.sqrt(1.+sinlt**2.*(params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)          
         else:
             slos= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
+                *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)
         t= (vpec+va)/slos
         return norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
     elif options.dfmodel.lower() == 'multiplepops':
@@ -713,15 +853,15 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
             va= asymmetricDriftModel.va(R,
                                         numpy.exp(params[2])/params[0]*sigmapops[ii],
                                         hR=options.hr/params[1]/_REFR0,
-                                        hs=options.hs/params[1]/_REFR0,
+                                        hs=thishs/params[1]/_REFR0,
                                         vc=_vc(params,R,options,vcf))*sinlt 
             #va= vc- <v>
             if options.fitsratio:
                 slos= numpy.exp(params[2])/params[0]\
-                    *numpy.sqrt(1.+sinlt**2.*(params[5+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)*sigmapops[ii]
+                    *numpy.sqrt(1.+sinlt**2.*(params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
             else:
                 slos= numpy.exp(params[2])/params[0]\
-                    *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)*sigmapops[ii]
+                    *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
             t= (vpec+va)/slos
             out[:,ii]= taupops[ii]/_TAU0-lognorm\
                 +norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
@@ -733,15 +873,15 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
         coslt= numpy.cos(l+theta)
         va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],
                                     hR=options.hr/params[1]/_REFR0,
-                                    hs=options.hs/params[1]/_REFR0,
+                                    hs=thishs/params[1]/_REFR0,
                                     vc=_vc(params,R,options,vcf))#no sinlt
         #va= vc- <v>
-        alphaskew= params[5+2*options.fitvpec+options.dwarf+options.fitsratio]
+        alphaskew= params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio]
         delta= alphaskew/math.sqrt(1.+alphaskew**2.)
-        sigmaR2= numpy.exp(2.*params[2])/params[0]**2.*numpy.exp(-2.*(R-1.)/options.hs*params[1]*_REFR0)
+        sigmaR2= numpy.exp(2.*params[2])/params[0]**2.*numpy.exp(-2.*(R-1.)/thishs*params[1]*_REFR0)
         sigmaR= numpy.sqrt(sigmaR2)
         if options.fitsratio:
-            sigmaT2= params[5+2*options.fitvpec+options.dwarf]*sigmaR2
+            sigmaT2= params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]*sigmaR2
         else:
             sigmaT2= 0.5*sigmaR2
         omega= numpy.sqrt(sigmaT2/(1.-2.*delta**2./math.pi))
@@ -750,7 +890,7 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
         return out-numpy.log(_REFV0) #For comparison
     elif options.dfmodel.lower() == 'dehnen':
         coslt= numpy.cos(l+theta)
-        sigmaR= numpy.exp(params[2])/params[0]*numpy.exp(-(R-1.)/options.hs*params[1]*_REFR0)
+        sigmaR= numpy.exp(params[2])/params[0]*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)
         out= numpy.log(evaldehnendf(vpec,sinlt,coslt,df,R,sigmaR,options,
                                     params))
         return out-numpy.log(_REFV0) #For comparison
@@ -782,8 +922,8 @@ def _vpec(params,vgal,R,options,l,theta,vcf):
 
 def _vgal(params,vhelio,l,b,options,sinl,cosl):
     if options.fitvpec:
-        return vhelio-params[5+options.dwarf]*cosl*_VRSUN/params[0]/_REFV0\
-            +params[6+options.dwarf]*sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
+        return vhelio-params[5+options.dwarf+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')]*cosl*_VRSUN/params[0]/_REFV0\
+            +params[6+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf]*sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
     else:
         return vhelio-cosl*_VRSUN/params[0]/_REFV0+sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
 
@@ -937,6 +1077,9 @@ def get_options():
                       help="scale height in kpc")
     parser.add_option("--hs",dest='hs',default=8.,type='float',
                       help="dispersion scale length in kpc")
+    parser.add_option("--fiths",action="store_true", dest="fiths",
+                      default=False,
+                      help="If set, fit for a dispersion scale length offsett")
     #Data options
     parser.add_option("--lmin",dest='lmin',default=25.,type='float',
                       help="readVclosData 'lmin'")
