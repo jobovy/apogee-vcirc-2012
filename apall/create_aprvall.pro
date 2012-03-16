@@ -5,6 +5,7 @@ if ~keyword_set(outfile) then outfile='$DATADIR/bovy/apogee/apall-'+redux+'.fits
 basedir= '$APOGEE_ROOT/spectro/'+redux+'/plates/'
 plateDirs= file_search(basedir+'*',/test_directory)
 foundFirst= 0
+goto, jump
 for ii=0L, n_elements(plateDirs)-1 do begin
     mjdDirs= file_search(plateDirs[ii]+'/*',/test_directory)
     plate= (strsplit(plateDirs[ii],'/',/extract))[-1]
@@ -50,7 +51,9 @@ endfor
 ;;flag duplicates
 apogee_rem_dups, outStr, out, /flag, /structs
 mwrfits, out, outfile, /create
+jump: print, "jumping"
 ;;add AK w/ python
-cmd= "/usr/local/epd/bin/python add_ak.py "+outfile+" "+outfile
+cmd= "/usr/local/epd/bin/python add_ak.py "+expand_path(outfile)+" "+expand_path(outfile)
+print, cmd
 spawn, cmd
 END
