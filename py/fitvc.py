@@ -968,7 +968,7 @@ def get_options():
     #Isochrone IMF
     parser.add_option("--imfmodel",dest='imfmodel',default='lognormalChabrier2001',
                       help="imfmodel for isochrone model")
-    parser.add_option("--Z",dest='Z',default=.019,type='float',
+    parser.add_option("--Z",dest='Z',default=.017,type='float',
                       help="Metallicity of isochrone")
     parser.add_option("--nods",action="store_true", 
                       dest="nods",
