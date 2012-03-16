@@ -87,13 +87,13 @@ def get_options():
                       help="scale length in kpc")
     parser.add_option("--hz",dest='hz',default=0.25,type='float',
                       help="scale height in kpc")
-    parser.add_option("--hs",dest='hs',default=8.,type='float',
+    parser.add_option("--hs",dest='hs',default=12.,type='float',
                       help="dispersion scale length in kpc")
     parser.add_option("--fitsratio",action="store_true", dest="fitsratio",
                       default=False,
                       help="If set, fit for the ration squared of tangential to radial dispersion")
     #Data options
-    parser.add_option("--lmin",dest='lmin',default=35.,type='float',
+    parser.add_option("--lmin",dest='lmin',default=25.,type='float',
                       help="readVclosData 'lmin'")
     parser.add_option("--bmax",dest='bmax',default=2.,type='float',
                       help="readVclosData 'bmax'")

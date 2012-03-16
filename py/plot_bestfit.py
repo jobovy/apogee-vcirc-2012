@@ -240,7 +240,7 @@ def get_options():
     parser.add_option("--hs",dest='hs',default=8.,type='float',
                       help="dispersion scale length in kpc")
     #Data options
-    parser.add_option("--lmin",dest='lmin',default=35.,type='float',
+    parser.add_option("--lmin",dest='lmin',default=25.,type='float',
                       help="readVclosData 'lmin'")
     parser.add_option("--bmax",dest='bmax',default=2.,type='float',
                       help="readVclosData 'bmax'")
