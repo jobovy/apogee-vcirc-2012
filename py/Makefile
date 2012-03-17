@@ -53,7 +53,7 @@ all_simpledrift_noro_dwarf_linear_vpec_sratio:
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf_linear_vpec_sratio.sav \
 	 --mcsample --nsamples=$(NSAMPLES) --rotcurve=linear \
 	--noroprior --dfmodel=simplegaussiandrift \
-	--dwarf --fitvpec --fitsratio --fiths
+	--dwarf --fitvpec --fitsratio
 
 all_simpledrift_noro_dwarf_quadratic_vpec_sratio:
 	$(PYTHON) fitvc.py \
@@ -65,5 +65,5 @@ all_simpledrift_noro_dwarf_quadratic_vpec_sratio:
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf_quadratic_vpec_sratio.sav \
 	 --mcsample --nsamples=$(NSAMPLES) --rotcurve=quadratic \
 	--noroprior --dfmodel=simplegaussiandrift \
-	--dwarf --fitvpec --fitsratio --fiths
+	--dwarf --fitvpec --fitsratio
 
