@@ -97,6 +97,10 @@ def get_options():
     parser.add_option("--fitsratio",action="store_true", dest="fitsratio",
                       default=False,
                       help="If set, fit for the ration squared of tangential to radial dispersion")
+    parser.add_option("--fitsratioinnerouter",
+                      action="store_true", dest="fitsratioinnerouter",
+                      default=False,
+                      help="If set, fit for the ration squared of tangential to radial dispersion")
     #Data options
     parser.add_option("--lmin",dest='lmin',default=25.,type='float',
                       help="readVclosData 'lmin'")

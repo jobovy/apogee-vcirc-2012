@@ -588,6 +588,10 @@ def get_options():
     parser.add_option("--fitsratio",action="store_true", dest="fitsratio",
                       default=False,
                       help="If set, fit for the ration squared of tangential to radial dispersion")
+    parser.add_option("--fitsratioinnerouter",
+                      action="store_true", dest="fitsratioinnerouter",
+                      default=False,
+                      help="If set, fit for the ration squared of tangential to radial dispersion")
     #Density model
     parser.add_option("--densmodel",dest='densmodel',default='expdisk',
                       help="Density model to use")
