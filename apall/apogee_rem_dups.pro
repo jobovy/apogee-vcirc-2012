@@ -24,7 +24,7 @@ endif else if tag_exist(in,'snr') then begin
     sortindx= reverse(sort(in.snr))
 endif else if tag_exist(in,'vraderr') then begin
     sortVal= in.vraderr/abs(in.vrad)
-    sortVal[where(sortVal EQ 0.)]= max(sortVal) ;;remove bad measurements
+    sortVal[where(sortVal EQ 0. or in.vraderr LT 0.05)]= max(sortVal) ;;remove bad measurements
     sortindx= sort(sortVal)
 endif
 in= in[sortindx]
