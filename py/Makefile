@@ -5,7 +5,8 @@ NSAMPLES=1000
 	all_simpledrift_noro_dwarf_linear_vpec_sratio \
 	all_simpledrift_noro_dwarf_quadratic_vpec_sratio \
 	all_simpledrift_noro_dwarf_vpec_sratioinnerouter_hs \
-	all_simpledrift_noro_dwarf_vpec_sratioinnerouter
+	all_simpledrift_noro_dwarf_vpec_sratioinnerouter \
+	all_simpledrift_noro_dwarf_vpec_sratio_hs_nooutliermean
 
 all_simpledrift_noro_dwarf_vpec_sratio_hs:
 	$(PYTHON) fitvc.py \
@@ -18,6 +19,18 @@ all_simpledrift_noro_dwarf_vpec_sratio_hs:
 	 --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio --fiths
+
+all_simpledrift_noro_dwarf_vpec_sratio_hs_nooutliermean:
+	$(PYTHON) fitvc.py \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs_nooutliermean.sav \
+	--noroprior --dwarf --fitvpec --fitsratio --fiths \
+	--dfmodel=simplegaussiandrift --nooutliermean
+	$(PYTHON) fitvc.py \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs_nooutliermean$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs_nooutliermean.sav \
+	 --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift \
+	--dwarf --fitvpec --fitsratio --fiths --nooutliermean
 
 all_simpledrift_noro_dwarf_vpec_sratioinnerouter_hs:
 	$(PYTHON) fitvc.py \
