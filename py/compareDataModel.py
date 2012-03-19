@@ -82,6 +82,10 @@ def get_options():
     #Velocity distribution model
     parser.add_option("--dfmodel",dest='dfmodel',default='simplegaussian',
                       help="DF model to use")
+    parser.add_option("--nooutliermean",action="store_true", 
+                      dest="nooutliermean",
+                      default=False,
+                      help="If set, use a zero mean for the outlier model (in Galactocentric coordinates)")
     #Density model
     parser.add_option("--densmodel",dest='densmodel',default='expdisk',
                       help="Density model to use")

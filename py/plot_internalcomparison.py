@@ -585,6 +585,10 @@ def get_options():
     #Velocity distribution model
     parser.add_option("--dfmodel",dest='dfmodel',default='simplegaussian',
                       help="DF model to use")
+    parser.add_option("--nooutliermean",action="store_true", 
+                      dest="nooutliermean",
+                      default=False,
+                      help="If set, use a zero mean for the outlier model (in Galactocentric coordinates)")
     parser.add_option("--fitsratio",action="store_true", dest="fitsratio",
                       default=False,
                       help="If set, fit for the ration squared of tangential to radial dispersion")
