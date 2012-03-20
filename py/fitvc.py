@@ -432,7 +432,7 @@ def _initialize_params(options):
         isDomainFinite.append([True,False])
         isDomainFinite.append([True,True])
         domain.append([0.,0.])
-        domain.append([0.,math.pi])
+        domain.append([-0.5,.5])
     return (init_params,isDomainFinite,domain)
 
 def cb(x): print x
@@ -462,7 +462,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     if options.fitah and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] < -0.2 or params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] > 0.4):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
-    if options.fitm2 and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] < 0. or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] < 0. or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] > math.pi):
+    if options.fitm2 and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] < 0. or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] < -0.5 or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] > 0.5):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     #For each star, marginalize over distance
     if options.dontbintegrate:
@@ -783,7 +783,7 @@ def _vc(params,R,options,vcf):
 def _vpec(params,vgal,R,options,l,theta,vcf):
     if options.fitm2:
         eps= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths]
-        phio= params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths]
+        phio= math.pi*params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths]
         #Defined as in Kuijken & Tremaine (1994)
         dvt= -eps*numpy.cos(2.*(theta-phio))
         dvr= -eps*numpy.sin(2.*(theta-phio))
