@@ -462,6 +462,8 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     if options.fitah and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] < -0.2 or params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] > 0.4):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
+    if options.fitm2 and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] < 0. or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] < 0. or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] > math.pi):
+        return numpy.finfo(numpy.dtype(numpy.float64)).max
     #For each star, marginalize over distance
     if options.dontbintegrate:
         out= 0.
@@ -656,7 +658,7 @@ def _dm(d):
 def _logdf(params,vpec,R,options,df,l,theta,vcf):
     sinlt= numpy.sin(l+theta)
     thishs= options.hs
-    if options.fiths: thishs*params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
+    if options.fiths: thishs*params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah]
     if options.dfmodel.lower() == 'simplegaussian':
         if options.fitsratio:
             slos= numpy.exp(params[2])/params[0]\
@@ -779,7 +781,16 @@ def _vc(params,R,options,vcf):
         return 1.+vcf(R*params[1]*_REFR0)/params[0] #interpolation of GP f
 
 def _vpec(params,vgal,R,options,l,theta,vcf):
-    return vgal-_vc(params,R,options,vcf)*numpy.sin(l+theta)
+    if options.fitm2:
+        eps= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths]
+        phio= params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths]
+        #Defined as in Kuijken & Tremaine (1994)
+        dvt= -eps*numpy.cos(2.*(theta-phio))
+        dvr= -eps*numpy.sin(2.*(theta-phio))
+        return vgal-(_vc(params,R,options,vcf)+dvt)*numpy.sin(l+theta)\
+            -dvr*numpy.cos(l+theta)
+    else:
+        return vgal-_vc(params,R,options,vcf)*numpy.sin(l+theta)
 
 def _vgal(params,vhelio,l,b,options,sinl,cosl):
     if options.fitvpec:

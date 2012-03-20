@@ -71,6 +71,9 @@ def get_options():
     #Rotation curve parameters/model
     parser.add_option("--rotcurve",dest='rotcurve',default='flat',
                       help="Rotation curve model to fit")
+    parser.add_option("--fitm2",action="store_true", dest="fitm2",
+                      default=False,
+                      help="If set, fit for an m=2 component")
     #Ro prior
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,
