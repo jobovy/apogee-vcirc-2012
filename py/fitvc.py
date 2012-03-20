@@ -788,7 +788,7 @@ def _vpec(params,vgal,R,options,l,theta,vcf):
         dvt= -eps*numpy.cos(2.*(theta-phio))
         dvr= -eps*numpy.sin(2.*(theta-phio))
         return vgal-(_vc(params,R,options,vcf)+dvt)*numpy.sin(l+theta)\
-            -dvr*numpy.cos(l+theta)
+            +dvr*numpy.cos(l+theta)
     else:
         return vgal-_vc(params,R,options,vcf)*numpy.sin(l+theta)
 
