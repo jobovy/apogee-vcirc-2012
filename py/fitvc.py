@@ -426,193 +426,14 @@ def _initialize_params(options):
         init_params.append(1.)
         isDomainFinite.append([True,False])
         domain.append([0.,0.])
+    if options.fitm2:
+        init_params.append(0.)
+        init_params.append(0.)
+        isDomainFinite.append([True,False])
+        isDomainFinite.append([True,True])
+        domain.append([0.,0.])
+        domain.append([0.,math.pi])
     return (init_params,isDomainFinite,domain)
-
-    if (options.rotcurve.lower() == 'flat' or options.rotcurve.lower() == 'gp')and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift' or options.dfmodel.lower() == 'simpleskeweddrift' or options.dfmodel.lower() == 'dehnen' or options.dfmodel.lower() == 'multiplepops'):
-        if options.dwarf:
-            if options.fitvpec:
-                if options.fitsratio:
-                    if options.fitdm:
-                        if options.fiths:
-                            return ([235./_REFV0,8./_REFR0,
-                                     numpy.log(35./_REFV0),0.1,0.,0.2,
-                                     1.,1.,0.5,-0.1,1.],
-                                    [[True,False],[True,True],[False,False],
-                                     [True,True],[False,False],[True,True],
-                                     [False,False],[False,False],[True,False],
-                                      [False,False],[True,False]],
-                [[0.,0.],[5./_REFR0,11./_REFR0],
-                                     [0.,0.],[0.,1.],[0.,0.],
-                                     [0.,1.],
-                                     [0.,0.],[0.,0.],[0.,0.],[0.,0.],[0.,0.]])
-                        else:
-                            return ([235./_REFV0,8./_REFR0,
-                                     numpy.log(35./_REFV0),0.1,0.,0.2,
-                                     1.,1.,0.5,-0.1],
-                                    [[True,False],[True,True],[False,False],
-                                     [True,True],[False,False],[True,True],
-                                     [False,False],[False,False],[True,False],
-                                      [False,False]],
-                                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                                     [0.,0.],[0.,1.],[0.,0.],
-                                     [0.,1.],
-                                     [0.,0.],[0.,0.],[0.,0.],[0.,0.]])
-                    elif options.fitah:
-                        if options.hs:
-                            return ([235./_REFV0,8./_REFR0,
-                                     numpy.log(35./_REFV0),0.1,0.,0.2,
-                                     1.,1.,0.5,-0.05,1.],
-                                    [[True,False],[True,True],[False,False],
-                                     [True,True],[False,False],[True,True],
-                                     [False,False],[False,False],[True,False],
-                                      [False,False],[True,False]],
-                                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                                     [0.,0.],[0.,1.],[0.,0.],
-                                     [0.,1.],
-                                     [0.,0.],[0.,0.],[0.,0.],[0.,0.],[0.,0.]])
-                        else:
-                            return ([235./_REFV0,8./_REFR0,
-                                     numpy.log(35./_REFV0),0.1,0.,0.2,
-                                     1.,1.,0.5,-0.05],
-                                    [[True,False],[True,True],[False,False],
-                                     [True,True],[False,False],[True,True],
-                                     [False,False],[False,False],[True,False],
-                                      [False,False]],
-                                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                                     [0.,0.],[0.,1.],[0.,0.],
-                                     [0.,1.],
-                                     [0.,0.],[0.,0.],[0.,0.],[0.,0.]])
-                    else:
-                        return ([235./_REFV0,8./_REFR0,
-                                 numpy.log(35./_REFV0),0.1,0.,0.2,
-                                 1.,1.,0.5],
-                                [[True,False],[True,True],[False,False],
-                                 [True,True],[False,False],[True,True],
-                                 [False,False],[False,False],[True,False]],
-                                [[0.,0.],[5./_REFR0,11./_REFR0],
-                                 [0.,0.],[0.,1.],[0.,0.],
-                                 [0.,1.],
-                                 [0.,0.],[0.,0.],[0.,0.]])
-                else:
-                    return ([235./_REFV0,8./_REFR0,
-                                 numpy.log(35./_REFV0),0.1,0.,0.2,
-                                 1.,1.,0.5],
-                                [[True,False],[True,True],[False,False],
-                                 [True,True],[False,False],[True,True],
-                                 [False,False],[False,False],[True,False]],
-                                [[0.,0.],[5./_REFR0,11./_REFR0],
-                                 [0.,0.],[0.,1.],[0.,0.],
-                                 [0.,1.],
-                                 [0.,0.],[0.,0.],[0.,0.]])
-                    
-            
-            else:
-                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2],
-                        [[True,False],[True,True],[False,False],
-                         [True,True],[False,False],[True,True]],
-                        [[0.,0.],[5./_REFR0,11./_REFR0],
-                         [0.,0.],[0.,1.],[0.,0.],
-                         [0.,1.]])
-        elif options.fitvpec:
-            if options.fitsratio:
-                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.,0.5],
-                        [[True,False],[True,True],[False,False],
-                         [True,True],[False,False],
-                         [False,False],[False,False],[True,False]],
-                        [[0.,0.],[5./_REFR0,11./_REFR0],
-                         [0.,0.],[0.,1.],[0.,0.],
-                         [0.,0.],[0.,0.],[0.,0.]])
-            if options.dfmodel.lower() == 'simpleskeweddrift':
-                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.,0.5,-2.],
-                        [[True,False],[True,True],[False,False],
-                         [True,True],[False,False],
-                         [False,False],[False,False],[True,False],[False,False]],
-                        [[0.,0.],[5./_REFR0,11./_REFR0],
-                         [0.,0.],[0.,1.],[0.,0.],
-                         [0.,0.],[0.,0.],[0.,0.],[0.,0.]])
-            else:
-                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,1.,1.],
-                        [[True,False],[True,True],[False,False],
-                         [True,True],[False,False],
-                         [False,False],[False,False]],
-                        [[0.,0.],[5./_REFR0,11./_REFR0],
-                         [0.,0.],[0.,1.],[0.,0.],
-                         [0.,0.],[0.,0.]])
-        elif options.dfmodel.lower() == 'simpleskeweddrift':
-                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,-2.],
-                        [[True,False],[True,True],[False,False],
-                         [True,True],[False,False],
-                         [False,False]],
-                        [[0.,0.],[5./_REFR0,11./_REFR0],
-                         [0.,0.],[0.,1.],[0.,0.],
-                         [0.,0.]])
-        elif options.fitdm:
-                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,-0.1],
-                        [[True,False],[True,True],[False,False],
-                         [True,True],[False,False],
-                         [False,False],[False,False]],
-                        [[0.,0.],[5./_REFR0,11./_REFR0],
-                         [0.,0.],[0.,1.],[0.,0.],
-                         [0.,0.],[0.,0.]])           
-        elif options.fitah:
-                return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,-0.1],
-                        [[True,False],[True,True],[False,False],
-                         [True,True],[False,False],
-                         [False,False],[False,False]],
-                        [[0.,0.],[5./_REFR0,11./_REFR0],
-                         [0.,0.],[0.,1.],[0.,0.],
-                         [0.,0.],[0.,0.]])           
-        else:
-            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.],
-                    [[True,False],[True,True],[False,False],
-                     [True,True],[False,False]],
-                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                     [0.,0.],[0.,1.],[0.,0.]])
-    elif (options.rotcurve.lower() == 'linear' or options.rotcurve.lower() == 'powerlaw') and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
-        if options.dwarf:
-            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2,0.],
-                    [[True,False],[True,True],[False,False],
-                    [True,True],[False,False],[True,True],[False,False]],
-                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                     [0.,0.],[0.,1.],[0.,0.],
-                     [0.,1.],[0.,0.]])
-        else:
-            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.],
-                    [[True,False],[True,True],[False,False],
-                     [True,True],[False,False],[False,False]],
-                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                     [0.,0.],[0.,1.],[0.,0.],[0.,0.]])
-    elif options.rotcurve.lower() == 'quadratic' and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
-        if options.dwarf:
-            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2,0.,0.],
-                    [[True,False],[True,True],[False,False],
-                    [True,True],[False,False],[True,True],[False,False],
-                     [False,False]],
-                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                     [0.,0.],[0.,1.],[0.,0.],
-                     [0.,1.],[0.,0.],[0.,0.]])
-        else:
-            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.,0.],
-                    [[True,False],[True,True],[False,False],
-                     [True,True],[False,False],[False,False],[False,False]],
-                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                     [0.,0.],[0.,1.],[0.,0.],[0.,0.],[0.,0.]])
-    elif options.rotcurve.lower() == 'cubic' and (options.dfmodel.lower() == 'simplegaussian' or options.dfmodel.lower() == 'simplegaussiandrift'):
-        if options.dwarf:
-            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.2,0.,0.,0.],
-                    [[True,False],[True,True],[False,False],
-                    [True,True],[False,False],[True,True],[False,False],
-                     [False,False],[False,False]],
-                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                     [0.,0.],[0.,1.],[0.,0.],
-                     [0.,1.],[0.,0.],[0.,0.],[0.,0.]])
-        else:
-            return ([235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1,0.,0.,0.,0.],
-                    [[True,False],[True,True],[False,False],
-                     [True,True],[False,False],[False,False],[False,False],
-                     [False,False]],
-                    [[0.,0.],[5./_REFR0,11./_REFR0],
-                     [0.,0.],[0.,1.],[0.,0.],[0.,0.],[0.,0.],[0.,0.]])
 
 def cb(x): print x
 
@@ -1094,6 +915,9 @@ def get_options():
     parser.add_option("--gpemcee",action="store_true", dest="gpemcee",
                       default=False,
                       help="If set, use emcee for GP indeed")
+    parser.add_option("--fitm2",action="store_true", dest="fitm2",
+                      default=False,
+                      help="If set, fit for an m=2 component")
     #Ro prior
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,
