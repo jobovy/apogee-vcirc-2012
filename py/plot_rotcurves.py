@@ -2,13 +2,14 @@ import sys
 import numpy
 from galpy.util import bovy_plot
 from fitvc import _REFV0, _REFR0
+_PLOTM31= True
 def plot_rotcurves(plotfilename):
     rs= numpy.linspace(3.5,16.,1001)
     #1: flat
     vo,ro= 0.93042695, 1.00408592
     vflat= rs**0.*vo*_REFV0
     #2: power-law
-    vo, ro, beta= 0.97316236, 1.00337476, -0.17313119
+    vo, ro, beta= 0.92351186, 1.00082572, -0.08535421
     vpl= vo*(rs/_REFR0/ro)**beta*_REFV0
     #3: linear
     vo, ro, dvdr= 0.92640056, 1.00226682, -0.05341841
@@ -31,6 +32,17 @@ def plot_rotcurves(plotfilename):
     bovy_plot.bovy_plot(rs,vlinear,'k-.',overplot=True)
     bovy_plot.bovy_plot(rs,vquadratic,'k:',overplot=True)
     bovy_plot.bovy_plot(rs,vcubic,'k-.',overplot=True,color='red')
+    if _PLOTM31:
+        #Read file
+        m31data= numpy.loadtxt('../data/m31.dat',comments='#')
+        rm31= m31data[:,0]
+        vcm31= m31data[:,1]
+        bovy_plot.bovy_plot(rm31,vcm31,'ks',overplot=True,mfc='none',mew=2.)
+        bovy_plot.bovy_text(17.,260.,r'$\mathrm{M31}$',size=14.)
+        indx= (rm31 > 15.2)*(rm31 <= 16.8)
+        print numpy.sum(indx)
+        bovy_plot.bovy_plot([17.,rm31[indx]],[260.,vcm31[indx]],'k-',
+                            overplot=True)
     bovy_plot.bovy_end_print(plotfilename)
     return None
 
