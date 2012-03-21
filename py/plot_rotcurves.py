@@ -3,18 +3,18 @@ import numpy
 from galpy.util import bovy_plot
 from fitvc import _REFV0, _REFR0
 def plot_rotcurves(plotfilename):
-    rs= numpy.linspace(5.,16.,1001)
+    rs= numpy.linspace(3.5,16.,1001)
     #1: flat
-    vo,ro= 0.92848419, 1.01213729
+    vo,ro= 0.93042695, 1.00408592
     vflat= rs**0.*vo*_REFV0
     #2: power-law
     vo, ro, beta= 0.97316236, 1.00337476, -0.17313119
     vpl= vo*(rs/_REFR0/ro)**beta*_REFV0
     #3: linear
-    vo, ro, dvdr= 0.96853544, 1.00568151, -0.08273548
+    vo, ro, dvdr= 0.92640056, 1.00226682, -0.05341841
     vlinear= (vo+dvdr*(rs/_REFR0-1.))*_REFV0
     #4: quadratic
-    vo, ro, dvdr, d2vdr2= 1.00872965, 1.03703529, -0.3736882, 0.5263341
+    vo, ro, dvdr, d2vdr2= 0.93287216, 1.00646025, -0.09445865, 0.04764972
     vquadratic= (vo+dvdr*(rs/_REFR0-1.)+d2vdr2*(rs/_REFR0-1.)**2.)*_REFV0
     #5: cubic
     vo, ro, dvdr, d2vdr2, d3vdr3= 0.99909976, 1.02583349, -0.35153006, 0.37377148, 0.11687969
