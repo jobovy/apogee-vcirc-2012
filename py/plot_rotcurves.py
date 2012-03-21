@@ -18,7 +18,7 @@ def plot_rotcurves(plotfilename):
     vo, ro, dvdr, d2vdr2= 0.93287216, 1.00646025, -0.09445865, 0.04764972
     vquadratic= (vo+dvdr*(rs/_REFR0-1.)+d2vdr2*(rs/_REFR0-1.)**2.)*_REFV0
     #5: cubic
-    vo, ro, dvdr, d2vdr2, d3vdr3= 0.99909976, 1.02583349, -0.35153006, 0.37377148, 0.11687969
+    vo, ro, dvdr, d2vdr2, d3vdr3= 0.93287216, 1.00646025, -0.09445865, 0.04764972, 0.9
     vcubic= (vo+dvdr*(rs/_REFR0-1.)+d2vdr2*(rs/_REFR0-1.)**2.\
                  +d3vdr3*(rs/_REFR0-1.)**3.)*_REFV0
     #Plot all
@@ -40,7 +40,6 @@ def plot_rotcurves(plotfilename):
         bovy_plot.bovy_plot(rm31,vcm31,'ks',overplot=True,mfc='none',mew=2.)
         bovy_plot.bovy_text(17.,260.,r'$\mathrm{M31}$',size=14.)
         indx= (rm31 > 15.2)*(rm31 <= 16.8)
-        print numpy.sum(indx)
         bovy_plot.bovy_plot([17.,rm31[indx]],[260.,vcm31[indx]],'k-',
                             overplot=True)
     bovy_plot.bovy_end_print(plotfilename)
