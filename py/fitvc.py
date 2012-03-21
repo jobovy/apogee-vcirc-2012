@@ -454,15 +454,15 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     if options.dwarf and (params[5-options.nooutliermean] < 0. or params[5-options.nooutliermean] > 1.):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
-    if options.fitsratio and params[5+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf-options.nooutliermean] < 0.:
+    if options.fitsratio and params[5+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf-options.nooutliermean] < 0.:
         return numpy.finfo(numpy.dtype(numpy.float64)).max
-    if options.fitsratioinnerouter and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf] < 0. or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf] < 0.):
+    if options.fitsratioinnerouter and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf] < 0. or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf] < 0.):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
-    if options.fitdm and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] > 1. or params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] < -1.):
+    if options.fitdm and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] > 1. or params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] < -1.):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
-    if options.fitah and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] < -0.2 or params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] > 0.4):
+    if options.fitah and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] < -0.2 or params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] > 0.4):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
-    if options.fitm2 and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] < 0. or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] < -0.5 or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] > 0.5):
+    if options.fitm2 and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] < 0. or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] < -0.5 or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths] > 0.5):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     #For each star, marginalize over distance
     if options.dontbintegrate:
@@ -497,7 +497,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         #If we are fitting a dehnendf, set it up
         if options.dfmodel.lower() == 'dehnen':
             #BOVY: Only works for flat rotation curve currently
-            if options.fiths: thishs= options.hs*params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
+            if options.fiths: thishs= options.hs*params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
             else: thishs= options.hs
             df= dehnendf(correct=False,profileParams=(options.hr/_REFR0/params[1],
                                                       thishs/_REFR0/params[1],
@@ -613,13 +613,13 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
         logpd= 0.
     elif options.fitdm: # and not (params[5+2*options.fitvpec+options.dwarf+options.fitsratio] == 0.):
         dm= _dm(d*params[1]*_REFR0)\
-            -params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
+            -params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
         for ii in range(len(vhelio)):
             mh= h[ii]-dm
             logpiso[ii]= iso[0](jk[ii],mh)
         logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
     elif options.fitah:
-        ah= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
+        ah= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
         dm= _dm(d*params[1]*_REFR0)
         for ii in range(len(vhelio)):
             mh= h[ii]-dm+ah
@@ -658,17 +658,17 @@ def _dm(d):
 def _logdf(params,vpec,R,options,df,l,theta,vcf):
     sinlt= numpy.sin(l+theta)
     thishs= options.hs
-    if options.fiths: thishs*params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah]
+    if options.fiths: thishs*params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah]
     if options.dfmodel.lower() == 'simplegaussian':
         if options.fitsratio:
             slos= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)
+                *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)
         elif options.fitsratioinnerouter:
             innerl= (l < 75.*_DEGTORAD)
             slos= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)
+                *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)
             slos[innerl]= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.+sinlt[innerl]**2.*(params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R[innerl]-1.)/thishs*params[1]*_REFR0)
+                *numpy.sqrt(1.+sinlt[innerl]**2.*(params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R[innerl]-1.)/thishs*params[1]*_REFR0)
         else:
             slos= numpy.exp(params[2])/params[0]\
                 *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)
@@ -682,13 +682,13 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
         #va= vc- <v>
         if options.fitsratio:
             slos= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)          
+                *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)          
         elif options.fitsratioinnerouter:
             innerl= (l < 75.*_DEGTORAD)
             slos= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)          
+                *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)          
             slos[innerl]= numpy.exp(params[2])/params[0]\
-                *numpy.sqrt(1.+sinlt[innerl]**2.*(params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R[innerl]-1.)/thishs*params[1]*_REFR0)          
+                *numpy.sqrt(1.+sinlt[innerl]**2.*(params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R[innerl]-1.)/thishs*params[1]*_REFR0)          
         else:
             slos= numpy.exp(params[2])/params[0]\
                 *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)
@@ -708,13 +708,13 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
             #va= vc- <v>
             if options.fitsratio:
                 slos= numpy.exp(params[2])/params[0]\
-                    *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
+                    *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
             elif options.fitsratioinnerouter:
                 innerl= (l < 75.*_DEGTORAD)
                 slos= numpy.exp(params[2])/params[0]\
-                    *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
+                    *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
                 slos[innerl]= numpy.exp(params[2])/params[0]\
-                    *numpy.sqrt(1.+sinlt[innerl]**2.*(params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R[innerl]-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
+                    *numpy.sqrt(1.+sinlt[innerl]**2.*(params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R[innerl]-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
             else:
                 slos= numpy.exp(params[2])/params[0]\
                     *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
@@ -732,16 +732,16 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
                                     hs=thishs/params[1]/_REFR0,
                                     vc=_vc(params,R,options,vcf))#no sinlt
         #va= vc- <v>
-        alphaskew= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
+        alphaskew= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
         delta= alphaskew/math.sqrt(1.+alphaskew**2.)
         sigmaR2= numpy.exp(2.*params[2])/params[0]**2.*numpy.exp(-2.*(R-1.)/thishs*params[1]*_REFR0)
         sigmaR= numpy.sqrt(sigmaR2)
         if options.fitsratio:
-            sigmaT2= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]*sigmaR2
+            sigmaT2= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]*sigmaR2
         elif options.fitsratio:
             innerl= (l < 75.*_DEGTORAD)
-            sigmaT2= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]*sigmaR2
-            sigmaT2[innerl]= params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]*sigmaR2[innerl]
+            sigmaT2= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]*sigmaR2
+            sigmaT2[innerl]= params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]*sigmaR2[innerl]
         else:
             sigmaT2= 0.5*sigmaR2
         omega= numpy.sqrt(sigmaT2/(1.-2.*delta**2./math.pi))
@@ -782,8 +782,8 @@ def _vc(params,R,options,vcf):
 
 def _vpec(params,vgal,R,options,l,theta,vcf):
     if options.fitm2:
-        eps= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths]
-        phio= math.pi*params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths]
+        eps= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths]
+        phio= math.pi*params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths]
         #Defined as in Kuijken & Tremaine (1994)
         dvt= -eps*numpy.cos(2.*(theta-phio))
         dvr= -eps*numpy.sin(2.*(theta-phio))
@@ -794,8 +794,8 @@ def _vpec(params,vgal,R,options,l,theta,vcf):
 
 def _vgal(params,vhelio,l,b,options,sinl,cosl):
     if options.fitvpec:
-        return vhelio-params[5-options.nooutliermean+options.dwarf+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')]*cosl*_VRSUN/params[0]/_REFV0\
-            +params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf]*sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
+        return vhelio-params[5-options.nooutliermean+options.dwarf+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')]*cosl*_VRSUN/params[0]/_REFV0\
+            +params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf]*sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
     else:
         return vhelio-cosl*_VRSUN/params[0]/_REFV0+sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
 
