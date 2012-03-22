@@ -90,5 +90,6 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
         platel= numpy.zeros(len(locs),dtype='int')
         for ii in range(len(locs)): platel[ii]= int(numpy.round(numpy.mean(data[(data['LOCATION'] == locs[ii])]['GLON'])))
         l150locs= locs[(platel == 150)]
-        data['LOCATION'][(data['LOCATION'] == l150locs[1])]= l150locs[0]
+        if len(l150locs) > 1:
+            data['LOCATION'][(data['LOCATION'] == l150locs[1])]= l150locs[0]
     return data
