@@ -40,15 +40,15 @@ def fieldsTable(parser):
         if nn > 0:
             printline+= '& %i' % nn
         else:
-            printline+= '& - '
+            printline+= '& \ldots '
         # # of data 12.8 <= H < 13.8
         nn= numpy.sum((data['LOCATION'] == locs[ii])*(data['HMAG'] >= 12.8)*(data['HMAG'] < 13.8))
         if nn > 0: printline+= '& %i' % nn
-        else: printline+= '& - '
+        else: printline+= '& \ldots '
         #median ak
         printline+= '& %.1f ' % numpy.median(data['AK'][indx])
         #median visits
-        printline+= '& %i ' % numpy.median(data['NVISITS'][indx])
+        #printline+= '& %i ' % numpy.median(data['NVISITS'][indx])
         #Write the line
         if not ii == (nlocs-1): printline+= '\\\\\n'
         else: printline+= '\n'
