@@ -18,9 +18,9 @@ def plot_rotcurves(plotfilename):
     vo, ro, dvdr, d2vdr2= 0.93287216, 1.00646025, -0.09445865, 0.04764972
     vquadratic= (vo+dvdr*(rs/_REFR0-1.)+d2vdr2*(rs/_REFR0-1.)**2.)*_REFV0
     #5: cubic
-    vo, ro, dvdr, d2vdr2, d3vdr3= 0.93287216, 1.00646025, -0.09445865, 0.04764972, 0.9
-    vcubic= (vo+dvdr*(rs/_REFR0-1.)+d2vdr2*(rs/_REFR0-1.)**2.\
-                 +d3vdr3*(rs/_REFR0-1.)**3.)*_REFV0
+    #vo, ro, dvdr, d2vdr2, d3vdr3= 1.02757215,  1.07745537, -0.41021252, -0.4103778,   1.34092465
+    #vcubic= (vo+dvdr*(rs/_REFR0-1.)+d2vdr2*(rs/_REFR0-1.)**2.\
+    #             +d3vdr3*(rs/_REFR0-1.)**3.)*_REFV0
     #Plot all
     bovy_plot.bovy_print(fig_width=8.)
     bovy_plot.bovy_plot(rs,vflat,'k-',
@@ -31,7 +31,7 @@ def plot_rotcurves(plotfilename):
     bovy_plot.bovy_plot(rs,vpl,'k--',overplot=True)
     bovy_plot.bovy_plot(rs,vlinear,'k-.',overplot=True)
     bovy_plot.bovy_plot(rs,vquadratic,'k:',overplot=True)
-    bovy_plot.bovy_plot(rs,vcubic,'k-.',overplot=True,color='red')
+    #bovy_plot.bovy_plot(rs,vcubic,'k-.',overplot=True,color='red')
     if _PLOTM31:
         #Read file
         m31data= numpy.loadtxt('../data/m31.dat',comments='#')
