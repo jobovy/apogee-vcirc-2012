@@ -69,14 +69,14 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.):
                           ylabel=r'$M_H\ [\mathrm{mag}]$',
                           interpolation='nearest')
     #Add extinction arrow
-    djk= 0.4
+    djk= 0.45
     dh= 1.55/1.5*djk
     from matplotlib.patches import FancyArrowPatch
     ax=pyplot.gca()
     ax.add_patch(FancyArrowPatch((1.,-2.),(1+djk,-2+dh),
                                  arrowstyle='->',mutation_scale=20,fill=True,
                                  lw=1.25))
-    bovy_plot.bovy_text(1.03,-2.05,r'$\mathrm{extinction}$',
+    bovy_plot.bovy_text(1.05,-2.05,r'$\mathrm{extinction}$',
                         rotation=-math.atan(1.5/1.55*1.3/13.)/math.pi*180.,
                         size=14.)
     #Add color cut

@@ -9,7 +9,8 @@ NSAMPLES=1000
 	all_simpledrift_noro_dwarf_vpec_sratioinnerouter_hs \
 	all_simpledrift_noro_dwarf_vpec_sratioinnerouter \
 	all_simpledrift_noro_dwarf_vpec_sratio_hs_nooutliermean \
-	all_simpledrift_noro_dwarf_vpec_sratio_m2
+	all_simpledrift_noro_dwarf_vpec_sratio_m2 \
+	all_multiplepops_noro_dwarf_vpec_sratio 
 
 all_simpledrift_noro_dwarf_vpec_sratio_hs:
 	$(PYTHON) fitvc.py \
@@ -119,3 +120,14 @@ all_simpledrift_noro_dwarf_cubic_vpec_sratio:
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio
 
+all_multiplepops_noro_dwarf_vpec_sratio:
+	$(PYTHON) fitvc.py \
+	$(FITSDIR)all_multiplepops_noro_dwarf_vpec_sratio_hs.sav \
+	--noroprior --dwarf --fitvpec --fitsratio \
+	--dfmodel=multiplepops
+	$(PYTHON) fitvc.py \
+	$(FITSDIR)all_multiplepops_noro_dwarf_vpec_sratio_hs_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_multiplepops_noro_dwarf_vpec_sratio_hs.sav \
+	 --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=multiplepops \
+	--dwarf --fitvpec --fitsratio --fiths
