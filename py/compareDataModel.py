@@ -14,6 +14,7 @@ from fitvc import mloglike, _dm, \
     _BINTEGRATEDMAX_DWARF, _BINTEGRATEDMIN_DWARF
 from readVclosData import readVclosData
 import isomodel
+_PLOTZERO= False
 def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf):
     """
     NAME:
@@ -256,6 +257,23 @@ if __name__ == '__main__':
                                           thislogpiso,thislogpisodwarf)
             pvlos-= logsumexp(pvlos)
             pvlos= numpy.exp(pvlos)
+            if _PLOTZERO:
+                pvloszero= numpy.zeros(options.nvlos)
+                params[2]= -3.8
+                if not options.multi is None:
+                    pvloszero= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
+                                                                        thesedata,df,options,
+                                                                        thislogpiso,
+                                                                        thislogpisodwarf)),
+                                                  range(options.nvlos),
+                                                  numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
+                else:
+                    for ii in range(options.nvlos):
+                        print ii
+                        pvloszero[ii]= pvlosplate(params,vlos[ii],thesedata,df,options,
+                                                  thislogpiso,thislogpisodwarf)
+                pvloszero-= logsumexp(pvloszero)
+                pvloszero= numpy.exp(pvloszero)
             #Plot data
             bovy_plot.bovy_print()
             hist, xvec, p= bovy_plot.bovy_hist(thesedata['VHELIO'],
@@ -266,7 +284,10 @@ if __name__ == '__main__':
             #Normalize prediction
             data_int= numpy.sum(hist)*(xvec[1]-xvec[0])
             pvlos*= data_int/numpy.sum(pvlos)/(vlos[1]-vlos[0])
-            bovy_plot.bovy_plot(vlos,pvlos,'-',color='0.65',overplot=True)
+            bovy_plot.bovy_plot(vlos,pvlos,'-',color='0.65',overplot=True,lw=2.)
+            if _PLOTZERO:
+                pvloszero*= data_int/numpy.sum(pvloszero)/(vlos[1]-vlos[0])
+                bovy_plot.bovy_plot(vlos,pvloszero,'--',color='0.65',overplot=True,lw=2.)
             #Add text
             bovy_plot.bovy_text(r'$\mathrm{location}\ =\ %i$' % location
                                 +'\n'
