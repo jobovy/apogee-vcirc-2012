@@ -286,7 +286,7 @@ def plot_internalcomparison(parser):
     options.hs= fid_hs
     options.dfmodel= 'multiplepops'
     fid_params=copy.copy(params)
-    params[2]= -1.55
+    params[2]= -1.5
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations)
