@@ -130,4 +130,4 @@ all_multiplepops_noro_dwarf_vpec_sratio:
 	--init=$(FITSDIR)all_multiplepops_noro_dwarf_vpec_sratio_hs.sav \
 	 --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=multiplepops \
-	--dwarf --fitvpec --fitsratio --fiths
+	--dwarf --fitvpec --fitsratio
