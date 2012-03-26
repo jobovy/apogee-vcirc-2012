@@ -10,6 +10,7 @@ NSAMPLES=1000
 	all_simpledrift_noro_dwarf_vpec_sratioinnerouter \
 	all_simpledrift_noro_dwarf_vpec_sratio_hs_nooutliermean \
 	all_simpledrift_noro_dwarf_vpec_sratio_m2 \
+	all_simpledrift_noro_dwarf_vpec_sratio_innerouter \
 	all_multiplepops_noro_dwarf_vpec_sratio \
 	loc4240_simpledrift_noro_dwarf_vpec_sratio
 
@@ -60,6 +61,18 @@ all_simpledrift_noro_dwarf_vpec_sratioinnerouter_hs:
 	 --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratioinnerouter --fiths
+
+all_simpledrift_noro_dwarf_vpec_sratio_innerouter:
+	$(PYTHON) fitvc.py \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_innerouter.sav \
+	--noroprior --dwarf --fitvpec --fitsratio \
+	--dfmodel=simplegaussiandrift --fitsrinnerouter --dwarfinnerouter
+	$(PYTHON) fitvc.py \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_innerouter_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_innerouter.sav \
+	 --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift \
+	--dwarf --fitvpec --fitsratio --fitsrinnerouter --dwarfinnerouter
 
 all_simpledrift_noro_dwarf_vpec_sratioinnerouter:
 	$(PYTHON) fitvc.py \

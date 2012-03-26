@@ -571,11 +571,11 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
             if options.dwarf: #Combine
                 tmpthisout= logsumexp(thisout[ii,:])+numpy.log(1.-params[5-options.nooutliermean])-logsumexp(logpd[ii,:])
                 if options.dwarfinnerouter and l[ii] < 75.*_DEGTORAD:
-                    tmpthisout+= -numpy.log(1.-params[5-options.nooutliermean])+numpy.log(1.-params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.srinnerouter+options.fitdm+options.fitah])
+                    tmpthisout+= -numpy.log(1.-params[5-options.nooutliermean])+numpy.log(1.-params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.fitdm+options.fitah])
                 thislogpdwarf= logpddwarf[ii,0]
                 tmpthisxtraout= thisxtraout[ii,0]+numpy.log(params[5-options.nooutliermean])-thislogpdwarf
                 if options.dwarfinnerouter and l[ii] < 75.*_DEGTORAD:
-                    tmpthisxtraout+= -numpy.log(params[5-options.nooutliermean])+numpy.log(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.srinnerouter+options.fitdm+options.fitah])
+                    tmpthisxtraout+= -numpy.log(params[5-options.nooutliermean])+numpy.log(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.fitdm+options.fitah])
                 #print tmpthisout, tmpthisxtraout, thisxtraout[ii,0]
                 c= numpy.amax([tmpthisout,tmpthisxtraout])
                 if arrout:
@@ -641,7 +641,7 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
         dm= _dm(d*params[1]*_REFR0)\
             -params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
         if options.fitdminnerouter: dminnerouter= _dm(d*params[1]*_REFR0)\
-            -params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.srinnerouter+options.dwarfinnerouter]
+            -params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter]
         for ii in range(len(vhelio)):
             mh= h[ii]-dm
             if options.fitdminnerouter and l[ii] < 75.*_DEGTORAD:
