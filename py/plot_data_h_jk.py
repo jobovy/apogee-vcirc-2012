@@ -3,12 +3,19 @@ import os, os.path
 from galpy.util import bovy_plot
 from readVclosData import readVclosData
 OUTDIR= os.path.join(os.getenv('HOME'),'Desktop')
+#OUTDIR= os.path.join(os.getenv('HOME'),'Desktop','hjkfigs')
 OUTDIR= '../tex/'
-OUTEXT= 'ps'
+OUTEXT= 'png'
 def plot_data_h_jk(location=None,
                    plotfilename=os.path.join(OUTDIR,'data_h_jk.'+OUTEXT)):
     data= readVclosData()
     if not location is None:
+        if location == 0:
+            locs= set(data['LOCATION'])
+            for l in locs:
+                plot_data_h_jk(location=l,
+                               plotfilename=os.path.join(OUTDIR,'data_h_jk_%i.' % l +OUTEXT))
+            return None
         data= data[(data['LOCATION'] == location)]
     bovy_plot.bovy_print()
     bovy_plot.bovy_plot(data['J0MAG']-data['K0MAG'],
@@ -22,7 +29,9 @@ def plot_data_h_jk(location=None,
     return None
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
         plot_data_h_jk(location=int(sys.argv[1]),plotfilename=sys.argv[2])
+    elif len(sys.argv) > 1:
+        plot_data_h_jk(location=int(sys.argv[1]))
     else:
         plot_data_h_jk()
