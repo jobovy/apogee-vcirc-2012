@@ -1,6 +1,7 @@
 ###################################################################################
 #  compareDataModel.py: module for comparing the data to the model
 ###################################################################################
+import copy
 from optparse import OptionParser
 import cPickle as pickle
 import numpy
@@ -15,6 +16,7 @@ from fitvc import mloglike, _dm, \
 from readVclosData import readVclosData
 import isomodel
 _PLOTZERO= False
+_PLOTALLJHK= False
 def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf):
     """
     NAME:
@@ -274,6 +276,25 @@ if __name__ == '__main__':
                                                   thislogpiso,thislogpisodwarf)
                 pvloszero-= logsumexp(pvloszero)
                 pvloszero= numpy.exp(pvloszero)
+            if _PLOTALLJHK:
+                pvlosalljhk= numpy.zeros(options.nvlos)
+                alljhkdata= copy.copy(data)
+                alljhkdata['GLON']= numpy.mean(thesedata['GLON'])
+                alljhkdata['GLAT']= numpy.mean(thesedata['GLAT'])
+                if not options.multi is None:
+                    pvlosalljhk= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
+                                                                          alljhkdata,df,options,
+                                                                          logpiso,
+                                                                        logpisodwarf)),
+                                                  range(options.nvlos),
+                                                  numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
+                else:
+                    for ii in range(options.nvlos):
+                        print ii
+                        pvlosalljhk[ii]= pvlosplate(params,vlos[ii],alljhkdata,df,options,
+                                                    logpiso,logpisodwarf)
+                pvlosalljhk-= logsumexp(pvlosalljhk)
+                pvlosalljhk= numpy.exp(pvlosalljhk)
             #Plot data
             bovy_plot.bovy_print()
             hist, xvec, p= bovy_plot.bovy_hist(thesedata['VHELIO'],
@@ -288,6 +309,9 @@ if __name__ == '__main__':
             if _PLOTZERO:
                 pvloszero*= data_int/numpy.sum(pvloszero)/(vlos[1]-vlos[0])
                 bovy_plot.bovy_plot(vlos,pvloszero,'--',color='0.65',overplot=True,lw=2.)
+            if _PLOTALLJHK:
+                pvlosalljhk*= data_int/numpy.sum(pvlosalljhk)/(vlos[1]-vlos[0])
+                bovy_plot.bovy_plot(vlos,pvlosalljhk,'--',color='0.65',overplot=True,lw=2.)
             #Add text
             bovy_plot.bovy_text(r'$\mathrm{location}\ =\ %i$' % location
                                 +'\n'
