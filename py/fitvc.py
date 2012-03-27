@@ -434,7 +434,7 @@ def _initialize_params(options):
         domain.append([0.,0.])
         domain.append([-0.5,.5])
     if options.fitsrinnerouter:
-        init_params.append(numpy.log(35./_REFV0))
+        init_params.append(0.)
         isDomainFinite.append([False,False])
         domain.append([0.,0.])
     if options.dwarfinnerouter:
@@ -718,7 +718,11 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
                 *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)          
             if options.fitsrinnerouter:
                 innerl= (l < 75.*_DEGTORAD)
-                slos[innerl]*= numpy.exp(-params[2]+params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah])
+                slos[innerl]*= numpy.exp(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths])
+                va[innerl]= asymmetricDriftModel.va(R[innerl],numpy.exp(params[2]+params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths])/params[0],
+                                                    hR=options.hr/params[1]/_REFR0,
+                                                    hs=thishs/params[1]/_REFR0,
+                                                    vc=_vc(params,R[innerl],options,vcf))*sinlt[innerl]
         elif options.fitsratioinnerouter:
             innerl= (l < 75.*_DEGTORAD)
             slos= numpy.exp(params[2])/params[0]\
