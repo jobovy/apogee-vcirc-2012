@@ -234,6 +234,22 @@ def get_options():
                       dest="nooutliermean",
                       default=False,
                       help="If set, use a zero mean for the outlier model (in Galactocentric coordinates)")
+    parser.add_option("--fitsrinnerouter",
+                      action="store_true", dest="fitsrinnerouter",
+                      default=False,
+                      help="If set, fit for the sigma_r separately for the inner disk")
+    parser.add_option("--dwarfinnerouter",
+                      action="store_true", dest="dwarfinnerouter",
+                      default=False,
+                      help="If set, fit for the dwarf contamination separately for the inner disk")
+    parser.add_option("--fitahinnerouter",
+                      action="store_true", dest="fitahinnerouter",
+                      default=False,
+                      help="If set, fit for the ah separately for the inner disk")
+    parser.add_option("--fitdminnerouter",
+                      action="store_true", dest="fitdminnerouter",
+                      default=False,
+                      help="If set, fit for the dm separately for the inner disk")
     parser.add_option("--fitsratio",action="store_true", dest="fitsratio",
                       default=False,
                       help="If set, fit for the ration squared of tangential to radial dispersion")
