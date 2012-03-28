@@ -6,7 +6,8 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                   meanb=0.,meanb_tol=0.5,jkmax=1.3,ak=True,
                   specprimary=True,
                   cutmultiples=False,
-                  datafilename=None):
+                  datafilename=None,
+                  cutoutliers=True):
     """
     NAME:
        readVclosData
@@ -84,6 +85,8 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
             thesedata= thesedata[indx]
             if numpy.std(thesedata['VRAD']) <= 1.: keepindx[ii]= True
         data= primarydata[keepindx]
+    if cutoutliers:
+        data= data[(numpy.fabs(data['VHELIO']) <= 200.)]
     #Combine l=150 locations into a single location
     if _COMBINEL150:
         locs= numpy.array(list(set(data['LOCATION'])))

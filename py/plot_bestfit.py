@@ -107,14 +107,14 @@ def plot_bestfit(parser):
                                                             thesedata,
                                                             df,options,
                                                             thislogpiso,
-                                                            thislogpisodwarf)),
+                                                            thislogpisodwarf,iso)),
                                       range(options.nvlos),
                                       numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
         else:
             for jj in range(options.nvlos):
                 print jj
                 pvlos[jj]= pvlosplate(params,vlos[jj],thesedata,df,options,
-                                      thislogpiso,thislogpisodwarf)
+                                      thislogpiso,thislogpisodwarf,iso)
         pvlos-= logsumexp(pvlos)
         pvlos= numpy.exp(pvlos)
         #Calculate mean and velocity dispersion

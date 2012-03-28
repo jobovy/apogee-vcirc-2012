@@ -18,7 +18,7 @@ from fitvc import mloglike, _dm, \
     _BINTEGRATEDMAX, _BINTEGRATEDMIN, _BINTEGRATENBINS, \
     _BINTEGRATEDMAX_DWARF, _BINTEGRATEDMIN_DWARF
 from compareDataModel import pvlosplate
-def calc_model(params,options,data,logpiso,logpisodwarf,df,nlocs,locations):
+def calc_model(params,options,data,logpiso,logpisodwarf,df,nlocs,locations,iso):
     avg_plate_model= numpy.zeros(nlocs)
     for ii in range(nlocs):
         #Calculate vlos | los
@@ -36,7 +36,7 @@ def calc_model(params,options,data,logpiso,logpisodwarf,df,nlocs,locations):
                                                             thesedata,
                                                             df,options,
                                                             thislogpiso,
-                                                            thislogpisodwarf)),
+                                                            thislogpisodwarf,iso)),
                                       range(options.nvlos),
                                       numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
         else:
@@ -125,7 +125,7 @@ def plot_internalcomparison(parser):
         logpisodwarf= None
     avg_plate_model_fid= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
-                                df,nlocs,locations)
+                                df,nlocs,locations,iso)
     #Plot everything
     bovy_plot.bovy_print(fig_height=10.,fig_width=7.)
     dx= 0.8/9.
@@ -190,7 +190,7 @@ def plot_internalcomparison(parser):
     options.hr= 2.
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
-                                df,nlocs,locations)
+                                df,nlocs,locations,iso)
     left, bottom, width, height= 0.1, 0.9-2.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
@@ -222,7 +222,7 @@ def plot_internalcomparison(parser):
     options.hr= 4.
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
-                                df,nlocs,locations)
+                                df,nlocs,locations,iso)
     left, bottom, width, height= 0.1, 0.9-3.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
@@ -255,7 +255,7 @@ def plot_internalcomparison(parser):
     options.hs= 5.
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
-                                df,nlocs,locations)
+                                df,nlocs,locations,iso)
     left, bottom, width, height= 0.1, 0.9-4.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
@@ -289,7 +289,7 @@ def plot_internalcomparison(parser):
     params[2]= -1.5
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
-                                df,nlocs,locations)
+                                df,nlocs,locations,iso)
     left, bottom, width, height= 0.1, 0.9-5.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
@@ -369,7 +369,7 @@ def plot_internalcomparison(parser):
         siga_plate[ii]= numpy.std(data['VHELIO'][indx])/numpy.sqrt(numpy.sum(indx))
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
-                                df,nlocs,locations)
+                                df,nlocs,locations,iso)
     left, bottom, width, height= 0.1, 0.9-6.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
@@ -447,7 +447,7 @@ def plot_internalcomparison(parser):
         siga_plate[ii]= numpy.std(data['VHELIO'][indx])/numpy.sqrt(numpy.sum(indx))
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
-                                df,nlocs,locations)
+                                df,nlocs,locations,iso)
     left, bottom, width, height= 0.1, 0.9-7.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
@@ -523,7 +523,7 @@ def plot_internalcomparison(parser):
         siga_plate[ii]= numpy.std(data['VHELIO'][indx])/numpy.sqrt(numpy.sum(indx))
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
-                                df,nlocs,locations)
+                                df,nlocs,locations,iso)
     left, bottom, width, height= 0.1, 0.9-8.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)

@@ -17,7 +17,7 @@ from readVclosData import readVclosData
 import isomodel
 _PLOTZERO= False
 _PLOTALLJHK= False
-def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf):
+def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf,iso):
     """
     NAME:
        pvlosplate
@@ -60,7 +60,7 @@ def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf):
                    cosb,
                    sinb,
                    logpiso,
-                   logpisodwarf,True,None,None) #None iso for now
+                   logpisodwarf,True,None,iso) #None iso for now
     #indx= (out >= -0.1)*(out <= 0.1)
     #print out[indx], jk[indx], h[indx]
     return logsumexp(out)
@@ -207,6 +207,17 @@ if __name__ == '__main__':
     #HACK
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
+    #Fit parameters
+    if options.dwarf:
+        params= [270./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.025,0.5,1.]
+    else:
+        params= [270./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.025,0.5]
+    if not options.init is None:
+        #Load initial parameters from file
+        savefile= open(options.init,'rb')
+        params= pickle.load(savefile)
+        savefile.close()
+    #params[2]= -2#numpy.log(20./235.)
     #Set up the isochrone
     print "Setting up the isochrone model ..."
     iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,expsfh=options.expsfh)
@@ -223,20 +234,48 @@ if __name__ == '__main__':
                        _BINTEGRATENBINS)
     dm= _dm(ds)
     for ii in range(len(data)):
-        mh= data['H0MAG'][ii]-dm
-        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
-                              +(data['J0MAG']-data['K0MAG'])[ii],mh)
+        if options.fitah:
+            ah= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
+            if options.fitahinnerouter and data[ii]['GLON'] < 35.: ah= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitah+options.fitdm]
+            mh= data['H0MAG'][ii]-dm+ah
+            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+                                  +(data['J0MAG']-data['K0MAG'])[ii]
+                                  +1.5/1.55*ah,mh)
+        elif options.fitdm:
+            pass
+        else:
+            mh= data['H0MAG'][ii]-dm
+            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+                                  +(data['J0MAG']-data['K0MAG'])[ii],mh)
     if options.dwarf:
         logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
         dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
                                     _BINTEGRATENBINS)
         dm= _dm(dwarfds)
         for ii in range(len(data)):
-            mh= data['H0MAG'][ii]-dm
-            logpisodwarf[ii,:]= iso[1](numpy.zeros(_BINTEGRATENBINS)
-                                       +(data['J0MAG']-data['K0MAG'])[ii],mh)
+            if options.fitah:
+                ah= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
+                if options.fitahinnerouter and data[ii]['GLON'] < 35.: ah= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitah+options.fitdm]
+                mh= data['H0MAG'][ii]-dm+ah
+                logpisodwarf[ii,:]= iso[1](numpy.zeros(_BINTEGRATENBINS)
+                                           +(data['J0MAG']-data['K0MAG'])[ii]
+                                           +1.5/1.55*ah,mh)
+            elif options.fitdm:
+                pass
+            else:
+                mh= data['H0MAG'][ii]-dm
+                logpisodwarf[ii,:]= iso[1](numpy.zeros(_BINTEGRATENBINS)
+                                           +(data['J0MAG']-data['K0MAG'])[ii],mh)
     else:
         logpisodwarf= None
+    if options.fitah:
+        params= list(params)
+        params.pop(5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter)
+        options.fitah= False
+        if options.fitahinnerouter:
+            params.pop(5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitah+options.fitdm)
+            options.fitahinnerouter= False
+        params= numpy.array(params)
     #test
     if options.plottype.lower() == 'pvloslos':
         for location in locations:
@@ -247,17 +286,6 @@ if __name__ == '__main__':
                 thislogpisodwarf= logpisodwarf[indx,:]
             else:
                 thislogpisodwarf= None
-            #Fit parameters
-            if options.dwarf:
-                params= [270./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.025,0.5,1.]
-            else:
-                params= [270./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.025,0.5]
-            if not options.init is None:
-                #Load initial parameters from file
-                savefile= open(options.init,'rb')
-                params= pickle.load(savefile)
-                savefile.close()
-            #params[2]= -2#numpy.log(20./235.)
             #Calculate vlos | los
             vlos= numpy.linspace(-200.,200.,options.nvlos)
             pvlos= numpy.zeros(options.nvlos)
@@ -265,14 +293,14 @@ if __name__ == '__main__':
                 pvlos= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
                                                                 thesedata,df,options,
                                                                 thislogpiso,
-                                                                thislogpisodwarf)),
+                                                                thislogpisodwarf,iso)),
                                           range(options.nvlos),
                                           numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
             else:
                 for ii in range(options.nvlos):
                     print ii
                     pvlos[ii]= pvlosplate(params,vlos[ii],thesedata,df,options,
-                                          thislogpiso,thislogpisodwarf)
+                                          thislogpiso,thislogpisodwarf,iso)
             pvlos-= logsumexp(pvlos)
             pvlos= numpy.exp(pvlos)
             if _PLOTZERO:
@@ -282,14 +310,14 @@ if __name__ == '__main__':
                     pvloszero= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
                                                                         thesedata,df,options,
                                                                         thislogpiso,
-                                                                        thislogpisodwarf)),
+                                                                        thislogpisodwarf,iso)),
                                                   range(options.nvlos),
                                                   numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
                 else:
                     for ii in range(options.nvlos):
                         print ii
                         pvloszero[ii]= pvlosplate(params,vlos[ii],thesedata,df,options,
-                                                  thislogpiso,thislogpisodwarf)
+                                                  thislogpiso,thislogpisodwarf,iso)
                 pvloszero-= logsumexp(pvloszero)
                 pvloszero= numpy.exp(pvloszero)
             if _PLOTALLJHK:
@@ -301,14 +329,14 @@ if __name__ == '__main__':
                     pvlosalljhk= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
                                                                           alljhkdata,df,options,
                                                                           logpiso,
-                                                                        logpisodwarf)),
+                                                                        logpisodwarf,iso)),
                                                   range(options.nvlos),
                                                   numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
                 else:
                     for ii in range(options.nvlos):
                         print ii
                         pvlosalljhk[ii]= pvlosplate(params,vlos[ii],alljhkdata,df,options,
-                                                    logpiso,logpisodwarf)
+                                                    logpiso,logpisodwarf,iso)
                 pvlosalljhk-= logsumexp(pvlosalljhk)
                 pvlosalljhk= numpy.exp(pvlosalljhk)
             #Plot data
