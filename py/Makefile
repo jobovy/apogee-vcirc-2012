@@ -199,7 +199,7 @@ loc4240_simpledrift_noro_dwarf_vpec_sratio:
 	--dwarf --fitvpec --fitsratio --location=4240
 
 all_simpledrift_noro_dwarf_vpec_sratio_dm_innerouterdm:
-	$(PYTHON) fitvc.py --fitdm --nooutliermean \
+	$(PYTHON) fitvc.py --fitdm --nooutliermean --Z=0.017 \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_innerouterdm.sav \
 	--noroprior --dwarf --fitvpec --fitsratio --fitdminnerouter \
 	--dfmodel=simplegaussiandrift --fitsrinnerouter --dwarfinnerouter
@@ -207,6 +207,6 @@ all_simpledrift_noro_dwarf_vpec_sratio_dm_innerouterdm:
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_innerouterdm_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_innerouterdm.sav \
 	 --mcsample --nsamples=$(NSAMPLES) --fitdminnerouter \
-	--noroprior --dfmodel=simplegaussiandrift \
+	--noroprior --dfmodel=simplegaussiandrift --Z=0.017 \
 	--dwarf --fitvpec --fitsratio --fitsrinnerouter --dwarfinnerouter
 

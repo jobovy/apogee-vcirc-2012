@@ -242,7 +242,11 @@ if __name__ == '__main__':
                                   +(data['J0MAG']-data['K0MAG'])[ii]
                                   +1.5/1.55*ah,mh)
         elif options.fitdm:
-            pass
+            if not options.fitdminnerouter or data[ii]['GLON'] >= 35.: xtra= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
+            if options.fitdminnerouter and data[ii]['GLON'] < 35.: xtra= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah]
+            mh= data[ii]['H0MAG']-dm+xtra
+            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+                                  +(data['J0MAG']-data['K0MAG'])[ii],mh)
         else:
             mh= data['H0MAG'][ii]-dm
             logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
@@ -275,6 +279,14 @@ if __name__ == '__main__':
         if options.fitahinnerouter:
             params.pop(5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitah+options.fitdm)
             options.fitahinnerouter= False
+        params= numpy.array(params)
+    if options.fitdm:
+        params= list(params)
+        params.pop(5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter)
+        options.fitdm= False
+        if options.fitdminnerouter:
+            params.pop(5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitah+options.fitdm)
+            options.fitdminnerouter= False
         params= numpy.array(params)
     #test
     if options.plottype.lower() == 'pvloslos':
