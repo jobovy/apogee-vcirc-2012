@@ -91,7 +91,7 @@ def createFakeData(parser):
                                cosb,
                                sinb,
                                logpiso,
-                               thislogpisodwarf,True,None)
+                               thislogpisodwarf,True,None,None)
     for ii in range(len(data)):
         pvlos[ii,:]-= logsumexp(pvlos[ii,:])
         pvlos[ii,:]= numpy.exp(pvlos[ii,:])

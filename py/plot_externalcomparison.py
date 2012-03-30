@@ -14,42 +14,12 @@ import multiprocessing
 import isomodel
 from readVclosData import readVclosData
 from fitvc import mloglike, _dm, \
-    _DEGTORAD, _REFV0, _REFR0, \
+    _DEGTORAD, _REFV0, _REFR0, _PMSGRA, \
     _BINTEGRATEDMAX, _BINTEGRATEDMIN, _BINTEGRATENBINS, \
     _BINTEGRATEDMAX_DWARF, _BINTEGRATEDMIN_DWARF
 from compareDataModel import pvlosplate
-def calc_model(params,options,data,logpiso,logpisodwarf,df,nlocs,locations,iso):
-    avg_plate_model= numpy.zeros(nlocs)
-    for ii in range(nlocs):
-        #Calculate vlos | los
-        indx= (data['LOCATION'] == locations[ii])
-        thesedata= data[indx]
-        thislogpiso= logpiso[indx,:]
-        if options.dwarf:
-            thislogpisodwarf= logpisodwarf[indx,:]
-        else:
-            thislogpisodwarf= None
-        vlos= numpy.linspace(-200.,200.,options.nvlos)
-        pvlos= numpy.zeros(options.nvlos)
-        if not options.multi is None:
-            pvlos= multi.parallel_map((lambda x: pvlosplate(params,vlos[x],
-                                                            thesedata,
-                                                            df,options,
-                                                            thislogpiso,
-                                                            thislogpisodwarf,iso)),
-                                      range(options.nvlos),
-                                      numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),options.multi]))
-        else:
-            for jj in range(options.nvlos):
-                print jj
-                pvlos[jj]= pvlosplate(params,vlos[jj],thesedata,df,options,
-                                      thislogpiso,thislogpisodwarf)
-        pvlos-= logsumexp(pvlos)
-        pvlos= numpy.exp(pvlos)
-        #Calculate mean and velocity dispersion
-        avg_plate_model[ii]= numpy.sum(vlos*pvlos)
-    return avg_plate_model
-def plot_internalcomparison(parser):
+from plot_internalcomparison import calc_model
+def plot_externalcomparison(parser):
     (options,args)= parser.parse_args()
     if len(args) == 0 or options.plotfilename is None:
         parser.print_help()
@@ -127,7 +97,7 @@ def plot_internalcomparison(parser):
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
     #Plot everything
-    bovy_plot.bovy_print(fig_height=10.,fig_width=7.)
+    bovy_plot.bovy_print(fig_height=6.,fig_width=7.)
     dx= 0.8/9.
     left, bottom, width, height= 0.1, 0.9, 0.8, dx
     axTop= pyplot.axes([left,bottom,width,height])
@@ -150,13 +120,13 @@ def plot_internalcomparison(parser):
     #pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
-    #Second is Dehnen
-    fid_dfmodel= options.dfmodel
-    options.dfmodel= 'dehnen'
-    avg_plate_model= avg_plate_model_fid 
-    #avg_plate_model= calc_model(params,options,data,
-    #                            logpiso,logpisodwarf,
-    #                            df,nlocs,locations,iso)
+    #Second is flat
+    fid_slope= params[5-options.nooutliermean+options.dwarf]
+    params[5-options.nooutliermean+options.dwarf]= 0.
+    avg_plate_model= calc_model(params,options,data,
+                                logpiso,logpisodwarf,
+                                df,nlocs,locations,iso)
+    params[5-options.nooutliermean+options.dwarf]= fid_slope
     left, bottom, width, height= 0.1, 0.9-dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
@@ -175,7 +145,8 @@ def plot_internalcomparison(parser):
     pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$\mathrm{Dehnen\ DF}$',top_right=True,size=14.)
+    bovy_plot.bovy_text(r'$\mathrm{flat\ rotation\ curve}$',
+                        top_right=True,size=14.)
     #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
@@ -184,10 +155,44 @@ def plot_internalcomparison(parser):
     #pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
-    #Third = hR= 2. kpc
-    fid_hr= options.hr
-    options.dfmodel= fid_dfmodel
-    options.hr= 2.
+    #Second is vc=250
+    fid_vc= params[0]
+    params[0]= 250./_REFV0
+    avg_plate_model= calc_model(params,options,data,
+                                logpiso,logpisodwarf,
+                                df,nlocs,locations,iso)
+    left, bottom, width, height= 0.1, 0.9-dx, 0.8, dx
+    thisax= pyplot.axes([left,bottom,width,height])
+    allaxes.append(thisax)
+    fig.sca(thisax)
+    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,
+                        zorder=-1)
+    bovy_plot.bovy_plot(l_plate,
+                        avg_plate-avg_plate_model_fid,
+                        'o',overplot=True,color='0.6')
+    pyplot.errorbar(l_plate,avg_plate-avg_plate_model_fid,
+                    yerr=siga_plate,marker='o',color='0.6',
+                    linestyle='none',elinestyle='-')
+    bovy_plot.bovy_plot(l_plate,
+                        avg_plate-avg_plate_model,
+                        'o',overplot=True,color='k')
+    pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
+                    yerr=siga_plate,marker='o',color='k',
+                    linestyle='none',elinestyle='-')
+    bovy_plot.bovy_text(r'$v_c(R_0) = 250\ \mathrm{km\ s}^{-1}$',
+                        top_right=True,size=14.)
+    pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    pyplot.ylim(-14.5,14.5)
+    pyplot.xlim(0.,360.)
+    bovy_plot._add_ticks()
+    thisax.xaxis.set_major_formatter(nullfmt)
+    #pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
+    pyplot.xlim(0.,360.)
+    bovy_plot._add_ticks()
+    #Third = R= 8.5
+    fid_Ro= params[1]
+    params[1]= 8.5/_REFR0
+    params[0]= fid_vc/fid_Ro*params[1]
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
@@ -208,7 +213,7 @@ def plot_internalcomparison(parser):
     pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$h_R = 2\ \mathrm{kpc}$',top_right=True,size=14.)
+    bovy_plot.bovy_text(r'$R_0 = 8.5\ \mathrm{kpc}$',top_right=True,size=14.)
     #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
@@ -217,9 +222,11 @@ def plot_internalcomparison(parser):
     #pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
-    #Fourth = hR= 4. kpc
-    options.dfmodel= fid_dfmodel
-    options.hr= 4.
+    #Fourth = vpec=SBD10
+    params[0]= fid_vc
+    params[1]= fid_Ro
+    params[5-options.nooutliermean+options.dwarf+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')]= 1.
+    params[6-options.nooutliermean+options.dwarf+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')]= (params[0]*_REFV0+12.24)/params[1]/_REFR0/_PMSGRA
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
@@ -240,313 +247,13 @@ def plot_internalcomparison(parser):
     pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$h_R = 4\ \mathrm{kpc}$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    bovy_plot.bovy_text(r'$\vec{v}_\odot = \vec{v}_c(R_0) + \mathrm{SBD10}$',
+                        top_right=True,size=14.)
+    pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
     thisax.xaxis.set_major_formatter(nullfmt)
-    #pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
-    pyplot.xlim(0.,360.)
-    bovy_plot._add_ticks()
-    #Fifth = hs= 5. kpc
-    fid_hs= options.hs
-    options.hr= fid_hr
-    options.hs= 5.
-    avg_plate_model= calc_model(params,options,data,
-                                logpiso,logpisodwarf,
-                                df,nlocs,locations,iso)
-    left, bottom, width, height= 0.1, 0.9-4.*dx, 0.8, dx
-    thisax= pyplot.axes([left,bottom,width,height])
-    allaxes.append(thisax)
-    fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
-    bovy_plot.bovy_plot(l_plate,
-                        avg_plate-avg_plate_model_fid,
-                        'o',overplot=True,color='0.6')
-    pyplot.errorbar(l_plate,avg_plate-avg_plate_model_fid,
-                    yerr=siga_plate,marker='o',color='0.6',
-                    linestyle='none',elinestyle='-')
-    bovy_plot.bovy_plot(l_plate,
-                        avg_plate-avg_plate_model,
-                        'o',overplot=True,color='k')
-    pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
-                    yerr=siga_plate,marker='o',color='k',
-                    linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$h_\sigma = 5\ \mathrm{kpc}$',top_right=True,size=14.)
-    pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}\ [\mathrm{km\ s}^{-1}]$')
-    pyplot.ylim(-14.5,14.5)
-    pyplot.xlim(0.,360.)
-    bovy_plot._add_ticks()
-    thisax.xaxis.set_major_formatter(nullfmt)
-    #pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
-    pyplot.xlim(0.,360.)
-    bovy_plot._add_ticks()
-    #Sixth: multiple pops
-    options.hs= fid_hs
-    options.dfmodel= 'multiplepops'
-    fid_params=copy.copy(params)
-    params[2]= -1.5
-    avg_plate_model= calc_model(params,options,data,
-                                logpiso,logpisodwarf,
-                                df,nlocs,locations,iso)
-    left, bottom, width, height= 0.1, 0.9-5.*dx, 0.8, dx
-    thisax= pyplot.axes([left,bottom,width,height])
-    allaxes.append(thisax)
-    fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
-    bovy_plot.bovy_plot(l_plate,
-                        avg_plate-avg_plate_model_fid,
-                        'o',overplot=True,color='0.6')
-    pyplot.errorbar(l_plate,avg_plate-avg_plate_model_fid,
-                    yerr=siga_plate,marker='o',color='0.6',
-                    linestyle='none',elinestyle='-')
-    bovy_plot.bovy_plot(l_plate,
-                        avg_plate-avg_plate_model,
-                        'o',overplot=True,color='k')
-    pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
-                    yerr=siga_plate,marker='o',color='k',
-                    linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$\mathrm{Multiple\ populations,\ SFR} = \exp\left( -t/8\ \mathrm{Gyr}\right)$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
-    pyplot.ylim(-14.5,14.5)
-    pyplot.xlim(0.,360.)
-    bovy_plot._add_ticks()
-    thisax.xaxis.set_major_formatter(nullfmt)
-    #pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
-    pyplot.xlim(0.,360.)
-    bovy_plot._add_ticks()
-    #Seventh: cut multiples
-    options.dfmodel= fid_dfmodel
-    params= fid_params
-    #Read the data
-    print "Reading the data ..."
-    data= readVclosData(postshutdown=options.postshutdown,
-                        fehcut=options.fehcut,
-                        cohort=options.cohort,
-                        lmin=options.lmin,
-                        bmax=options.bmax,
-                        ak=True,
-                        cutmultiples=True,
-                        jkmax=options.jkmax)
-    #HACK
-    indx= (data['J0MAG']-data['K0MAG'] < 0.5)
-    data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
-    print "Pre-calculating isochrone distance prior ..."
-    logpiso= numpy.zeros((len(data),_BINTEGRATENBINS))
-    ds= numpy.linspace(_BINTEGRATEDMIN,_BINTEGRATEDMAX,
-                       _BINTEGRATENBINS)
-    dm= _dm(ds)
-    for ii in range(len(data)):
-        mh= data['H0MAG'][ii]-dm
-        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
-                              +(data['J0MAG']-data['K0MAG'])[ii],mh)
-    if options.dwarf:
-        logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
-        dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
-                                    _BINTEGRATENBINS)
-        dm= _dm(dwarfds)
-        for ii in range(len(data)):
-            mh= data['H0MAG'][ii]-dm
-            logpisodwarf[ii,:]= iso[1](numpy.zeros(_BINTEGRATENBINS)
-                                       +(data['J0MAG']-data['K0MAG'])[ii],mh)
-    else:
-        logpisodwarf= None
-    l_plate_fid= l_plate
-    avg_plate_fid= avg_plate
-    siga_plate_fid= siga_plate
-    locations= list(set(data['LOCATION']))
-    nlocs= len(locations)
-    l_plate= numpy.zeros(nlocs)
-    avg_plate= numpy.zeros(nlocs)
-    sig_plate= numpy.zeros(nlocs)
-    siga_plate= numpy.zeros(nlocs)
-    for ii in range(nlocs):
-        indx= (data['LOCATION'] == locations[ii])
-        l_plate[ii]= numpy.mean(data['GLON'][indx])
-        avg_plate[ii]= numpy.mean(data['VHELIO'][indx])
-        sig_plate[ii]= numpy.std(data['VHELIO'][indx])
-        siga_plate[ii]= numpy.std(data['VHELIO'][indx])/numpy.sqrt(numpy.sum(indx))
-    avg_plate_model= calc_model(params,options,data,
-                                logpiso,logpisodwarf,
-                                df,nlocs,locations,iso)
-    left, bottom, width, height= 0.1, 0.9-6.*dx, 0.8, dx
-    thisax= pyplot.axes([left,bottom,width,height])
-    allaxes.append(thisax)
-    fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
-    bovy_plot.bovy_plot(l_plate_fid,
-                        avg_plate_fid-avg_plate_model_fid,
-                        'o',overplot=True,color='0.6')
-    pyplot.errorbar(l_plate_fid,avg_plate_fid-avg_plate_model_fid,
-                    yerr=siga_plate_fid,marker='o',color='0.6',
-                    linestyle='none',elinestyle='-')
-    bovy_plot.bovy_plot(l_plate,
-                        avg_plate-avg_plate_model,
-                        'o',overplot=True,color='k')
-    pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
-                    yerr=siga_plate,marker='o',color='k',
-                    linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$\mathrm{Multiple\ visit\ dispersion} < 1\ \mathrm{km\ s}^{-1}$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
-    pyplot.ylim(-14.5,14.5)
-    pyplot.xlim(0.,360.)
-    bovy_plot._add_ticks()
-    thisax.xaxis.set_major_formatter(nullfmt)
-    #pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
-    pyplot.xlim(0.,360.)
-    bovy_plot._add_ticks()
-    #Eight b=2
-    options.dfmodel= fid_dfmodel
-    params= fid_params
-    #Read the data
-    print "Reading the data ..."
-    data= readVclosData(postshutdown=options.postshutdown,
-                        fehcut=options.fehcut,
-                        cohort=options.cohort,
-                        lmin=options.lmin,
-                        bmax=10.,
-                        meanb=4.,
-                        ak=True,
-                        cutmultiples=options.cutmultiples,
-                        jkmax=options.jkmax)
-    #HACK
-    indx= (data['J0MAG']-data['K0MAG'] < 0.5)
-    data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
-    print "Pre-calculating isochrone distance prior ..."
-    logpiso= numpy.zeros((len(data),_BINTEGRATENBINS))
-    ds= numpy.linspace(_BINTEGRATEDMIN,_BINTEGRATEDMAX,
-                       _BINTEGRATENBINS)
-    dm= _dm(ds)
-    for ii in range(len(data)):
-        mh= data['H0MAG'][ii]-dm
-        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
-                              +(data['J0MAG']-data['K0MAG'])[ii],mh)
-    if options.dwarf:
-        logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
-        dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
-                                    _BINTEGRATENBINS)
-        dm= _dm(dwarfds)
-        for ii in range(len(data)):
-            mh= data['H0MAG'][ii]-dm
-            logpisodwarf[ii,:]= iso[1](numpy.zeros(_BINTEGRATENBINS)
-                                       +(data['J0MAG']-data['K0MAG'])[ii],mh)
-    else:
-        logpisodwarf= None
-    locations= list(set(data['LOCATION']))
-    nlocs= len(locations)
-    l_plate= numpy.zeros(nlocs)
-    avg_plate= numpy.zeros(nlocs)
-    sig_plate= numpy.zeros(nlocs)
-    siga_plate= numpy.zeros(nlocs)
-    for ii in range(nlocs):
-        indx= (data['LOCATION'] == locations[ii])
-        l_plate[ii]= numpy.mean(data['GLON'][indx])
-        avg_plate[ii]= numpy.mean(data['VHELIO'][indx])
-        sig_plate[ii]= numpy.std(data['VHELIO'][indx])
-        siga_plate[ii]= numpy.std(data['VHELIO'][indx])/numpy.sqrt(numpy.sum(indx))
-    avg_plate_model= calc_model(params,options,data,
-                                logpiso,logpisodwarf,
-                                df,nlocs,locations,iso)
-    left, bottom, width, height= 0.1, 0.9-7.*dx, 0.8, dx
-    thisax= pyplot.axes([left,bottom,width,height])
-    allaxes.append(thisax)
-    fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
-    bovy_plot.bovy_plot(l_plate_fid,
-                        avg_plate_fid-avg_plate_model_fid,
-                        'o',overplot=True,color='0.6')
-    pyplot.errorbar(l_plate_fid,avg_plate_fid-avg_plate_model_fid,
-                    yerr=siga_plate_fid,marker='o',color='0.6',
-                    linestyle='none',elinestyle='-')
-    bovy_plot.bovy_plot(l_plate,
-                        avg_plate-avg_plate_model,
-                        'o',overplot=True,color='k')
-    pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
-                    yerr=siga_plate,marker='o',color='k',
-                    linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$b = 4^\circ\ \mathrm{fields}$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
-    pyplot.ylim(-14.5,14.5)
-    pyplot.xlim(0.,360.)
-    bovy_plot._add_ticks()
-    thisax.xaxis.set_major_formatter(nullfmt)
-    #pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
-    pyplot.xlim(0.,360.)
-    bovy_plot._add_ticks()
-    #Nintht b=-2
-    #Read the data
-    print "Reading the data ..."
-    data= readVclosData(postshutdown=options.postshutdown,
-                        fehcut=options.fehcut,
-                        cohort=options.cohort,
-                        lmin=options.lmin,
-                        bmax=10.,
-                        meanb=-4.,
-                        ak=True,
-                        cutmultiples=options.cutmultiples,
-                        jkmax=options.jkmax)
-    #HACK
-    indx= (data['J0MAG']-data['K0MAG'] < 0.5)
-    data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
-    print "Pre-calculating isochrone distance prior ..."
-    logpiso= numpy.zeros((len(data),_BINTEGRATENBINS))
-    ds= numpy.linspace(_BINTEGRATEDMIN,_BINTEGRATEDMAX,
-                       _BINTEGRATENBINS)
-    dm= _dm(ds)
-    for ii in range(len(data)):
-        mh= data['H0MAG'][ii]-dm
-        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
-                              +(data['J0MAG']-data['K0MAG'])[ii],mh)
-    if options.dwarf:
-        logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
-        dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
-                                    _BINTEGRATENBINS)
-        dm= _dm(dwarfds)
-        for ii in range(len(data)):
-            mh= data['H0MAG'][ii]-dm
-            logpisodwarf[ii,:]= iso[1](numpy.zeros(_BINTEGRATENBINS)
-                                       +(data['J0MAG']-data['K0MAG'])[ii],mh)
-    else:
-        logpisodwarf= None
-    locations= list(set(data['LOCATION']))
-    nlocs= len(locations)
-    l_plate= numpy.zeros(nlocs)
-    avg_plate= numpy.zeros(nlocs)
-    sig_plate= numpy.zeros(nlocs)
-    siga_plate= numpy.zeros(nlocs)
-    for ii in range(nlocs):
-        indx= (data['LOCATION'] == locations[ii])
-        l_plate[ii]= numpy.mean(data['GLON'][indx])
-        avg_plate[ii]= numpy.mean(data['VHELIO'][indx])
-        sig_plate[ii]= numpy.std(data['VHELIO'][indx])
-        siga_plate[ii]= numpy.std(data['VHELIO'][indx])/numpy.sqrt(numpy.sum(indx))
-    avg_plate_model= calc_model(params,options,data,
-                                logpiso,logpisodwarf,
-                                df,nlocs,locations,iso)
-    left, bottom, width, height= 0.1, 0.9-8.*dx, 0.8, dx
-    thisax= pyplot.axes([left,bottom,width,height])
-    allaxes.append(thisax)
-    fig.sca(thisax)
-    bovy_plot.bovy_plot([0.,360.],[0.,0.],'-',color='0.5',overplot=True,zorder=-1)
-    bovy_plot.bovy_plot(l_plate_fid,
-                        avg_plate_fid-avg_plate_model_fid,
-                        'o',overplot=True,color='0.6')
-    pyplot.errorbar(l_plate_fid,avg_plate_fid-avg_plate_model_fid,
-                    yerr=siga_plate_fid,marker='o',color='0.6',
-                    linestyle='none',elinestyle='-')
-    bovy_plot.bovy_plot(l_plate,
-                        avg_plate-avg_plate_model,
-                        'o',overplot=True,color='k')
-    pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
-                    yerr=siga_plate,marker='o',color='k',
-                    linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$b = -4^\circ\ \mathrm{fields}$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
-    pyplot.ylim(-14.5,14.5)
-    pyplot.xlim(0.,360.)
-    bovy_plot._add_ticks()
-    #thisax.xaxis.set_major_formatter(nullfmt)
     pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
@@ -698,5 +405,5 @@ def get_options():
 
 if __name__ == '__main__':
     numpy.random.seed(1) #We need to seed to get, e.g., the same permutation when downsampling
-    plot_internalcomparison(get_options())
+    plot_externalcomparison(get_options())
 
