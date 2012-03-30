@@ -15,6 +15,7 @@ NSAMPLES=1000
 	all_simpledrift_noro_dwarf_vpec_sratio_dm_innerouterdm \
 	all_simpledrift_noro_dwarf_vpec_sratio_hs_innerouter \
 	all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_innerouter \
+	all_simpledrift_noro_dwarf_powerlaw_vpec_sratioinnerouter_innerouter \
 	all_multiplepops_noro_dwarf_vpec_sratio \
 	loc4240_simpledrift_noro_dwarf_vpec_sratio \
 	allwoloc4240_simpledrift_noro_dwarf_vpec_sratio
@@ -114,6 +115,18 @@ all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_innerouter:
 	 --mcsample --nsamples=$(NSAMPLES) --rotcurve=powerlaw \
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio --fitsrinnerouter --dwarfinnerouter
+
+all_simpledrift_noro_dwarf_powerlaw_vpec_sratioinnerouter_innerouter:
+	$(PYTHON) fitvc.py --nooutliermean \
+	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratioinnerouter_innerouter.sav \
+	--noroprior --dwarf --fitvpec --fitsratioinnerouter --rotcurve=powerlaw \
+	--dfmodel=simplegaussiandrift --fitsrinnerouter --dwarfinnerouter
+	$(PYTHON) fitvc.py --nooutliermean \
+	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratioinnerouter_innerouter_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratioinnerouter_innerouter.sav \
+	 --mcsample --nsamples=$(NSAMPLES) --rotcurve=powerlaw \
+	--noroprior --dfmodel=simplegaussiandrift \
+	--dwarf --fitvpec --fitsratioinnerouter --fitsrinnerouter --dwarfinnerouter
 
 all_simpledrift_noro_dwarf_vpec_sratioinnerouter:
 	$(PYTHON) fitvc.py \

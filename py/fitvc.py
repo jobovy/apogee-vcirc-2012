@@ -733,6 +733,13 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
                 *numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)          
             slos[innerl]= numpy.exp(params[2])/params[0]\
                 *numpy.sqrt(1.+sinlt[innerl]**2.*(params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R[innerl]-1.)/thishs*params[1]*_REFR0)          
+            if options.fitsrinnerouter and not numpy.all(R == 1.): #Don't do this for dwarfs
+                innerl= (l < 35.*_DEGTORAD)
+                slos[innerl]*= numpy.exp(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths])
+                va[innerl]= asymmetricDriftModel.va(R[innerl],numpy.exp(params[2]+params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fiths])/params[0],
+                                                    hR=options.hr/params[1]/_REFR0,
+                                                    hs=thishs/params[1]/_REFR0,
+                                                    vc=_vc(params,R[innerl],options,vcf))*sinlt[innerl]
         else:
             slos= numpy.exp(params[2])/params[0]\
                 *numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)
