@@ -98,8 +98,8 @@ def plot_externalcomparison(parser):
                                 df,nlocs,locations,iso)
     #Plot everything
     bovy_plot.bovy_print(fig_height=6.,fig_width=7.)
-    dx= 0.8/9.
-    left, bottom, width, height= 0.1, 0.9, 0.8, dx
+    dx= 0.8/5.
+    left, bottom, width, height= 0.1, 0.9-dx, 0.8, dx
     axTop= pyplot.axes([left,bottom,width,height])
     allaxes= [axTop]
     fig= pyplot.gcf()
@@ -127,7 +127,7 @@ def plot_externalcomparison(parser):
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
     params[5-options.nooutliermean+options.dwarf]= fid_slope
-    left, bottom, width, height= 0.1, 0.9-dx, 0.8, dx
+    left, bottom, width, height= 0.1, 0.9-2.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
@@ -161,7 +161,7 @@ def plot_externalcomparison(parser):
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
-    left, bottom, width, height= 0.1, 0.9-dx, 0.8, dx
+    left, bottom, width, height= 0.1, 0.9-3.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
@@ -196,7 +196,7 @@ def plot_externalcomparison(parser):
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
-    left, bottom, width, height= 0.1, 0.9-2.*dx, 0.8, dx
+    left, bottom, width, height= 0.1, 0.9-4.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
@@ -230,7 +230,7 @@ def plot_externalcomparison(parser):
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
-    left, bottom, width, height= 0.1, 0.9-3.*dx, 0.8, dx
+    left, bottom, width, height= 0.1, 0.9-5.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
     allaxes.append(thisax)
     fig.sca(thisax)
@@ -249,11 +249,11 @@ def plot_externalcomparison(parser):
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$\vec{v}_\odot = \vec{v}_c(R_0) + \mathrm{SBD10}$',
                         top_right=True,size=14.)
-    pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
-    thisax.xaxis.set_major_formatter(nullfmt)
+    #thisax.xaxis.set_major_formatter(nullfmt)
     pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
