@@ -86,6 +86,8 @@ def fitvc(parser):
                         datafilename=options.fakedata)
     if not options.location is None:
         data= data[(data['LOCATION'] == options.location)]
+    if not options.removelocation is None:
+        data= data[(data['LOCATION'] != options.removelocation)]
     if not options.downsample is None:
         indx= numpy.random.permutation(len(data))[0:int(math.floor(len(data)/options.downsample))]
         data= data[indx]
@@ -1040,6 +1042,9 @@ def get_options():
                       help="readVclosData 'jkmax'")
     parser.add_option("--location",dest='location',default=None,type='int',
                       help="location id when looking at single los")
+    parser.add_option("--removelocation",
+                      dest='removelocation',default=None,type='int',
+                      help="location id to remove")
     parser.add_option("--downsample",dest='downsample',default=None,
                       type='float',
                       help="Factor with which to downsample the data")
