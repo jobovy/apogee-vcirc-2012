@@ -1,0 +1,20 @@
+FAKEDIR=../fake/
+FITSDIR=../fits/
+
+.PHONY:
+	fake \
+	fakedehnen
+
+fake:
+	$(PYTHON) createFakeData.py --nooutliermean \
+	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio.sav \
+	--noroprior --dwarf --fitvpec --fitsratio \
+	--dfmodel=simplegaussiandrift --rotcurve=powerlaw \
+	-o $(FAKEDIR)fake_simpledrift_noro.fits --nvlos=201
+
+fakedehnen:
+	$(PYTHON) createFakeData.py --nooutliermean \
+	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio.sav \
+	--noroprior --dwarf --fitvpec --fitsratio \
+	--dfmodel=dehnen --rotcurve=powerlaw \
+	-o $(FAKEDIR)fake_dehnendf_noro.fits --nvlos=201 -m 15

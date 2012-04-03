@@ -1,0 +1,10 @@
+FAKEDIR=../fake/
+
+.PHONY:
+	fake
+
+fake:
+	$(PYTHON) fitvc.py --nooutliermean \
+	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio.sav \
+	--noroprior --dwarf --fitvpec --fitsratio \
+	--dfmodel=simplegaussiandrift --rotcurve=powerlaw

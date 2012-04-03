@@ -142,7 +142,7 @@ def get_options():
                       help="readVclosData 'fehcut'")
     parser.add_option("--cohort",dest='cohort',default=None,
                       help="readVclosData 'cohort'")
-    parser.add_option("--jkmax",dest='jkmax',default=1.2,type='float',
+    parser.add_option("--jkmax",dest='jkmax',default=1.3,type='float',
                       help="readVclosData 'jkmax'")
     parser.add_option("--location",dest='location',default=4318,type='int',
                       help="location id when looking at single los (if 0, all los)")
