@@ -35,7 +35,7 @@ all_simpledrift_noro_dwarf_vpec_sratio_hs:
 
 all_simpledrift_noro_dwarf_vpec_sratio:
 	$(PYTHON) fitvc.py \
-	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio.sav \
 	--noroprior --dwarf --fitvpec --fitsratio \
 	--dfmodel=simplegaussiandrift
 	$(PYTHON) fitvc.py \
