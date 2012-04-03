@@ -1,5 +1,6 @@
-PRO create_aprvall, outfile=outfile, fromapvisit=fromapvisit
-redux= 'v0.91'
+PRO create_aprvall, outfile=outfile, fromapvisit=fromapvisit, redux=redux, $
+                    silent=silent
+if ~keyword_set(redux) then redux= 'v0.91'
 if ~keyword_set(outfile) then outfile='$DATADIR/bovy/apogee/apall-'+redux+'.fits'
 ;;Get all of the plates
 basedir= '$APOGEE_ROOT/spectro/'+redux+'/plates/'
@@ -8,6 +9,8 @@ foundFirst= 0
 for ii=0L, n_elements(plateDirs)-1 do begin
     mjdDirs= file_search(plateDirs[ii]+'/*',/test_directory)
     plate= (strsplit(plateDirs[ii],'/',/extract))[-1]
+    if ~keyword_set(silent) then print, format = '("Working on plate ",i4,a1,$)' $
+      , plate, string(13b)
     for jj=0L, n_elements(mjdDirs)-1 do begin
         mjd= (strsplit(mjdDirs[jj],'/',/extract))[-1]
         if keyword_set(fromapvisit) then begin
@@ -19,7 +22,12 @@ for ii=0L, n_elements(plateDirs)-1 do begin
                 apvisit= [apvisit,read_apvisit_header(apVisits[kk])]
             endfor
             ;;Add plPlugMap structure's relevant entries
-            plPlugMap= mrdfits(mjdDirs[jj]+'/apPlate-b-'+strtrim(string(plate,format='(I4)'),2)+'-'+strtrim(string(mjd,format='(I5)'),2)+'.fits',11,/silent)
+            plPlugMap= mrdfits(mjdDirs[jj]+'/apPlate-b-'+strtrim(string(plate,format='(I4)'),2)+'-'+strtrim(string(mjd,format='(I5)'),2)+'.fits',11,/silent,status=status)
+            if status lt 0 then begin
+                print, "plPugMap for this version not found, trying v0.91 ..."
+                plPlugMap= mrdfits(repstr(mjdDirs[jj]+'/apPlate-b-'+strtrim(string(plate,format='(I4)'),2)+'-'+strtrim(string(mjd,format='(I5)'),2)+'.fits','v1','v0.91'),11,/silent,status=status)
+                if status lt 0 then print, "plPlugMap not found ..."
+            endif
             match, apvisit.fiberid, plPlugMap.fiberid, suba, subb, /sort
             newtag= {apogee_target1:0L,apogee_target2:0L,objtype:''}
             newtag= replicate(newtag,n_elements(apvisit))
