@@ -310,7 +310,7 @@ def plot_nonaxi(parser):
     barfile= '/work/bovy/data/bovy/nonaximw/elliptical/el_rect_so_0.2_res_51_grid_101_tform_-150._tsteady_125._cp_0.05_nsigma_4.sav'
     avg_plate_bar= calc_nonaxi(params,barfile,options,
                                data,logpiso,
-                               nlocs,locations,90.*_DEGTORAD)
+                               nlocs,locations,-45.*_DEGTORAD)
     print avg_plate_bar
     left, bottom, width, height= 0.1, 0.9-5.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])

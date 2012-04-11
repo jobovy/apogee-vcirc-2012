@@ -35,6 +35,8 @@ def plot_bestfit(parser):
     #HACK
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
+    #Cut inner disk locations
+    #data= data[(data['GLON'] > 75.)]
     #Cut outliers
     #data= data[(data['VHELIO'] < 200.)*(data['VHELIO'] > -200.)]
     #Set up the isochrone
@@ -89,6 +91,8 @@ def plot_bestfit(parser):
     savefile= open(args[0],'rb')
     params= pickle.load(savefile)
     savefile.close()
+    #params[0]= 245./235.
+    #params[1]= 8.5/8.
     avg_plate_model= numpy.zeros(nlocs)
     sig_plate_model= numpy.zeros(nlocs)
     for ii in range(nlocs):
