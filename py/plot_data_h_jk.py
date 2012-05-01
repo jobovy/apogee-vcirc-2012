@@ -3,8 +3,8 @@ import os, os.path
 from galpy.util import bovy_plot
 from readVclosData import readVclosData
 OUTDIR= os.path.join(os.getenv('HOME'),'Desktop')
-#OUTDIR= os.path.join(os.getenv('HOME'),'Desktop','hjkfigs')
-OUTDIR= '../tex/'
+OUTDIR= os.path.join(os.getenv('HOME'),'Desktop','hjkfigs')
+#OUTDIR= '../tex/'
 OUTEXT= 'png'
 def plot_data_h_jk(location=None,
                    plotfilename=os.path.join(OUTDIR,'data_h_jk.'+OUTEXT)):
