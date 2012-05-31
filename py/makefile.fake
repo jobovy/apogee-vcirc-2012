@@ -1,20 +1,52 @@
 FAKEDIR=../fake/
 FITSDIR=../fits/
+NSAMPLES=1000
 
 .PHONY:
 	fake \
-	fakedehnen
+	fakedehnen \
+	fitfake \
+	fitfakedehnen
 
 fake:
-	$(PYTHON) createFakeData.py --nooutliermean \
-	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio.sav \
-	--noroprior --dwarf --fitvpec --fitsratio \
-	--dfmodel=simplegaussiandrift --rotcurve=powerlaw \
-	-o $(FAKEDIR)fake_simpledrift_noro.fits --nvlos=201
+	$(PYTHON) createFakeData.py \
+	-o $(FAKEDIR)fake_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
+	--nvlos=201 --dfmodel=simplegaussiandrift \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noro -m 15 --dwarf --fitvpec --fitsratio --fiths
+
+fitfake:
+	$(PYTHON) fitvc.py \
+	-f $(FAKEDIR)fake_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+	$(PYTHON) fitvc.py \
+	-f $(FAKEDIR)fake_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
 
 fakedehnen:
-	$(PYTHON) createFakeData.py --nooutliermean \
-	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio.sav \
-	--noroprior --dwarf --fitvpec --fitsratio \
-	--dfmodel=dehnen --rotcurve=powerlaw \
-	-o $(FAKEDIR)fake_dehnendf_noro.fits --nvlos=201 -m 15
+	$(PYTHON) createFakeData.py \
+	-o $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--nvlos=201 --dfmodel=dehnen \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noro -m 15 --dwarf --fitvpec --fitsratio --fiths
+
+fitfakedehnen_hr3:
+	$(PYTHON) fitvc.py \
+	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+	$(PYTHON) fitvc.py \
+	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
