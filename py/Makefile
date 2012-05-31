@@ -191,11 +191,11 @@ all_simpledrift_noro_dwarf_powerlaw_vpec_sratio:
 	--dwarf --fitvpec --fitsratio
 
 all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs:
-	$(PYTHON) fitvc.py --nooutliermean --fiths \
+	$(PYTHON) fitvc.py --fiths \
 	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav \
 	--noroprior --dwarf --fitvpec --fitsratio \
 	--dfmodel=simplegaussiandrift --rotcurve=powerlaw
-	$(PYTHON) fitvc.py --nooutliermean --fiths \
+	$(PYTHON) fitvc.py --fiths \
 	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav \
 	 --mcsample --nsamples=$(NSAMPLES) --rotcurve=powerlaw \
