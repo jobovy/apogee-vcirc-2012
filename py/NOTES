@@ -9,6 +9,12 @@ w/ Dehnen
 python createFakeData.py --dfmodel=dehnen ../fits/all_simpledrift_noro.sav -o ../fake/fake_simpledrift-dehnen_noro.fits --nvlos=201
 
 
+FLAT
+
+python createFakeData.py -o ../fake/fake_simpledrift_noro_dwarf_vpec_sratio_hs.fits --nvlos=201 --dfmodel=simplegaussiandrift ../fits/all_simpledrift_noro_dwarf_vpec_sratio_hs.sav --nvlos=201 --noro -m 15 --location=0 --dwarf --fitvpec --fitsratio --fiths
+
+python createFakeData.py -o ../fake/fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits --nvlos=201 --dfmodel=dehnen ../fits/all_simpledrift_noro_dwarf_vpec_sratio_hs.sav --nvlos=201 --noro -m 15 --location=0 --dwarf --fitvpec --fitsratio --fiths
+
 ###LOCATION PLOTS
 
 python compareDataModel.py --dfmodel=simplegaussiandrift --init=../fits/all_simpledrift_noro.sav -o ../tex/locations/all_simpledrift_noro --nvlos=201 -m 15 --location=0
