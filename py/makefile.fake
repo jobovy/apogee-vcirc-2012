@@ -37,6 +37,20 @@ fitfake:
 	--init=$(FAKEDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
 	--noro --dwarf --fitvpec --fitsratio --fiths
 
+fitfake2:
+	$(PYTHON) fitvc.py \
+	-f $(FAKEDIR)fake2_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all2_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+	$(PYTHON) fitvc.py \
+	-f $(FAKEDIR)fake2_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all2_simpledrift_noro_dwarf_vpec_sratio_hs_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all2_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
 fakedehnen:
 	$(PYTHON) createFakeData.py \
 	-o $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
