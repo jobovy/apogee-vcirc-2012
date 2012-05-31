@@ -31,7 +31,8 @@ def plot_bestfit(parser):
                         bmax=options.bmax,
                         ak=True,
                         cutmultiples=options.cutmultiples,
-                        jkmax=options.jkmax)
+                        jkmax=options.jkmax,
+                        datafilename=options.fakedata)
     #HACK
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]

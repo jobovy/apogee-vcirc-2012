@@ -171,7 +171,7 @@ all_simpledrift_noro_dwarf_quadratic_vpec_sratio_hs:
 	$(FITSDIR)all_simpledrift_noro_dwarf_quadratic_vpec_sratio_hs.sav \
 	--noroprior --dwarf --fitvpec --fitsratio \
 	--dfmodel=simplegaussiandrift --rotcurve=quadratic
-	$(PYTHON) fitvc.py \
+	$(PYTHON) fitvc.py --fiths \
 	$(FITSDIR)all_simpledrift_noro_dwarf_quadratic_vpec_sratio_hs_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf_quadratic_vpec_sratio_hs.sav \
 	 --mcsample --nsamples=$(NSAMPLES) --rotcurve=quadratic \

@@ -1,6 +1,6 @@
 FAKEDIR=../fake/
 FITSDIR=../fits/
-NSAMPLES=1000
+NSAMPLES=10000
 
 .PHONY:
 	fake \
@@ -14,7 +14,7 @@ fake:
 	-o $(FAKEDIR)fake_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
 	--nvlos=201 --dfmodel=simplegaussiandrift \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
-	--noro -m 15 --dwarf --fitvpec --fitsratio --fiths
+	--noro -m 15 --dwarf --fitvpec --fitsratio --fiths --seed=1
 
 fake2:
 	$(PYTHON) createFakeData.py \
@@ -22,6 +22,13 @@ fake2:
 	--nvlos=201 --dfmodel=simplegaussiandrift \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
 	--noro -m 15 --dwarf --fitvpec --fitsratio --fiths --seed=2
+
+fake3:
+	$(PYTHON) createFakeData.py \
+	-o $(FAKEDIR)fake3_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
+	--nvlos=201 --dfmodel=simplegaussiandrift \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noro -m 15 --dwarf --fitvpec --fitsratio --fiths --seed=3
 
 fitfake:
 	$(PYTHON) fitvc.py \
@@ -51,12 +58,26 @@ fitfake2:
 	--init=$(FAKEDIR)all2_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
 	--noro --dwarf --fitvpec --fitsratio --fiths
 
+fitfake3:
+	$(PYTHON) fitvc.py \
+	-f $(FAKEDIR)fake3_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all3_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+	$(PYTHON) fitvc.py \
+	-f $(FAKEDIR)fake3_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all3_simpledrift_noro_dwarf_vpec_sratio_hs_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all3_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
 fakedehnen:
 	$(PYTHON) createFakeData.py \
 	-o $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
 	--nvlos=201 --dfmodel=dehnen \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
-	--noro -m 15 --dwarf --fitvpec --fitsratio --fiths
+	--noro -m 15 --dwarf --fitvpec --fitsratio --fiths --seed=1
 
 fitfakedehnen_hr3:
 	$(PYTHON) fitvc.py \

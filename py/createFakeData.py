@@ -80,6 +80,43 @@ def createFakeData(parser):
         thislogpisodwarf= logpisodwarf
     else:
         thislogpisodwarf= None
+    if not options.multi is None and options.multi > 1:
+        thismulti= options.multi
+        options.multi= 1 #To avoid conflict
+        thispvlos= multi.parallel_map((lambda x: -mloglike(params,
+                                                           numpy.zeros(len(data))+vlos[x],
+                                                           l,
+                                                           b,
+                                                           jk,
+                                                           h,
+                                                           df,options,
+                                                           sinl,
+                                                           cosl,
+                                                           cosb,
+                                                           sinb,
+                                                           logpiso,
+                                                           thislogpisodwarf,
+                                                           True,
+                                                           None,None)),
+                                      range(options.nvlos),
+                                      numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),thismulti]))
+        for jj in range(options.nvlos):
+            pvlos[:,jj]= thispvlos[jj]
+    else:
+        for jj in range(options.nvlos):
+            pvlos[:,jj]= -mloglike(params,numpy.zeros(len(data))+vlos[jj],
+                                   l,
+                                   b,
+                                   jk,
+                                   h,
+                                   df,options,
+                                   sinl,
+                                   cosl,
+                                   cosb,
+                                   sinb,
+                                   logpiso,
+                                   thislogpisodwarf,True,None,None)
+    """
     for jj in range(options.nvlos):
         pvlos[:,jj]= -mloglike(params,numpy.zeros(len(data))+vlos[jj],
                                l,
@@ -93,6 +130,7 @@ def createFakeData(parser):
                                sinb,
                                logpiso,
                                thislogpisodwarf,True,None,None)
+    """
     for ii in range(len(data)):
         pvlos[ii,:]-= logsumexp(pvlos[ii,:])
         pvlos[ii,:]= numpy.exp(pvlos[ii,:])

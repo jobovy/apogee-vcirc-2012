@@ -201,7 +201,8 @@ if __name__ == '__main__':
                         lmin=options.lmin,
                         bmax=options.bmax,
                         ak=True,
-                        jkmax=options.jkmax)
+                        jkmax=options.jkmax,
+                        datafilename=options.fakedata)
     if options.location == 0:
         locations= list(set(data['LOCATION']))
     else:

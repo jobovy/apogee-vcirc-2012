@@ -63,7 +63,8 @@ def plot_internalcomparison(parser):
                         bmax=options.bmax,
                         ak=True,
                         cutmultiples=options.cutmultiples,
-                        jkmax=options.jkmax)
+                        jkmax=options.jkmax,
+                        datafilename=options.fakedata)
     #data= data[0:20]
     #HACK
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
