@@ -40,6 +40,7 @@ def plot_bestfit(parser):
     #data= data[(data['GLON'] > 75.)]
     #Cut outliers
     #data= data[(data['VHELIO'] < 200.)*(data['VHELIO'] > -200.)]
+    print "Using %i data points ..." % len(data)
     #Set up the isochrone
     print "Setting up the isochrone model ..."
     iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,

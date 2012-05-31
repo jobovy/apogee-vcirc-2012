@@ -1,4 +1,4 @@
-FITSDIR=../fits/
+FITSDIR=../fits_1.1/
 NSAMPLES=1000
 
 .PHONY: all_simpledrift_noro_dwarf_vpec_sratio_hs \
@@ -22,7 +22,8 @@ NSAMPLES=1000
 	all_simpledrift_noro_dwarf_powerlaw_vpec_sratioinnerouter_innerouter \
 	all_multiplepops_noro_dwarf_vpec_sratio \
 	loc4240_simpledrift_noro_dwarf_vpec_sratio \
-	allwoloc4240_simpledrift_noro_dwarf_vpec_sratio
+	allwoloc4240_simpledrift_noro_dwarf_vpec_sratio_hs \
+	allwoloc4241_simpledrift_noro_dwarf_vpec_sratio_hs
 
 all_simpledrift_noro_dwarf_vpec_sratio_hs:
 	$(PYTHON) fitvc.py \
@@ -264,7 +265,7 @@ loc4240_simpledrift_noro_dwarf_vpec_sratio_hs:
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio --location=4240
 
-allwoloc4240_simpledrift_noro_dwarf_vpec_sratio:
+allwoloc4240_simpledrift_noro_dwarf_vpec_sratio_hs:
 	$(PYTHON) fitvc.py --fiths \
 	$(FITSDIR)allwoloc4240_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
 	--noroprior --dwarf --fitvpec --fitsratio \
@@ -275,6 +276,18 @@ allwoloc4240_simpledrift_noro_dwarf_vpec_sratio:
 	 --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio --removelocation=4240
+
+allwoloc4241_simpledrift_noro_dwarf_vpec_sratio_hs:
+	$(PYTHON) fitvc.py --fiths \
+	$(FITSDIR)allwoloc4241_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noroprior --dwarf --fitvpec --fitsratio \
+	--dfmodel=simplegaussiandrift --removelocation=4241
+	$(PYTHON) fitvc.py --fiths \
+	$(FITSDIR)allwoloc4241_simpledrift_noro_dwarf_vpec_sratio_hs_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)allwoloc4241_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	 --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift \
+	--dwarf --fitvpec --fitsratio --removelocation=4241
 
 allwoloc4240_simpledrift_noro_dwarf_powerlaw_vpec_sratio:
 	$(PYTHON) fitvc.py --rotcurve=powerlaw \
