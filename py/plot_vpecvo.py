@@ -18,8 +18,8 @@ def plot_vpecvo(filename,plotfilename):
     savefile.close()
     vos= numpy.array([s[0] for s in params])*_REFV0
     ros= numpy.array([s[1] for s in params])*_REFR0
-    vpec= numpy.array([s[6] for s in params])*_PMSGRA*ros -vos#7 w/ dwarf
-    vpecR= numpy.array([s[5] for s in params])*_VRSUN#6 w/ dwarf
+    vpec= numpy.array([s[7] for s in params])*_PMSGRA*ros -vos#7 w/ dwarf
+    vpecR= numpy.array([s[6] for s in params])*_VRSUN#6 w/ dwarf
     bovy_plot.bovy_print()
     levels= list(special.erf(0.5*numpy.arange(1,4)))
     levels.append(1.01) #HACK to not plot outliers

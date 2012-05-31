@@ -3,7 +3,7 @@ import fitsio
 import apogee
 _COMBINEL150= True
 def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
-                  meanb=0.,meanb_tol=0.5,jkmax=1.3,ak=True,
+                  meanb=0.,meanb_tol=0.5,jkmax=1.1,ak=True,
                   specprimary=True,
                   cutmultiples=False,
                   datafilename=None,
