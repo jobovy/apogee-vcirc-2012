@@ -186,6 +186,8 @@ def get_options():
     #Multiprocessing?
     parser.add_option("-m","--multi",dest='multi',default=None,type='int',
                       help="number of cpus to use")
+    parser.add_option("--seed",dest='seed',default=1,type='int',
+                      help="seed for random number generator")
     return parser
 
 if __name__ == '__main__':

@@ -17,6 +17,7 @@ def createFakeData(parser):
         parser.print_help()
         return
         #Read the data
+    numpy.random.seed(options.seed)
     print "Reading the data ..."
     data= readVclosData(postshutdown=options.postshutdown,
                         fehcut=options.fehcut,
