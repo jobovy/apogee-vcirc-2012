@@ -44,6 +44,20 @@ fitfake:
 	--init=$(FAKEDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
 	--noro --dwarf --fitvpec --fitsratio --fiths
 
+fitfake_pl:
+	$(PYTHON) fitvc.py \
+	-f $(FAKEDIR)fake_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --rotcurve=powerlaw
+	$(PYTHON) fitvc.py  --rotcurve=powerlaw \
+	-f $(FAKEDIR)fake_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
 fitfake2:
 	$(PYTHON) fitvc.py \
 	-f $(FAKEDIR)fake2_simpledrift_noro_dwarf_vpec_sratio_hs.fits \
