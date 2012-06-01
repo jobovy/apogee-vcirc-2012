@@ -92,6 +92,8 @@ def plot_bestfit(parser):
     #Load initial parameters from file
     savefile= open(args[0],'rb')
     params= pickle.load(savefile)
+    if not options.index is None:
+        params= params[options.index]
     savefile.close()
     #params[0]= 245./235.
     #params[1]= 8.5/8.
@@ -342,6 +344,8 @@ def get_options():
     #Output file
     parser.add_option("-o",dest='plotfilename',default=None,
                       help="Name of the file for the plot")
+    parser.add_option("-i","--indx",dest='index',default=None,type='int',
+                      help="If samples are given, use this index")
     return parser
 
 if __name__ == '__main__':
