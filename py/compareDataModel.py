@@ -188,6 +188,9 @@ def get_options():
                       help="number of cpus to use")
     parser.add_option("--seed",dest='seed',default=1,type='int',
                       help="seed for random number generator")
+    #
+    parser.add_option("-i","--indx",dest='index',default=None,type='int',
+                      help="If samples are given, use this index")
     return parser
 
 if __name__ == '__main__':
@@ -219,6 +222,8 @@ if __name__ == '__main__':
         #Load initial parameters from file
         savefile= open(options.init,'rb')
         params= pickle.load(savefile)
+        if not options.index is None:
+            params= params[options.index]
         savefile.close()
     #params[2]= -2#numpy.log(20./235.)
     #Set up the isochrone

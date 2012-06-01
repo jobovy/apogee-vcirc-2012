@@ -122,7 +122,7 @@ def rovpecr(filename=None,options=None,bins=31):
 def rovpect(filename=None,options=None,bins=31):
     options= set_options(options)
     params= load_samples(filename)
-    vpects= numpy.array([s[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf]*_PMSGRA*s[1]*_REFR0/s[0] for s in params])
+    vpects= numpy.array([s[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf]*_PMSGRA*s[1]*_REFR0 for s in params])
     ros= numpy.array([s[1] for s in params])*_REFR0
     bovy_plot.bovy_print()
     levels= list(special.erf(0.5*numpy.arange(1,4)))
@@ -133,6 +133,44 @@ def rovpect(filename=None,options=None,bins=31):
                           bins=bins,
                           xrange=[220.,290.],
                           yrange=[6.,12.],
+                          contours=True,
+                          cntrcolors='k',
+                          onedhists=True,
+                          cmap='gist_yarg')
+    return None
+def roosun(filename=None,options=None,bins=31):
+    options= set_options(options)
+    params= load_samples(filename)
+    vpects= numpy.array([s[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf] for s in params])
+    ros= numpy.array([s[1] for s in params])*_REFR0
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    bovy_plot.scatterplot(vpects,ros,'k,',levels=levels,
+                          xlabel=r'$\Omega_{\odot}/\mu_{\mathrm{Sgr\ A}^*}\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$',
+                          ylabel=r'$R_0\ [\mathrm{kpc}]$',
+                          bins=bins,
+                          xrange=[0.75,1.25],
+                          yrange=[6.,12.],
+                          contours=True,
+                          cntrcolors='k',
+                          onedhists=True,
+                          cmap='gist_yarg')
+    return None
+def voosun(filename=None,options=None,bins=31):
+    options= set_options(options)
+    params= load_samples(filename)
+    vpects= numpy.array([s[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf] for s in params])
+    vos= numpy.array([s[0] for s in params])*_REFV0
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    bovy_plot.scatterplot(vpects,vos,'k,',levels=levels,
+                          xlabel=r'$\Omega_{\odot}/\mu_{\mathrm{Sgr\ A}^*}\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$',
+                          ylabel=r'$v_0\ [\mathrm{km\ s}^{-1}]$',
+                          bins=bins,
+                          xrange=[0.75,1.25],
+                          yrange=[180.,240.],
                           contours=True,
                           cntrcolors='k',
                           onedhists=True,
@@ -209,6 +247,82 @@ def rosratio(filename=None,options=None,bins=31):
                           bins=bins,
                           xrange=[0.,1.],
                           yrange=[6.,12.],
+                          contours=True,
+                          cntrcolors='k',
+                          onedhists=True,
+                          cmap='gist_yarg')
+    return None
+def rodvcdr(filename=None,options=None,bins=31):
+    options= set_options(options)
+    params= load_samples(filename)
+    dvcdrs= numpy.array([s[5-options.nooutliermean+options.dwarf] for s in params])
+    ros= numpy.array([s[1] for s in params])*_REFR0
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    bovy_plot.scatterplot(dvcdrs,ros,'k,',levels=levels,
+                          xlabel=r'$\beta$',
+                          ylabel=r'$R_0\ [\mathrm{kpc}]$',
+                          bins=bins,
+                          xrange=[-0.5,.5],
+                          yrange=[6.,12.],
+                          contours=True,
+                          cntrcolors='k',
+                          onedhists=True,
+                          cmap='gist_yarg')
+    return None
+def vcdvcdr(filename=None,options=None,bins=31):
+    options= set_options(options)
+    params= load_samples(filename)
+    dvcdrs= numpy.array([s[5-options.nooutliermean+options.dwarf] for s in params])
+    vcs= numpy.array([s[0] for s in params])*_REFV0
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    bovy_plot.scatterplot(dvcdrs,vcs,'k,',levels=levels,
+                          ylabel=r'$v_0\ [\mathrm{km\ s}^{-1}]$',
+                          xlabel=r'$\beta$',
+                          bins=bins,
+                          xrange=[-0.5,0.5],
+                          yrange=[150.,250.],
+                          contours=True,
+                          cntrcolors='k',
+                          onedhists=True,
+                          cmap='gist_yarg')
+    return None
+def vcd2vcdr2(filename=None,options=None,bins=31):
+    options= set_options(options)
+    params= load_samples(filename)
+    dvcdrs= numpy.array([s[6-options.nooutliermean+options.dwarf] for s in params])
+    vcs= numpy.array([s[0] for s in params])*_REFV0
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    bovy_plot.scatterplot(dvcdrs,vcs,'k,',levels=levels,
+                          ylabel=r'$v_0\ [\mathrm{km\ s}^{-1}]$',
+                          xlabel=r'$\mathrm{second\ derivative}$',
+                          bins=bins,
+                          xrange=[-0.5,0.5],
+                          yrange=[150.,250.],
+                          contours=True,
+                          cntrcolors='k',
+                          onedhists=True,
+                          cmap='gist_yarg')
+    return None
+def dvcdrd2vcdr2(filename=None,options=None,bins=31):
+    options= set_options(options)
+    params= load_samples(filename)
+    dvcdrs= numpy.array([s[6-options.nooutliermean+options.dwarf] for s in params])
+    d2vcdr2s= numpy.array([s[5-options.nooutliermean+options.dwarf] for s in params])
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    bovy_plot.scatterplot(dvcdrs,d2vcdr2s,'k,',levels=levels,
+                          xlabel=r'$\mathrm{first\ derivative}$',
+                          ylabel=r'$\mathrm{second\ derivative}$',
+                          bins=bins,
+                          xrange=[-0.5,0.5],
+                          yrange=[-0.5,0.5],
                           contours=True,
                           cntrcolors='k',
                           onedhists=True,

@@ -14,7 +14,7 @@ def logl(init=None,data=None,options=None):
         data= readVclosData(lmin=25.,
                             bmax=2.,
                             ak=True,
-                            jkmax=1.3)
+                            jkmax=1.1)
     #HACK
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
