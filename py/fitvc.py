@@ -426,7 +426,7 @@ def _initialize_params(options):
         domain.append([0.,0.])
     if options.fiths:
         init_params.append(1.)
-        isDomainFinite.append([True,False])
+        isDomainFinite.append([False,False])
         domain.append([0.,0.])
     if options.fitm2:
         init_params.append(0.)
