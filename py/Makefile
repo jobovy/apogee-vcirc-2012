@@ -309,7 +309,7 @@ all_simpledrift_noro_dwarf_vpec_sratio_dm_z21:
 	$(PYTHON) fitvc.py --fitdm \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_z21_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_z21.sav \
-	 --mcsample --nsamples=$(NSAMPLES) --fiths\
+	 --mcsample --nsamples=$(NSAMPLES) --fiths \
 	--noroprior --dfmodel=simplegaussiandrift --Z=0.021 \
 	--dwarf --fitvpec --fitsratio
 
