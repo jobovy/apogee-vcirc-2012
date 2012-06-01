@@ -100,6 +100,13 @@ fakedehnen2:
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
 	--noro -m 15 --dwarf --fitvpec --fitsratio --fiths --seed=2
 
+fakedehnen3:
+	$(PYTHON) createFakeData.py \
+	-o $(FAKEDIR)fake3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--nvlos=201 --dfmodel=dehnen \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noro -m 15 --dwarf --fitvpec --fitsratio --fiths --seed=3
+
 fitfakedehnen_hr3:
 	$(PYTHON) fitvc.py \
 	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
