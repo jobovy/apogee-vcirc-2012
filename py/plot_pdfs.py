@@ -138,6 +138,25 @@ def rovpect(filename=None,options=None,bins=31):
                           onedhists=True,
                           cmap='gist_yarg')
     return None
+def vovpect(filename=None,options=None,bins=31):
+    options= set_options(options)
+    params= load_samples(filename)
+    vpects= numpy.array([s[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf]*_PMSGRA*s[1]*_REFR0 for s in params])
+    vos= numpy.array([s[0] for s in params])*_REFV0
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    bovy_plot.scatterplot(vpects,vos,'k,',levels=levels,
+                          xlabel=r'$v_{\phi,\odot}\ [\mathrm{km\ s}^{-1}]$',
+                          ylabel=r'$v_0\ [\mathrm{km s}^{-1}]$',
+                          bins=bins,
+                          xrange=[220.,290.],
+                          yrange=[180.,250.],
+                          contours=True,
+                          cntrcolors='k',
+                          onedhists=True,
+                          cmap='gist_yarg')
+    return None
 def roosun(filename=None,options=None,bins=31):
     options= set_options(options)
     params= load_samples(filename)
