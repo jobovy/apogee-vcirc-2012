@@ -115,5 +115,4 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
             indx[len(data)-thesendata+int(numpy.floor(akquantiles[0]*thesendata)):len(data)-thesendata+int(numpy.floor(akquantiles[1]*thesendata))]= False
             data= data[sortindx]
             data= data[(indx == False)]
-            print len(data)
     return data
