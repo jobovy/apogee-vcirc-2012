@@ -1,3 +1,4 @@
+import copy
 import numpy
 import fitsio
 import apogee
@@ -7,7 +8,8 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                   specprimary=True,
                   cutmultiples=False,
                   datafilename=None,
-                  cutoutliers=True):
+                  cutoutliers=True,
+                  akquantiles=None):
     """
     NAME:
        readVclosData
@@ -27,6 +29,9 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
        specprimary= (default= True) select only primary objects
        cutmultiples= (default: False) cut objects suspected to be in multiples (repeated Vlos std dev > 1 km/s) ONLY WORKS WITH SPECPRIMARY=True
        datafilename= if set, use this data file (useful for fake data)
+       cutoutliers= if True (default), cut |v| > 300 km/s outliers
+       akquantiles= if set, only select stars within these quantiles in each 
+                    plates AK
     OUTPUT:
     HISTORY:
        2012-01-25 - Written - Bovy (IAS)
@@ -95,4 +100,20 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
         l150locs= locs[(platel == 150)]
         if len(l150locs) > 1:
             data['LOCATION'][(data['LOCATION'] == l150locs[1])]= l150locs[0]
+    #A_K quantiles
+    if not akquantiles is None:
+        #For each plate, only select stars in the selected AK quantile
+        locs= numpy.array(list(set(data['LOCATION'])))
+        nlocs= len(locs)
+        for ii in range(nlocs):
+            indx= (data['LOCATION'] == locs[ii])
+            thesendata= numpy.sum(indx)
+            theseak= copy.copy(data['AK'])
+            theseak[(data['LOCATION'] != locs[ii])]= -1.
+            sortindx= numpy.argsort(theseak)
+            indx= indx[sortindx]
+            indx[len(data)-thesendata+int(numpy.floor(akquantiles[0]*thesendata)):len(data)-thesendata+int(numpy.floor(akquantiles[1]*thesendata))]= False
+            data= data[sortindx]
+            data= data[(indx == False)]
+            print len(data)
     return data
