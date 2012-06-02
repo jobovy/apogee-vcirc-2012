@@ -191,6 +191,11 @@ def get_options():
     #
     parser.add_option("-i","--indx",dest='index',default=None,type='int',
                       help="If samples are given, use this index")
+    #A_K quantiles
+    parser.add_option("--aklow",dest='aklow',type='float',default=None,
+                      help="lower AK quantile of using AK-quantiles")
+    parser.add_option("--akhigh",dest='akhigh',type='float',default=None,
+                      help="upper AK quantile of using AK-quantiles")
     return parser
 
 if __name__ == '__main__':
@@ -198,6 +203,11 @@ if __name__ == '__main__':
     parser= get_options()
     options,args= parser.parse_args()
     #Read data
+    #AK quantiles?
+    if not options.aklow is None:
+        akquantiles= [options.aklow,options.akhigh]
+    else:
+        akquantiles= None
     data= readVclosData(postshutdown=options.postshutdown,
                         fehcut=options.fehcut,
                         cohort=options.cohort,
@@ -205,7 +215,8 @@ if __name__ == '__main__':
                         bmax=options.bmax,
                         ak=True,
                         jkmax=options.jkmax,
-                        datafilename=options.fakedata)
+                        datafilename=options.fakedata,
+                        akquantiles=akquantiles)
     if options.location == 0:
         locations= list(set(data['LOCATION']))
     else:
