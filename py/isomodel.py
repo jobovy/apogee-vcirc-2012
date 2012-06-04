@@ -203,3 +203,36 @@ class isomodel:
                                      ylabel=r'$M_H\ [\mathrm{mag}]$',
                                      interpolation='nearest')
     
+    def peak(self,jk,h):
+        """
+        NAME:
+           peak
+        PURPOSE:
+           assign a distance based on the peak of the likelihood
+        INPUT:
+           jk - dereddened color
+           h - dereddenend apparent mag
+        OUTPUT:
+           distance in kpc
+        HISTORY:
+           2012-06-04 - Written - Bovy (IAS)
+        """
+        if not hasattr(self,'_peakh'):
+            self._setupPeakh()
+        dm= h-self._peakh(jk)
+        return 10.**(dm/5.-2.)
+
+    def _setupPeakh(self):
+        """Set up the peak of the PDF interpolation"""
+        jks= numpy.linspace(self._jkmin+self._djk/2.,
+                            self._jkmax-self._djk/2.,
+                            self._nbins)
+        hs= numpy.linspace(self._hmin+self._dh/2.,
+                           self._hmax-self._dh/2.,
+                           self._nbins)
+        peakhs= numpy.zeros(self._nbins)
+        for ii in range(self._nbins):
+            peakhs[ii]= hs[numpy.argmax(self._loghist[ii,:])]
+        #Interpolate
+        self._peakh= scipy.interpolate.interp1d(jks,peakhs,kind=3)
+        return None

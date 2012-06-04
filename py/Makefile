@@ -13,7 +13,7 @@ NSAMPLES=1000
 	all_simpledrift_noro_dwarf_vpec_sratio_hs_nooutliermean \
 	all_simpledrift_noro_dwarf_vpec_sratio_m2 \
 	all_simpledrift_noro_dwarf_vpec_sratio_innerouter \
-	all_simpledrift_noro_dwarf_vpec_sratio_ah_innerouterah \
+	all_simpledrift_noro_dwarf_vpec_sratio_ah_hs_innerouterah \
 	all_simpledrift_noro_dwarf_vpec_sratio_dm_innerouterdm \
 	all_simpledrift_noro_dwarf_vpec_sratio_ah_hs \
 	all_simpledrift_noro_dwarf_vpec_sratio_dm_hs \
@@ -97,17 +97,17 @@ all_simpledrift_noro_dwarf_vpec_sratio_innerouter:
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio --fitsrinnerouter --dwarfinnerouter
 
-all_simpledrift_noro_dwarf_vpec_sratio_ah_innerouterah:
-	$(PYTHON) fitvc.py --fitah \
-	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_ah_innerouterah.sav \
+all_simpledrift_noro_dwarf_vpec_sratio_ah_hs_innerouterah:
+	$(PYTHON) fitvc.py --fitah --fiths \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_ah_hs_innerouterah.sav \
 	--noroprior --dwarf --fitvpec --fitsratio --fitahinnerouter \
-	--dfmodel=simplegaussiandrift --fitsrinnerouter --dwarfinnerouter
-	$(PYTHON) fitvc.py --fitah \
-	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_ah_innerouterah_$(NSAMPLES)samples.sav \
-	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_ah_innerouterah.sav \
+	--dfmodel=simplegaussiandrift
+	$(PYTHON) fitvc.py --fitah --fiths \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_ah_hs_innerouterah_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_ah_hs_innerouterah.sav \
 	 --mcsample --nsamples=$(NSAMPLES) --fitahinnerouter \
 	--noroprior --dfmodel=simplegaussiandrift \
-	--dwarf --fitvpec --fitsratio --fitsrinnerouter --dwarfinnerouter
+	--dwarf --fitvpec --fitsratio
 
 all_simpledrift_noro_dwarf_vpec_sratio_ah_hs:
 	$(PYTHON) fitvc.py --fitah \
