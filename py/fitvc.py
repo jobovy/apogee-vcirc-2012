@@ -84,6 +84,10 @@ def fitvc(parser):
                         cutmultiples=options.cutmultiples,
                         jkmax=options.jkmax,
                         datafilename=options.fakedata)
+    if options.justinner:
+        data= data[(data['GLON'] < 97.)]
+    elif options.justouter:
+        data= data[(data['GLON'] >= 97.)]
     if not options.location is None:
         data= data[(data['LOCATION'] == options.location)]
     if not options.removelocation is None:
@@ -1059,6 +1063,14 @@ def get_options():
                       dest="cutmultiples",
                       default=False,
                       help="readVclosData 'cutmultiples'")
+    parser.add_option("--justinner",action="store_true", 
+                      dest="justinner",
+                      default=False,
+                      help="Only fit inner (l < 97) fields")
+    parser.add_option("--justouter",action="store_true", 
+                      dest="justouter",
+                      default=False,
+                      help="Only fit outer (l > 97) fields")
     parser.add_option("-f",dest='fakedata',default=None,
                       help="Name of the fake data filename")
     #Isochrone IMF
