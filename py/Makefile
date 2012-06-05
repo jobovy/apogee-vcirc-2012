@@ -481,3 +481,15 @@ all_simpledrift_noro_dwarf_vpec_sratio_dm_z21:
 	--noroprior --dfmodel=simplegaussiandrift --Z=0.021 \
 	--dwarf --fitvpec --fitsratio
 
+short_simpledrift_noro_dwarf_vpec_sratio_hs:
+	$(PYTHON) fitvc.py --cohort=short \
+	$(FITSDIR)short_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	--noroprior --dwarf --fitvpec --fitsratio --fiths \
+	--dfmodel=simplegaussiandrift
+	$(PYTHON) fitvc.py --cohort=short \
+	$(FITSDIR)short_simpledrift_noro_dwarf_vpec_sratio_hs_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)short_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	 --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift \
+	--dwarf --fitvpec --fitsratio --fiths
+
