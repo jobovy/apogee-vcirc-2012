@@ -133,6 +133,18 @@ all_simpledrift_noro_dwarf_vpec_sratio_ah_hs_innerouterah:
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio
 
+all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_innerouterdm:
+	$(PYTHON) fitvc.py --fitdm --fiths \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_innerouterah.sav \
+	--noroprior --dwarf --fitvpec --fitsratio --fitdminnerouter \
+	--dfmodel=simplegaussiandrift
+	$(PYTHON) fitvc.py --fitdm --fiths \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_innerouterdm_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_d_hs_innerouterdm.sav \
+	 --mcsample --nsamples=$(NSAMPLES) --fitdminnerouter \
+	--noroprior --dfmodel=simplegaussiandrift \
+	--dwarf --fitvpec --fitsratio
+
 all_simpledrift_noro_dwarf_vpec_sratio_ah_hs:
 	$(PYTHON) fitvc.py --fitah \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_ah_hs.sav \
