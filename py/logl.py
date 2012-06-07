@@ -79,5 +79,5 @@ def logl(init=None,data=None,options=None):
                    cosb,
                    sinb,
                    logpiso,
-                   logpisodwarf,True,None,None) #None iso for now
+                   logpisodwarf,True,None,iso) #None iso for now
     return out
