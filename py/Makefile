@@ -140,7 +140,7 @@ all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_innerouterdm:
 	--dfmodel=simplegaussiandrift
 	$(PYTHON) fitvc.py --fitdm --fiths \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_innerouterdm_$(NSAMPLES)samples.sav \
-	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_d_hs_innerouterdm.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_innerouterdm.sav \
 	 --mcsample --nsamples=$(NSAMPLES) --fitdminnerouter \
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio
