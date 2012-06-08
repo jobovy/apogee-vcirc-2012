@@ -135,7 +135,7 @@ all_simpledrift_noro_dwarf_vpec_sratio_ah_hs_innerouterah:
 
 all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_innerouterdm:
 	$(PYTHON) fitvc.py --fitdm --fiths \
-	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_innerouterah.sav \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_innerouterdm.sav \
 	--noroprior --dwarf --fitvpec --fitsratio --fitdminnerouter \
 	--dfmodel=simplegaussiandrift
 	$(PYTHON) fitvc.py --fitdm --fiths \
