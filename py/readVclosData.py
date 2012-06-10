@@ -9,7 +9,8 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                   cutmultiples=False,
                   datafilename=None,
                   cutoutliers=True,
-                  akquantiles=None):
+                  akquantiles=None,
+                  correctak=True):
     """
     NAME:
        readVclosData
@@ -32,6 +33,8 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
        cutoutliers= if True (default), cut |v| > 300 km/s outliers
        akquantiles= if set, only select stars within these quantiles in each 
                     plates AK
+       correctak= if True (default: False), correct the reddening values 
+                  (inner/outer)
     OUTPUT:
     HISTORY:
        2012-01-25 - Written - Bovy (IAS)
@@ -115,4 +118,15 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
             indx[len(data)-thesendata+int(numpy.floor(akquantiles[0]*thesendata)):len(data)-thesendata+int(numpy.floor(akquantiles[1]*thesendata))]= False
             data= data[sortindx]
             data= data[(indx == False)]
+    if correctak:
+        innerindx= (data['GLON'] < 97.)
+        innerah= -0.03
+        data['H0MAG'][innerindx]+= innerah
+        data['J0MAG'][innerindx]+= innerah*2.5/1.55
+        data['K0MAG'][innerindx]+= innerah/1.55
+        outerindx= (data['GLON'] >= 97.)
+        outerah= 0.05
+        data['H0MAG'][outerindx]+= outerah
+        data['J0MAG'][outerindx]+= outerah*2.5/1.55
+        data['K0MAG'][outerindx]+= outerah/1.55
     return data
