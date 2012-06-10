@@ -1,5 +1,5 @@
-FITSDIR=../fits_1.1/
-NSAMPLES=1000
+FITSDIR=../fits_ah/
+NSAMPLES=10000
 
 .PHONY: all_simpledrift_noro_dwarf_vpec_sratio_hs \
 	all_simpledrift_noro_dwarf_vpec_sratio \
