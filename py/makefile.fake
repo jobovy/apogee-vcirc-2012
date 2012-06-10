@@ -1,5 +1,5 @@
 FAKEDIR=../fake/
-FITSDIR=../fits/
+FITSDIR=../fits_1.1/
 NSAMPLES=10000
 
 .PHONY:
