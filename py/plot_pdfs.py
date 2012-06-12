@@ -405,3 +405,22 @@ def dvcdrd2vcdr2(filename=None,options=None,bins=31):
                           onedhists=True,
                           cmap='gist_yarg')
     return None
+def dvcdrd3vcdr3(filename=None,options=None,bins=31):
+    options= set_options(options)
+    params= load_samples(filename)
+    dvcdrs= numpy.array([s[5-options.nooutliermean+options.dwarf] for s in params])
+    d2vcdr2s= numpy.array([s[7-options.nooutliermean+options.dwarf] for s in params])
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    bovy_plot.scatterplot(dvcdrs,d2vcdr2s,'k,',levels=levels,
+                          xlabel=r'$\mathrm{first\ derivative}$',
+                          ylabel=r'$\mathrm{third\ derivative}$',
+                          bins=bins,
+                          xrange=[-0.5,0.5],
+                          yrange=[-1.,1.],
+                          contours=True,
+                          cntrcolors='k',
+                          onedhists=True,
+                          cmap='gist_yarg')
+    return None
