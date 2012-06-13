@@ -132,9 +132,9 @@ def fitvc(parser):
                                              expsfh=options.expsfh,
                                              marginalizefeh=True,
                                              glon=locl))
-            else:
-                iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
-                                       expsfh=options.expsfh)
+        else:
+            iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
+                                   expsfh=options.expsfh)
         if options.dwarf:
             iso= [iso,
                   isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
