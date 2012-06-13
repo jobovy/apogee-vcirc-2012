@@ -539,7 +539,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
             logpddwarf= numpy.zeros((len(vhelio),_BINTEGRATENBINS))
             dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
                                     _BINTEGRATENBINS)/params[1]/_REFR0
-        if options.multi > 1:
+        if options.multi > 1: #BOVY: MAY BE BROKEN
             thisout= numpy.zeros((len(vhelio),_BINTEGRATENBINS,2))
             thisout= multi.parallel_map((lambda x: _mloglikedIntegrand(ds[x],
                                                                        params,vhelio/params[0]/_REFV0,
