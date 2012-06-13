@@ -43,8 +43,19 @@ def plot_bestfit(parser):
     print "Using %i data points ..." % len(data)
     #Set up the isochrone
     print "Setting up the isochrone model ..."
-    iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
-                           expsfh=options.expsfh)
+    if options.varfeh:
+        locs= list(set(data['LOCATION']))
+        iso= []
+        for ii in range(len(locs)):
+            indx= (data['LOCATION'] == locs[ii])
+            locl= numpy.mean(data['GLON'][indx]*_DEGTORAD)
+            iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                         expsfh=options.expsfh,
+                                         marginalizefeh=True,
+                                         glon=locl))
+    else:
+        iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
+                               expsfh=options.expsfh)
     if options.dwarf:
         iso= [iso, 
               isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
@@ -59,8 +70,13 @@ def plot_bestfit(parser):
     dm= _dm(ds)
     for ii in range(len(data)):
         mh= data['H0MAG'][ii]-dm
-        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
-                              +(data['J0MAG']-data['K0MAG'])[ii],mh)
+        if options.varfeh:
+            #Find correct iso
+            indx= (locl == data[ii]['LOCATION'])
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+        else:
+            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+                                  +(data['J0MAG']-data['K0MAG'])[ii],mh)
     if options.dwarf:
         logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
         dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
@@ -319,6 +335,9 @@ def get_options():
     parser.add_option("--expsfh",action="store_true", dest="expsfh",
                       default=False,
                       help="If set, use an exponentially declining SFH")
+    parser.add_option("--varfeh",action="store_false", dest="varfeh",
+                      default=True,
+                      help="If set, don't use a varying [Fe/H] distribution as a function of l")
     #Add dwarf part?
     parser.add_option("--dwarf",action="store_true", 
                       dest="dwarf",

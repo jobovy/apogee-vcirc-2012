@@ -166,6 +166,9 @@ def get_options():
     parser.add_option("--expsfh",action="store_true", dest="expsfh",
                       default=False,
                       help="If set, use an exponentially declining SFH")
+    parser.add_option("--varfeh",action="store_false", dest="varfeh",
+                      default=True,
+                      help="If set, don't use a varying [Fe/H] distribution as a function of l")
     #Add dwarf part?
     parser.add_option("--dwarf",action="store_true", 
                       dest="dwarf",
@@ -239,7 +242,18 @@ if __name__ == '__main__':
     #params[2]= -2#numpy.log(20./235.)
     #Set up the isochrone
     print "Setting up the isochrone model ..."
-    iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,expsfh=options.expsfh)
+    if options.varfeh:
+        locs= list(set(data['LOCATION']))
+        iso= []
+        for ii in range(len(locs)):
+            indx= (data['LOCATION'] == locs[ii])
+            locl= numpy.mean(data['GLON'][indx]*_DEGTORAD)
+            iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                         expsfh=options.expsfh,
+                                         marginalizefeh=True,
+                                         glon=locl))
+    else:
+        iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,expsfh=options.expsfh)
     if options.dwarf:
         iso= [iso, 
               isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
@@ -257,19 +271,34 @@ if __name__ == '__main__':
             ah= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
             if options.fitahinnerouter and data[ii]['GLON'] < 35.: ah= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitah+options.fitdm]
             mh= data['H0MAG'][ii]-dm+ah
-            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
-                                  +(data['J0MAG']-data['K0MAG'])[ii]
-                                  +1.5/1.55*ah,mh)
+            if options.varfeh:
+            #Find correct iso
+                indx= (locl == data[ii]['LOCATION'])
+                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+            else:
+                logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+                                      +(data['J0MAG']-data['K0MAG'])[ii]
+                                      +1.5/1.55*ah,mh)
         elif options.fitdm:
             if not options.fitdminnerouter or data[ii]['GLON'] >= 35.: xtra= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
             if options.fitdminnerouter and data[ii]['GLON'] < 35.: xtra= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah]
             mh= data[ii]['H0MAG']-dm+xtra
-            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+            if options.varfeh:
+            #Find correct iso
+                indx= (locl == data[ii]['LOCATION'])
+                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+            else:
+                logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
                                   +(data['J0MAG']-data['K0MAG'])[ii],mh)
         else:
             mh= data['H0MAG'][ii]-dm
-            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
-                                  +(data['J0MAG']-data['K0MAG'])[ii],mh)
+            if options.varfeh:
+            #Find correct iso
+                indx= (locl == data[ii]['LOCATION'])
+                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+            else:
+                logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+                                      +(data['J0MAG']-data['K0MAG'])[ii],mh)
     if options.dwarf:
         logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
         dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,

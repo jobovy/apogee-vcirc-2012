@@ -459,6 +459,9 @@ def get_options():
     parser.add_option("--expsfh",action="store_true", dest="expsfh",
                       default=False,
                       help="If set, use an exponentially declining SFH")
+    parser.add_option("--varfeh",action="store_false", dest="varfeh",
+                      default=True,
+                      help="If set, don't use a varying [Fe/H] distribution as a function of l")
     #Add dwarf part?
     parser.add_option("--dwarf",action="store_true", 
                       dest="dwarf",

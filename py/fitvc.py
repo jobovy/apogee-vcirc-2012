@@ -82,6 +82,7 @@ def fitvc(parser):
                         bmax=options.bmax,
                         ak=True,
                         cutmultiples=options.cutmultiples,
+                        correctak=options.correctak,
                         jkmax=options.jkmax,
                         datafilename=options.fakedata)
     if options.justinner:
@@ -114,6 +115,16 @@ def fitvc(parser):
         iso= dummyIso
         global _BINTEGRATEDMAX
         _BINTEGRATEDMAX= 10. #kpc
+    elif options.varfeh:
+        locs= list(set(data['LOCATION']))
+        iso= []
+        for ii in range(len(locs)):
+            indx= (data['LOCATION'] == locs[ii])
+            locl= numpy.mean(data['GLON'][indx]*_DEGTORAD)
+            iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                         expsfh=options.expsfh,
+                                         marginalizefeh=True,
+                                         glon=locl))
     else:
         iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
                                expsfh=options.expsfh)
@@ -131,7 +142,7 @@ def fitvc(parser):
         savefile= open(options.init,'rb')
         init_params= pickle.load(savefile)
         savefile.close()
-    #Pre-calculate p(J-K,Hs|...)[isochrone] (in fact does not depend on the parameters
+    #Pre-calculate p(J-K,Hs|...)[isochrone] (in fact does not depend on the parameters if dm or ah are not fitted
     print "Pre-calculating isochrone distance prior ..."
     logpiso= numpy.zeros((len(data),_BINTEGRATENBINS))
     ds= numpy.linspace(_BINTEGRATEDMIN,_BINTEGRATEDMAX,
@@ -139,7 +150,12 @@ def fitvc(parser):
     dm= _dm(ds)
     for ii in range(len(data)):
         mh= h[ii]-dm
-        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+        if options.varfeh:
+            #Find correct iso
+            indx= (locl == data[ii]['LOCATION'])
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+        else:
+            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
     if options.dwarf:
         logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
         dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
@@ -653,7 +669,12 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
             mh= h[ii]-dm
             if options.fitdminnerouter and l[ii] < 97.*_DEGTORAD:
                 mh= h[ii]-dminnerouter
-            logpiso[ii]= iso[0](jk[ii],mh)
+            if options.varfeh:
+                raise NotImplementedError("changing dm with varfeh not implemented yet")
+                for jj in range(len(iso[0])):
+                    logpiso[ii,jj]= iso[0][jj](jk[ii],mh)
+            else:
+                logpiso[ii]= iso[0](jk[ii],mh)
         logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
     elif options.fitah:
         ah= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
@@ -661,10 +682,20 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
         dm= _dm(d*params[1]*_REFR0)
         for ii in range(len(vhelio)):
             mh= h[ii]-dm+ah
-            logpiso[ii]= iso[0](jk[ii]+1.5/1.55*ah,mh) #Accounts for red. law
+            if options.varfeh:
+                raise NotImplementedError("changing ah with varfeh not implemented yet")
+                for jj in range(len(iso[0])):
+                    logpiso[ii,jj]= iso[0][jj](jk[ii]+1.5/1.55*ah,mh) #Accounts for red. law
+            else:
+                logpiso[ii]= iso[0](jk[ii]+1.5/1.55*ah,mh) #Accounts for red. law
             if options.fitahinnerouter and l[ii] < 97.*_DEGTORAD:
                 mh= h[ii]-dm+ahinnerouter
-                logpiso[ii]= iso[0](jk[ii]+1.5/1.55*ahinnerouter,mh) #Accounts for red. law
+                if options.varfeh:
+                    raise NotImplementedError("changing ah with varfeh not implemented yet")
+                    for jj in range(len(iso[0])):
+                        logpiso[ii,jj]= iso[0][jj](jk[ii]+1.5/1.55*ahinnerouter,mh) #Accounts for red. law
+                else:
+                    logpiso[ii]= iso[0](jk[ii]+1.5/1.55*ahinnerouter,mh) #Accounts for red. law
         logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
     else:
         logpd= _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso)
@@ -1063,6 +1094,10 @@ def get_options():
                       dest="cutmultiples",
                       default=False,
                       help="readVclosData 'cutmultiples'")
+    parser.add_option("--correctak",action="store_true", 
+                      dest="correctak",
+                      default=False,
+                      help="readVclosData 'correctak'")
     parser.add_option("--justinner",action="store_true", 
                       dest="justinner",
                       default=False,
@@ -1091,6 +1126,9 @@ def get_options():
     parser.add_option("--expsfh",action="store_true", dest="expsfh",
                       default=False,
                       help="If set, use an exponentially declining SFH")
+    parser.add_option("--varfeh",action="store_false", dest="varfeh",
+                      default=True,
+                      help="If set, don't use a varying [Fe/H] distribution as a function of l")
     #Add dwarf part?
     parser.add_option("--dwarf",action="store_true", 
                       dest="dwarf",
