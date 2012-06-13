@@ -74,7 +74,8 @@ class isomodel:
                     if dN[ii] > 0.: 
                         sample.append([JK,H])
                         if marginalizefeh:
-                            if expsfh:
+                            if H < (11./-1.3*(JK-0.3)): weights.append(0.) #HACK TO GET RID OF UNWANTED BRIGHT POINTS
+                            elif expsfh:
                                 weights.append(pZs[zz]*dN[ii]*10**(logage-7.)*numpy.exp((10.**(logage-7.))/800.)) #e.g., Binney (2010)
                             else:
                                 weights.append(pZs[zz]*dN[ii]*10**(logage-7.))
