@@ -1,3 +1,4 @@
+import os, os.path
 import numpy
 import cPickle as pickle
 import isomodel
