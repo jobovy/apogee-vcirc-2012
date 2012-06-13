@@ -19,24 +19,34 @@ def logl(init=None,data=None,options=None):
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
     #Set up the isochrone
-    if options.varfeh:
-        locs= list(set(data['LOCATION']))
-        iso= []
-        for ii in range(len(locs)):
-            indx= (data['LOCATION'] == locs[ii])
-            locl= numpy.mean(data['GLON'][indx]*_DEGTORAD)
-            iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
-                                         expsfh=options.expsfh,
-                                         marginalizefeh=True,
-                                         glon=locl))
+    if not options.isofile is None and os.path.exists(options.isofile):
+        print "Loading the isochrone model ..."
+        isofile= open(options.isofile,'rb')
+        iso= pickle.load(isofile)
+        isofile.close()
     else:
-        iso= isomodel.isomodel(Z=0.019)
-    if options.dwarf:
-        iso= [iso, 
-              isomodel.isomodel(Z=0.019,
-                                dwarf=True)]
-    else:
-        iso= [iso]
+        if options.varfeh:
+            locs= list(set(data['LOCATION']))
+            iso= []
+            for ii in range(len(locs)):
+                indx= (data['LOCATION'] == locs[ii])
+                locl= numpy.mean(data['GLON'][indx]*_DEGTORAD)
+                iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                             expsfh=options.expsfh,
+                                             marginalizefeh=True,
+                                             glon=locl))
+        else:
+            iso= isomodel.isomodel(Z=0.019)
+        if options.dwarf:
+            iso= [iso, 
+                  isomodel.isomodel(Z=0.019,
+                                    dwarf=True)]
+        else:
+            iso= [iso]
+        if not options.isofile is None:
+            isofile= open(options.isofile,'wb')
+            pickle.dump(iso,isofile)
+            isofile.close()
     df= None
     #Pre-calculate distance prior
     logpiso= numpy.zeros((len(data),_BINTEGRATENBINS))

@@ -110,30 +110,40 @@ def fitvc(parser):
     jk[(jk < 0.5)]= 0.5 #BOVY: FIX THIS HACK BY EMAILING GAIL
     h= data['H0MAG']
     #Set up the isochrone
-    print "Setting up the isochrone model ..."
-    if options.nods:
-        iso= dummyIso
-        global _BINTEGRATEDMAX
-        _BINTEGRATEDMAX= 10. #kpc
-    elif options.varfeh:
-        locs= list(set(data['LOCATION']))
-        iso= []
-        for ii in range(len(locs)):
-            indx= (data['LOCATION'] == locs[ii])
-            locl= numpy.mean(data['GLON'][indx]*_DEGTORAD)
-            iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
-                                         expsfh=options.expsfh,
-                                         marginalizefeh=True,
-                                         glon=locl))
+    if not options.isofile is None and os.path.exists(options.isofile):
+        print "Loading the isochrone model ..."
+        isofile= open(options.isofile,'rb')
+        iso= pickle.load(isofile)
+        isofile.close()
     else:
-        iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
-                               expsfh=options.expsfh)
-    if options.dwarf:
-        iso= [iso,
-              isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
-                                dwarf=True,expsfh=options.expsfh)]
-    else:
-        iso= [iso]
+        print "Setting up the isochrone model ..."
+        if options.nods:
+            iso= dummyIso
+            global _BINTEGRATEDMAX
+            _BINTEGRATEDMAX= 10. #kpc
+        elif options.varfeh:
+            locs= list(set(data['LOCATION']))
+            iso= []
+            for ii in range(len(locs)):
+                indx= (data['LOCATION'] == locs[ii])
+                locl= numpy.mean(data['GLON'][indx]*_DEGTORAD)
+                iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                             expsfh=options.expsfh,
+                                             marginalizefeh=True,
+                                             glon=locl))
+            else:
+                iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
+                                       expsfh=options.expsfh)
+        if options.dwarf:
+            iso= [iso,
+                  isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
+                                    dwarf=True,expsfh=options.expsfh)]
+        else:
+            iso= [iso]
+        if not options.isofile is None:
+            isofile= open(options.isofile,'wb')
+            pickle.dump(iso,isofile)
+            isofile.close()
     df= None
     #Initial condition for fit/sample
     init_params, isDomainFinite, domain= _initialize_params(options)
@@ -1129,6 +1139,8 @@ def get_options():
     parser.add_option("--varfeh",action="store_false", dest="varfeh",
                       default=True,
                       help="If set, don't use a varying [Fe/H] distribution as a function of l")
+    parser.add_option("--isofile",dest="isofile",default=None,
+                      help="if set, store or restore the isochrone model(s) in this file")
     #Add dwarf part?
     parser.add_option("--dwarf",action="store_true", 
                       dest="dwarf",
