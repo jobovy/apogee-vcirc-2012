@@ -120,6 +120,25 @@ def roah(filename=None,options=None,bins=31):
                           onedhists=True,
                           cmap='gist_yarg')
     return None
+def ahah(filename=None,options=None,bins=31):
+    options= set_options(options)
+    params= load_samples(filename)
+    ahinners= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitah+options.fitdm] for s in params])
+    ahs= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] for s in params])
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    bovy_plot.scatterplot(ahs,ahinners,'k,',levels=levels,
+                          xlabel=r'$\Delta A_H\ (\mathrm{outer}) [\mathrm{mag}]$',
+                          ylabel=r'$\Delta A_H\ (\mathrm{inner}) [\mathrm{mag}]$',
+                          bins=bins,
+                          xrange=[-0.1,.1],
+                          yrange=[-0.1,.1],
+                          contours=True,
+                          cntrcolors='k',
+                          onedhists=True,
+                          cmap='gist_yarg')
+    return None
 def rodm(filename=None,options=None,bins=31):
     options= set_options(options)
     params= load_samples(filename)
@@ -133,6 +152,25 @@ def rodm(filename=None,options=None,bins=31):
                           ylabel=r'$R_0\ [\mathrm{kpc}]$',
                           bins=bins,
                           xrange=[-0.5,.5],
+                          yrange=[6.,12.],
+                          contours=True,
+                          cntrcolors='k',
+                          onedhists=True,
+                          cmap='gist_yarg')
+    return None
+def rodminner(filename=None,options=None,bins=31):
+    options= set_options(options)
+    params= load_samples(filename)
+    ros= numpy.array([s[1] for s in params])*_REFR0
+    dms= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah] for s in params])
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    bovy_plot.scatterplot(dms,ros,'k,',levels=levels,
+                          xlabel=r'$\Delta m\ (\mathrm{inner})\ [\mathrm{mag}]$',
+                          ylabel=r'$R_0\ [\mathrm{kpc}]$',
+                          bins=bins,
+                          xrange=[-1.,1.],
                           yrange=[6.,12.],
                           contours=True,
                           cntrcolors='k',
