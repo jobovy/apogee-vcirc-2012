@@ -19,7 +19,18 @@ def logl(init=None,data=None,options=None):
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
     #Set up the isochrone
-    iso= isomodel.isomodel(Z=0.019)
+    if options.varfeh:
+        locs= list(set(data['LOCATION']))
+        iso= []
+        for ii in range(len(locs)):
+            indx= (data['LOCATION'] == locs[ii])
+            locl= numpy.mean(data['GLON'][indx]*_DEGTORAD)
+            iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                         expsfh=options.expsfh,
+                                         marginalizefeh=True,
+                                         glon=locl))
+    else:
+        iso= isomodel.isomodel(Z=0.019)
     if options.dwarf:
         iso= [iso, 
               isomodel.isomodel(Z=0.019,
@@ -34,8 +45,13 @@ def logl(init=None,data=None,options=None):
     dm= _dm(ds)
     for ii in range(len(data)):
         mh= data['H0MAG'][ii]-dm
-        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
-                              +(data['J0MAG']-data['K0MAG'])[ii],mh)
+        if options.varfeh:
+            #Find correct iso
+            indx= (locl == data[ii]['LOCATION'])
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+        else:
+            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+                                  +(data['J0MAG']-data['K0MAG'])[ii],mh)
     if options.dwarf:
         logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
         dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
