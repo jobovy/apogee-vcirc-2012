@@ -1,5 +1,6 @@
 ###############################################################################
 # isomodel.py: isochrone model for the distribution in (J-Ks,M_H)
+#              also includes the metallicity dependence on l
 ###############################################################################
 import math
 import numpy
@@ -14,7 +15,8 @@ except ImportError:
 class isomodel:
     """isomodel: isochrone model for the distribution in (J-Ks,M_H)"""
     def __init__(self,dwarf=False,imfmodel='lognormalChabrier2001',Z=None,
-                 interpolate=False,expsfh=False):
+                 interpolate=False,expsfh=False,marginalizefeh=False,
+                 glon=None):
         """
         NAME:
            __init__
@@ -25,6 +27,9 @@ class isomodel:
            dwarf= (default: False) if True, use dwarf part
            imfmodel= (default: 'lognormalChabrier2001') IMF model to use (see isodist.imf code for options)
            interpolate= (default: False) if True, interpolate the binned representation
+           expsfh= if True, use an exponentially-declining star-formation history
+           marginalizefeh= if True, marginalize over the FeH distribution along line of sight glon
+           glon - galactic longitude in rad of los for marginalizefeh
         OUTPUT:
            object
         HISTORY:
@@ -32,7 +37,11 @@ class isomodel:
         """
        #Read isochrones
         zs= numpy.arange(0.0005,0.03005,0.0005)
-        if Z is None:
+        if marginalizefeh:
+            Zs= numpy.arange(0.008,0.031,0.001)            
+            dFeHdZ= 1./Zs
+            pZs= feh_l(glon,isodist.Z2FEH(Zs))*dFeHdZ
+        elif Z is None:
             Zs= zs
         elif isinstance(Z,float):
             if Z < 0.01:
@@ -44,8 +53,8 @@ class isomodel:
         sample= []
         weights= []
         for logage in p.logages():
-            for z in Zs:
-                thisiso= p(logage,z,asrecarray=True)
+            for zz in range(len(Zs)):
+                thisiso= p(logage,Zs[zz],asrecarray=True)
                 #Calculate int_IMF for this IMF model
                 if not imfmodel == 'lognormalChabrier2001': #That would be the default
                     if imfmodel == 'exponentialChabrier2001':
@@ -64,10 +73,16 @@ class isomodel:
                         continue
                     if dN[ii] > 0.: 
                         sample.append([JK,H])
-                        if expsfh:
-                            weights.append(dN[ii]*10**(logage-7.)*numpy.exp((10.**(logage-7.))/800.)) #e.g., Binney (2010)
+                        if marginalizefeh:
+                            if expsfh:
+                                weights.append(pZs[zz]*dN[ii]*10**(logage-7.)*numpy.exp((10.**(logage-7.))/800.)) #e.g., Binney (2010)
+                            else:
+                                weights.append(pZs[zz]*dN[ii]*10**(logage-7.))
                         else:
-                            weights.append(dN[ii]*10**(logage-7.))
+                            if expsfh:
+                                weights.append(dN[ii]*10**(logage-7.)*numpy.exp((10.**(logage-7.))/800.)) #e.g., Binney (2010)
+                            else:
+                                weights.append(dN[ii]*10**(logage-7.))
                     else: 
                         continue #no use in continuing here   
         #Form array
@@ -236,3 +251,38 @@ class isomodel:
         #Interpolate
         self._peakh= scipy.interpolate.interp1d(jks,peakhs,kind=3)
         return None
+
+def feh_l(l,feh):
+    """
+    NAME:
+       feh_l
+    PURPOSE:
+       return the [Fe/H] distribution at l evaluated at feh
+    INPUT:
+       l - Galactic longitude in rad
+       feh - metallicity
+    OUTPUT:
+       p(feh|l)
+    HISTORY:
+       2012-06-13 - Written - Bovy (IAS)
+    """
+    #First calculate mean
+    mfehl= mean_feh_l(l)
+    #Dispersion is 0.2 dex around the mean
+    return numpy.exp(-(feh-mfehl)**2./2./0.2**2.)
+
+def mean_feh_l(l):
+    """
+    NAME:
+       MEAN_feh_l
+    PURPOSE:
+       return the mean [Fe/H] at l
+    INPUT:
+       l - Galactic longitude in rad
+    OUTPUT:
+       mean feh
+    HISTORY:
+       2012-06-13 - Written - Bovy (IAS)
+    """
+    rl= numpy.sqrt(8.**2.+4.**2-2.*4.*8.*numpy.cos(l))
+    return -0.05*(rl-8.)
