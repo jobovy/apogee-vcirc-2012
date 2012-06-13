@@ -274,7 +274,7 @@ if __name__ == '__main__':
             if options.varfeh:
             #Find correct iso
                 indx= (locl == data[ii]['LOCATION'])
-                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
             else:
                 logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
                                       +(data['J0MAG']-data['K0MAG'])[ii]
@@ -286,7 +286,7 @@ if __name__ == '__main__':
             if options.varfeh:
             #Find correct iso
                 indx= (locl == data[ii]['LOCATION'])
-                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
             else:
                 logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
                                   +(data['J0MAG']-data['K0MAG'])[ii],mh)
@@ -295,7 +295,7 @@ if __name__ == '__main__':
             if options.varfeh:
             #Find correct iso
                 indx= (locl == data[ii]['LOCATION'])
-                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
             else:
                 logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
                                       +(data['J0MAG']-data['K0MAG'])[ii],mh)
