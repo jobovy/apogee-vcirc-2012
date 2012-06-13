@@ -23,6 +23,7 @@ def logl(init=None,data=None,options=None):
         print "Loading the isochrone model ..."
         isofile= open(options.isofile,'rb')
         iso= pickle.load(isofile)
+        locl= pickle.load(isofile)
         isofile.close()
     else:
         if options.varfeh:
@@ -46,6 +47,7 @@ def logl(init=None,data=None,options=None):
         if not options.isofile is None:
             isofile= open(options.isofile,'wb')
             pickle.dump(iso,isofile)
+            pickle.dump(locl,isofile)
             isofile.close()
     df= None
     #Pre-calculate distance prior

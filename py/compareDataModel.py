@@ -248,6 +248,7 @@ if __name__ == '__main__':
         print "Loading the isochrone model ..."
         isofile= open(options.isofile,'rb')
         iso= pickle.load(isofile)
+        locl= pickle.load(isofile)
         isofile.close()
     else:
         print "Setting up the isochrone model ..."
@@ -261,17 +262,18 @@ if __name__ == '__main__':
                                              expsfh=options.expsfh,
                                              marginalizefeh=True,
                                              glon=locl))
-            else:
-                iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,expsfh=options.expsfh)
+        else:
+            iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,expsfh=options.expsfh)
         if options.dwarf:
-                    iso= [iso, 
-                          isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
-                                            dwarf=True,expsfh=options.expsfh)]
+            iso= [iso, 
+                  isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
+                                    dwarf=True,expsfh=options.expsfh)]
         else:
             iso= [iso]
         if not options.isofile is None:
             isofile= open(options.isofile,'wb')
             pickle.dump(iso,isofile)
+            pickle.dump(locl,isofile)
             isofile.close()
     df= None
     print "Pre-calculating isochrone distance prior ..."

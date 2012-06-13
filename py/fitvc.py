@@ -114,6 +114,7 @@ def fitvc(parser):
         print "Loading the isochrone model ..."
         isofile= open(options.isofile,'rb')
         iso= pickle.load(isofile)
+        locl= pickle.load(isofile)
         isofile.close()
     else:
         print "Setting up the isochrone model ..."
@@ -143,6 +144,7 @@ def fitvc(parser):
         if not options.isofile is None:
             isofile= open(options.isofile,'wb')
             pickle.dump(iso,isofile)
+            pickle.dump(locl,isofile)
             isofile.close()
     df= None
     #Initial condition for fit/sample
