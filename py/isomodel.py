@@ -16,7 +16,7 @@ class isomodel:
     """isomodel: isochrone model for the distribution in (J-Ks,M_H)"""
     def __init__(self,dwarf=False,imfmodel='lognormalChabrier2001',Z=None,
                  interpolate=False,expsfh=False,marginalizefeh=False,
-                 glon=None):
+                 glon=None,dontgather=False):
         """
         NAME:
            __init__
@@ -30,6 +30,7 @@ class isomodel:
            expsfh= if True, use an exponentially-declining star-formation history
            marginalizefeh= if True, marginalize over the FeH distribution along line of sight glon
            glon - galactic longitude in rad of los for marginalizefeh
+           dontgather= if True, don't gather surrounding Zs
         OUTPUT:
            object
         HISTORY:
@@ -44,7 +45,9 @@ class isomodel:
         elif Z is None:
             Zs= zs
         elif isinstance(Z,float):
-            if Z < 0.001 or Z > 0.0295:
+            if dontgather:
+                Zs= [Z]
+            elif Z < 0.001 or Z > 0.0295:
                 Zs= [Z] 
             elif Z < 0.0015 or Z > 0.029:
                 Zs= [Z-0.0005,Z,Z+0.0005] #build up statistics
@@ -84,7 +87,6 @@ class isomodel:
                             else:
                                 weights.append(pZs[zz]*dN[ii]*10**(logage-7.))
                         else:
-#                            if Zs[zz] > 0.02 and H < (11./-1.3*(JK-0.3)): weights.append(0.) #HACK TO GET RID OF UNWANTED BRIGHT POINTS
                             if expsfh:
                                 weights.append(dN[ii]*10**(logage-7.)*numpy.exp((10.**(logage-7.))/800.)) #e.g., Binney (2010)
                             else:
