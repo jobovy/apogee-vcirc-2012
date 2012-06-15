@@ -44,7 +44,7 @@ class isomodel:
         elif Z is None:
             Zs= zs
         elif isinstance(Z,float):
-            if Z < 0.001 or Z < 0.0295:
+            if Z < 0.001 or Z > 0.0295:
                 Zs= [Z] 
             elif Z < 0.0015 or Z > 0.029:
                 Zs= [Z-0.0005,Z,Z+0.0005] #build up statistics
