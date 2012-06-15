@@ -10,7 +10,8 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                   datafilename=None,
                   cutoutliers=True,
                   akquantiles=None,
-                  correctak=True):
+                  correctak=True,
+                  validfeh=False):
     """
     NAME:
        readVclosData
@@ -35,6 +36,7 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                     plates AK
        correctak= if True (default: False), correct the reddening values 
                   (inner/outer)
+       validfeh= if True, only select objects with valid [Fe/H]
     OUTPUT:
     HISTORY:
        2012-01-25 - Written - Bovy (IAS)
@@ -58,6 +60,8 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
     data= data[(data['VRADERR'] != 0.)]
     if postshutdown:
         data= data[(data['MJD5'] > 55788)]
+    if validfeh:
+        data= data[(data['FEH'] != -9999.00)] #require valid [Fe/H]
     if fehcut:
         data= data[(data['FEH'] > -0.5)]
     if not cohort is None:
