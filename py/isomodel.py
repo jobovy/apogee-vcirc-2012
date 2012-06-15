@@ -35,7 +35,7 @@ class isomodel:
         HISTORY:
            2012-02-17 - Written - Bovy (IAS)
         """
-       #Read isochrones
+        #Read isochrones
         zs= numpy.arange(0.0005,0.03005,0.0005)
         if marginalizefeh:
             Zs= numpy.arange(0.008,0.031,0.001)            
@@ -44,7 +44,11 @@ class isomodel:
         elif Z is None:
             Zs= zs
         elif isinstance(Z,float):
-            if Z < 0.01:
+            if Z < 0.001 or Z < 0.0295:
+                Zs= [Z] 
+            elif Z < 0.0015 or Z > 0.029:
+                Zs= [Z-0.0005,Z,Z+0.0005] #build up statistics
+            elif Z < 0.01:
                 Zs= [Z-0.001,Z-0.0005,Z,Z+0.0005,Z+0.001] #build up statistics
             else:
                 Zs= [Z-0.0005,Z,Z+0.0005] #build up statistics
@@ -80,6 +84,7 @@ class isomodel:
                             else:
                                 weights.append(pZs[zz]*dN[ii]*10**(logage-7.))
                         else:
+#                            if Zs[zz] > 0.02 and H < (11./-1.3*(JK-0.3)): weights.append(0.) #HACK TO GET RID OF UNWANTED BRIGHT POINTS
                             if expsfh:
                                 weights.append(dN[ii]*10**(logage-7.)*numpy.exp((10.**(logage-7.))/800.)) #e.g., Binney (2010)
                             else:
