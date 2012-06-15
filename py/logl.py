@@ -2,6 +2,7 @@ import os, os.path
 import numpy
 import cPickle as pickle
 import isomodel
+import isodist
 from readVclosData import readVclosData
 from fitvc import _BINTEGRATENBINS, _BINTEGRATEDMAX, _BINTEGRATEDMIN, \
     _BINTEGRATEDMIN_DWARF, _BINTEGRATEDMAX_DWARF, _dm, get_options, \
