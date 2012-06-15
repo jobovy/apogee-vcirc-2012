@@ -15,6 +15,8 @@ def logl(init=None,data=None,options=None):
         data= readVclosData(lmin=25.,
                             bmax=2.,
                             ak=True,
+                            validfeh=options.indivfeh, #if indivfeh, we need validfeh
+                            correctak=options.correctak,
                             jkmax=1.1)
     #HACK
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
@@ -24,10 +26,21 @@ def logl(init=None,data=None,options=None):
         print "Loading the isochrone model ..."
         isofile= open(options.isofile,'rb')
         iso= pickle.load(isofile)
-        locl= pickle.load(isofile)
+        if options.indivfeh:
+            zs= pickle.load(isofile)
+        elif options.varfeh:
+            locl= pickle.load(isofile)
         isofile.close()
     else:
-        if options.varfeh:
+        if options.indivfeh:
+            #Load all isochrones
+            iso= []
+            zs= numpy.arange(0.0005,0.03005,0.0005)
+            for ii in range(len(zs)):
+                iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                             expsfh=options.expsfh,
+                                             Z=zs[ii]))
+        elif options.varfeh:
             locs= list(set(data['LOCATION']))
             iso= []
             for ii in range(len(locs)):
@@ -48,7 +61,10 @@ def logl(init=None,data=None,options=None):
         if not options.isofile is None:
             isofile= open(options.isofile,'wb')
             pickle.dump(iso,isofile)
-            pickle.dump(locl,isofile)
+            if options.indivfeh:
+                pickle.dump(zs,isofile)
+            elif options.varfeh:
+                pickle.dump(locl,isofile)
             isofile.close()
     df= None
     #Pre-calculate distance prior
@@ -58,7 +74,12 @@ def logl(init=None,data=None,options=None):
     dm= _dm(ds)
     for ii in range(len(data)):
         mh= data['H0MAG'][ii]-dm
-        if options.varfeh:
+        if options.indivfeh:
+            #Find closest Z
+            thisZ= isodist.FEH2Z(data[ii]['FEH'])
+            indx= numpy.argmin((thisZ-zs))
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+        elif options.varfeh:
             #Find correct iso
             indx= (locl == data[ii]['LOCATION'])
             logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)

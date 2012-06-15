@@ -1,4 +1,4 @@
-FITSDIR=../fits_varfeh/
+FITSDIR=../fits_indivfeh/
 NSAMPLES=10000
 
 .PHONY: all_simpledrift_noro_dwarf_vpec_sratio_hs \
@@ -30,11 +30,11 @@ NSAMPLES=10000
 	allwoloc4241_simpledrift_noro_dwarf_vpec_sratio_hs
 
 all_simpledrift_noro_dwarf_vpec_sratio_hs:
-	$(PYTHON) fitvc.py \
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
 	--noroprior --dwarf --fitvpec --fitsratio --fiths \
 	--dfmodel=simplegaussiandrift
-	$(PYTHON) fitvc.py \
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
 	 --mcsample --nsamples=$(NSAMPLES) \
