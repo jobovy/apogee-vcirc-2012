@@ -96,6 +96,8 @@ class isomodel:
         #Form array
         sample= numpy.array(sample)
         weights= numpy.array(weights)
+        self._sample= sample
+        self._weights= weights
         #Histogram
         self._jkmin, self._jkmax= 0.3,1.6
         if dwarf:
@@ -103,7 +105,7 @@ class isomodel:
             self._nbins= 51
         else: 
             self._hmin, self._hmax= -11.,2.
-            self._nbins= 49
+            self._nbins= 26#49
         self._djk= (self._jkmax-self._jkmin)/float(self._nbins)
         self._dh= (self._hmax-self._hmin)/float(self._nbins)
         self._hist, self._edges= numpy.histogramdd(sample,weights=weights,
@@ -225,6 +227,26 @@ class isomodel:
                                      xlabel=r'$(J-K_s)_0\ [\mathrm{mag}]$',
                                      ylabel=r'$M_H\ [\mathrm{mag}]$',
                                      interpolation='nearest')
+    
+    def plot_samples(self):
+        """
+        NAME:
+           plot_samples
+        PURPOSE:
+           plot the samples that the histogramming is based on 
+        INPUT:
+        OUTPUT:
+           plot to output device
+        HISTORY:
+           2012-06-15 - Written - Bovy (IAS)
+        """
+        if not _BOVY_PLOT_LOADED:
+            raise ImportError("'galpy.util.bovy_plot' plotting package not found")
+        return bovy_plot.bovy_plot(self._sample[:,0],self._sample[:,1],'k,',
+                                     xrange=[self._jkmin,self._jkmax],
+                                     yrange=[self._hmax,self._hmin],
+                                     xlabel=r'$(J-K_s)_0\ [\mathrm{mag}]$',
+                                     ylabel=r'$M_H\ [\mathrm{mag}]$')
     
     def peak(self,jk,h):
         """
