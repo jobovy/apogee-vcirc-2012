@@ -10,7 +10,7 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                   datafilename=None,
                   cutoutliers=True,
                   akquantiles=None,
-                  correctak=True,
+                  correctak=False,
                   validfeh=False):
     """
     NAME:

@@ -16,6 +16,7 @@ from fitvc import mloglike, _dm, \
     _BINTEGRATEDMAX_DWARF, _BINTEGRATEDMIN_DWARF
 from readVclosData import readVclosData
 import isomodel
+import isodist
 _PLOTZERO= False
 _PLOTALLJHK= False
 def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf,iso):
@@ -61,7 +62,7 @@ def pvlosplate(params,vhelio,data,df,options,logpiso,logpisodwarf,iso):
                    cosb,
                    sinb,
                    logpiso,
-                   logpisodwarf,True,None,iso) #None iso for now
+                   logpisodwarf,True,None,iso,data['FEH']) #None iso for now
     #indx= (out >= -0.1)*(out <= 0.1)
     #print out[indx], jk[indx], h[indx]
     return logsumexp(out)
@@ -167,9 +168,12 @@ def get_options():
     parser.add_option("--expsfh",action="store_true", dest="expsfh",
                       default=False,
                       help="If set, use an exponentially declining SFH")
-    parser.add_option("--varfeh",action="store_false", dest="varfeh",
-                      default=True,
+    parser.add_option("--varfeh",action="store_true", dest="varfeh",
+                      default=False,
                       help="If set, don't use a varying [Fe/H] distribution as a function of l")
+    parser.add_option("--indivfeh",action="store_false", dest="indivfeh",
+                      default=True,
+                      help="If set, use distances calculated based on the individual [Fe/H] of the objects")
     parser.add_option("--isofile",dest="isofile",default=None,
                       help="if set, store or restore the isochrone model(s) in this file")
     #Add dwarf part?
@@ -222,6 +226,7 @@ if __name__ == '__main__':
                         ak=True,
                         jkmax=options.jkmax,
                         datafilename=options.fakedata,
+                        validfeh=options.indivfeh, #if indivfeh, we need validfeh
                         akquantiles=akquantiles)
     if options.location == 0:
         locations= list(set(data['LOCATION']))
@@ -248,11 +253,22 @@ if __name__ == '__main__':
         print "Loading the isochrone model ..."
         isofile= open(options.isofile,'rb')
         iso= pickle.load(isofile)
-        locl= pickle.load(isofile)
+        if options.indivfeh:
+            zs= pickle.load(isofile)
+        elif options.varfeh:
+            locl= pickle.load(isofile)
         isofile.close()
     else:
         print "Setting up the isochrone model ..."
-        if options.varfeh:
+        if options.indivfeh:
+            #Load all isochrones
+            iso= []
+            zs= numpy.arange(0.0005,0.03005,0.0005)
+            for ii in range(len(zs)):
+                iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                             expsfh=options.expsfh,
+                                             Z=zs[ii]))
+        elif options.varfeh:
             locs= list(set(data['LOCATION']))
             iso= []
             for ii in range(len(locs)):
@@ -273,7 +289,10 @@ if __name__ == '__main__':
         if not options.isofile is None:
             isofile= open(options.isofile,'wb')
             pickle.dump(iso,isofile)
-            pickle.dump(locl,isofile)
+            if options.indivfeh:
+                pickle.dump(zs,isofile)
+            elif options.varfeh:
+                pickle.dump(locl,isofile)
             isofile.close()
     df= None
     print "Pre-calculating isochrone distance prior ..."
@@ -286,8 +305,13 @@ if __name__ == '__main__':
             ah= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
             if options.fitahinnerouter and data[ii]['GLON'] < 35.: ah= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitah+options.fitdm]
             mh= data['H0MAG'][ii]-dm+ah
-            if options.varfeh:
-            #Find correct iso
+            if options.indivfeh:
+                #Find closest Z
+                thisZ= isodist.FEH2Z(data[ii]['FEH'])
+                indx= numpy.argmin((thisZ-zs))
+                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+            elif options.varfeh:
+                #Find correct iso
                 indx= (locl == data[ii]['LOCATION'])
                 logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
             else:
@@ -298,8 +322,13 @@ if __name__ == '__main__':
             if not options.fitdminnerouter or data[ii]['GLON'] >= 35.: xtra= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]
             if options.fitdminnerouter and data[ii]['GLON'] < 35.: xtra= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah]
             mh= data[ii]['H0MAG']-dm+xtra
-            if options.varfeh:
-            #Find correct iso
+            if options.indivfeh:
+                #Find closest Z
+                thisZ= isodist.FEH2Z(data[ii]['FEH'])
+                indx= numpy.argmin((thisZ-zs))
+                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+            elif options.varfeh:
+                #Find correct iso
                 indx= (locl == data[ii]['LOCATION'])
                 logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
             else:
@@ -307,8 +336,13 @@ if __name__ == '__main__':
                                   +(data['J0MAG']-data['K0MAG'])[ii],mh)
         else:
             mh= data['H0MAG'][ii]-dm
-            if options.varfeh:
-            #Find correct iso
+            if options.indivfeh:
+                #Find closest Z
+                thisZ= isodist.FEH2Z(data[ii]['FEH'])
+                indx= numpy.argmin((thisZ-zs))
+                logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+            elif options.varfeh:
+                #Find correct iso
                 indx= (locl == data[ii]['LOCATION'])
                 logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
             else:

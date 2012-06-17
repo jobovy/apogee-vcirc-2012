@@ -12,6 +12,7 @@ from matplotlib.ticker import NullFormatter
 import multi
 import multiprocessing
 import isomodel
+import isodist
 from readVclosData import readVclosData
 from fitvc import mloglike, _dm, \
     _DEGTORAD, _REFV0, _REFR0, _PMSGRA, \
@@ -33,6 +34,7 @@ def plot_externalcomparison(parser):
                         bmax=options.bmax,
                         ak=True,
                         cutmultiples=options.cutmultiples,
+                        validfeh=options.indivfeh, #if indivfeh, we need validfeh
                         jkmax=options.jkmax,
                         datafilename=options.fakedata)
     #data= data[0:20]
@@ -46,11 +48,22 @@ def plot_externalcomparison(parser):
         print "Loading the isochrone model ..."
         isofile= open(options.isofile,'rb')
         iso= pickle.load(isofile)
-        locl= pickle.load(isofile)
+        if options.indivfeh:
+            zs= pickle.load(isofile)
+        elif options.varfeh:
+            locl= pickle.load(isofile)
         isofile.close()
     else:
         print "Setting up the isochrone model ..."
-        if options.varfeh:
+        if options.indivfeh:
+            #Load all isochrones
+            iso= []
+            zs= numpy.arange(0.0005,0.03005,0.0005)
+            for ii in range(len(zs)):
+                iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                             expsfh=options.expsfh,
+                                             Z=zs[ii]))
+        elif options.varfeh:
             locs= list(set(data['LOCATION']))
             iso= []
             for ii in range(len(locs)):
@@ -72,7 +85,10 @@ def plot_externalcomparison(parser):
         if not options.isofile is None:
             isofile= open(options.isofile,'wb')
             pickle.dump(iso,isofile)
-            pickle.dump(locl,isofile)
+            if options.indivfeh:
+                pickle.dump(zs,isofile)
+            elif options.varfeh:
+                pickle.dump(locl,isofile)
             isofile.close()
     df= None
     print "Pre-calculating isochrone distance prior ..."
@@ -82,7 +98,12 @@ def plot_externalcomparison(parser):
     dm= _dm(ds)
     for ii in range(len(data)):
         mh= data['H0MAG'][ii]-dm
-        if options.varfeh:
+        if options.indivfeh:
+            #Find closest Z
+            thisZ= isodist.FEH2Z(data[ii]['FEH'])
+            indx= numpy.argmin((thisZ-zs))
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+        elif options.varfeh:
             #Find correct iso
             indx= (locl == data[ii]['LOCATION'])
             logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
@@ -411,6 +432,9 @@ def get_options():
     parser.add_option("--varfeh",action="store_false", dest="varfeh",
                       default=True,
                       help="If set, don't use a varying [Fe/H] distribution as a function of l")
+    parser.add_option("--indivfeh",action="store_false", dest="indivfeh",
+                      default=True,
+                      help="If set, use distances calculated based on the individual [Fe/H] of the objects")
     parser.add_option("--isofile",dest="isofile",default=None,
                       help="if set, store or restore the isochrone model(s) in this file")
     #Add dwarf part?
