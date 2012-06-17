@@ -150,11 +150,11 @@ all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_innerouterdm:
 	--dwarf --fitvpec --fitsratio
 
 all_simpledrift_noro_dwarf_vpec_sratio_ah_hs:
-	$(PYTHON) fitvc.py --fitah \
+	$(PYTHON) fitvc.py --fitah --isofile=$(FITSDIR)isos.dat \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_ah_hs.sav \
 	--noroprior --dwarf --fitvpec --fitsratio --fiths \
 	--dfmodel=simplegaussiandrift
-	$(PYTHON) fitvc.py --fitah \
+	$(PYTHON) fitvc.py --fitah --isofile=$(FITSDIR)isos.dat \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_ah_hs_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_ah_hs.sav \
 	 --mcsample --nsamples=$(NSAMPLES) --fiths \
@@ -162,11 +162,11 @@ all_simpledrift_noro_dwarf_vpec_sratio_ah_hs:
 	--dwarf --fitvpec --fitsratio 
 
 all_simpledrift_noro_dwarf_vpec_sratio_dm_hs:
-	$(PYTHON) fitvc.py --fitdm \
+	$(PYTHON) fitvc.py --fitdm --isofile=$(FITSDIR)isos.dat \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_hs.sav \
 	--noroprior --dwarf --fitvpec --fitsratio --fiths \
 	--dfmodel=simplegaussiandrift
-	$(PYTHON) fitvc.py --fitdm \
+	$(PYTHON) fitvc.py --fitdm --isofile=$(FITSDIR)isos.dat \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_dm_hs.sav \
 	 --mcsample --nsamples=$(NSAMPLES) --fiths \
@@ -270,11 +270,11 @@ all_simpledrift_noro_dwarf_quadratic_vpec_sratio_ah_hs_innerouterah:
 	--dwarf --fitvpec --fitsratio
 
 all_simpledrift_noro_dwarf_powerlaw_vpec_sratio:
-	$(PYTHON) fitvc.py \
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
 	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio.sav \
 	--noroprior --dwarf --fitvpec --fitsratio \
 	--dfmodel=simplegaussiandrift --rotcurve=powerlaw
-	$(PYTHON) fitvc.py \
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
 	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio.sav \
 	 --mcsample --nsamples=$(NSAMPLES) --rotcurve=powerlaw \
@@ -282,11 +282,11 @@ all_simpledrift_noro_dwarf_powerlaw_vpec_sratio:
 	--dwarf --fitvpec --fitsratio
 
 all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs:
-	$(PYTHON) fitvc.py --fiths \
+	$(PYTHON) fitvc.py --fiths --isofile=$(FITSDIR)isos.dat \
 	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav \
 	--noroprior --dwarf --fitvpec --fitsratio \
 	--dfmodel=simplegaussiandrift --rotcurve=powerlaw
-	$(PYTHON) fitvc.py --fiths \
+	$(PYTHON) fitvc.py --fiths --isofile=$(FITSDIR)isos.dat \
 	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs_$(NSAMPLES)samples.sav \
 	--init=$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav \
 	 --mcsample --nsamples=$(NSAMPLES) --rotcurve=powerlaw \

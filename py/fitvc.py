@@ -207,7 +207,7 @@ def fitvc(parser):
                                            l,b,jk,h,df,options,
                                            sinl,cosl,cosb,sinb,
                                            logpiso,logpisodwarf,False,None,
-                                           iso),
+                                           iso,data['FEH']),
                                      callback=cb)
         print params
         save_pickles(args[0],params)       
@@ -355,7 +355,8 @@ def fitvc(parser):
                                     (data['VHELIO'],
                                      l,b,jk,h,df,options,
                                      sinl,cosl,cosb,sinb,
-                                     logpiso,logpisodwarf,None,iso),
+                                     logpiso,logpisodwarf,None,iso,
+                                     data['FEH']),
                                     isDomainFinite=isDomainFinite,
                                     domain=domain,
                                     nsamples=options.nsamples,
@@ -509,11 +510,11 @@ def _initialize_params(options):
 def cb(x): print x
 
 def loglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
-            logpiso,logpisodwarf,vcf,iso):
+            logpiso,logpisodwarf,vcf,iso,feh):
     return -mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
-                     logpiso,logpisodwarf,False,vcf,iso)
+                     logpiso,logpisodwarf,False,vcf,iso,feh)
 def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
-             logpiso,logpisodwarf,arrout,vcf,iso):
+             logpiso,logpisodwarf,arrout,vcf,iso,feh):
     """minus log likelihood Eqn (1),
     params= [vc(ro),ro,sigmar]"""
     #Boundaries
@@ -594,7 +595,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                                                                        params,vhelio/params[0]/_REFV0,
                                                                        l,b,jk,h,df,options,
                                                                        sinl,cosl,cosb,sinb,
-                                                                       True,logpiso[:,x],vcf,iso,True)),
+                                                                       True,logpiso[:,x],vcf,iso,feh,True)),
                                                range(len(ds)),
                                         numcores=numpy.amin([len(ds),multiprocessing.cpu_count(),options.multi]))
             #thisout is list of len(vhelio)
@@ -609,14 +610,14 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                                                                 params,vhelio/params[0]/_REFV0,
                                                                 l,b,jk,h,df,options,
                                                                 sinl,cosl,cosb,sinb,
-                                                                True,logpiso[:,ii],vcf,iso)
+                                                                True,logpiso[:,ii],vcf,iso,feh)
                 if options.dwarf:
                     if ii > 0: continue #HACK
                     thisxtraout[:,ii], logpddwarf[:,ii]= _mloglikedIntegrand(dwarfds[ii],
                                                                              params,vhelio/params[0]/_REFV0,
                                                                              l,b,jk,h,df,options,
                                                                              sinl,cosl,cosb,sinb,
-                                                                             True,logpisodwarf[:,ii],vcf,iso,dwarf=True)
+                                                                             True,logpisodwarf[:,ii],vcf,iso,feh,dwarf=True)
         #Sum each one
         if arrout:
             out= numpy.zeros(len(vhelio))
@@ -653,7 +654,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
 
 def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
                         df,options,sinl,cosl,cosb,sinb,returnlog,logpiso,vcf,
-                        iso,
+                        iso,feh,
                         pdinout=False,dwarf=False):
     #All positions are /ro, all velocities are /vo (d and vhelio have this already
     #Calculate coordinates, distances are /Ro (/params[1])
@@ -690,6 +691,8 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
     c= numpy.amax(numpy.array([logpvlos,logpvlos_outlier]),axis=0)
     logpvlos= numpy.log(numpy.exp(logpvlos-c)
                         +numpy.exp(logpvlos_outlier-c))+c
+    if options.indivfeh and (options.fitdm or options.fitah):
+        zs= numpy.arange(0.0005,0.03005,0.0005)
     if dwarf:
         logpd= 0.
     #Re-calculate logpiso if necessary
@@ -702,7 +705,12 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
             mh= h[ii]-dm
             if options.fitdminnerouter and l[ii] < 97.*_DEGTORAD:
                 mh= h[ii]-dminnerouter
-            if options.varfeh:
+            if options.indivfeh:
+                #Find closest Z
+                thisZ= isodist.FEH2Z(feh[ii])
+                indx= numpy.argmin((thisZ-zs))
+                logpiso[ii]= iso[0][indx](jk[ii],mh)
+            elif options.varfeh:
                 raise NotImplementedError("changing dm with varfeh not implemented yet")
                 for jj in range(len(iso[0])):
                     logpiso[ii,jj]= iso[0][jj](jk[ii],mh)
@@ -715,7 +723,12 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
         dm= _dm(d*params[1]*_REFR0)
         for ii in range(len(vhelio)):
             mh= h[ii]-dm+ah
-            if options.varfeh:
+            if options.indivfeh:
+                #Find closest Z
+                thisZ= isodist.FEH2Z(feh[ii])
+                indx= numpy.argmin((thisZ-zs))
+                logpiso[ii]= iso[0][indx](jk[ii],mh)
+            elif options.varfeh:
                 raise NotImplementedError("changing ah with varfeh not implemented yet")
                 for jj in range(len(iso[0])):
                     logpiso[ii,jj]= iso[0][jj](jk[ii]+1.5/1.55*ah,mh) #Accounts for red. law
