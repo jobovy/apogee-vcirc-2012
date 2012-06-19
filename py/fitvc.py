@@ -727,7 +727,7 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
                 #Find closest Z
                 thisZ= isodist.FEH2Z(feh[ii])
                 indx= numpy.argmin((thisZ-zs))
-                logpiso[ii]= iso[0][indx](jk[ii],mh)
+                logpiso[ii]= iso[0][indx](jk[ii]+1.5/1.55*ah,mh) #Accounts for red. law
             elif options.varfeh:
                 raise NotImplementedError("changing ah with varfeh not implemented yet")
                 for jj in range(len(iso[0])):
@@ -736,7 +736,12 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
                 logpiso[ii]= iso[0](jk[ii]+1.5/1.55*ah,mh) #Accounts for red. law
             if options.fitahinnerouter and l[ii] < 97.*_DEGTORAD:
                 mh= h[ii]-dm+ahinnerouter
-                if options.varfeh:
+                if options.indivfeh:
+                    #Find closest Z
+                    thisZ= isodist.FEH2Z(feh[ii])
+                    indx= numpy.argmin((thisZ-zs))
+                    logpiso[ii]= iso[0][indx](jk[ii]+1.5/1.55*ah,mh) #Accounts for red. law
+                elif options.varfeh:
                     raise NotImplementedError("changing ah with varfeh not implemented yet")
                     for jj in range(len(iso[0])):
                         logpiso[ii,jj]= iso[0][jj](jk[ii]+1.5/1.55*ahinnerouter,mh) #Accounts for red. law
