@@ -60,8 +60,6 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
     data= data[(data['VRADERR'] != 0.)]
     if postshutdown:
         data= data[(data['MJD5'] > 55788)]
-    if validfeh:
-        data= data[(data['FEH'] != -9999.00)] #require valid [Fe/H]
     if fehcut:
         data= data[(data['FEH'] > -0.5)]
     if not cohort is None:
@@ -99,6 +97,31 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
         data= primarydata[keepindx]
     if cutoutliers:
         data= data[(numpy.fabs(data['VHELIO']) <= 300.)]
+    if validfeh:
+        #First fill in invalid [Fe/H] w/ [Fe/H] from other visits
+        indx= (data['FEH'] == -9999.00)
+        invaliddata= data[indx]
+        alldata= fitsio.read(datafile,1) #to compare with
+        fix= 0
+        nofix= 0
+        newfeh= numpy.zeros(len(invaliddata))-9999.00
+        for ii in range(len(invaliddata)):
+            if invaliddata['NVISITS'][ii] == 1: 
+                nofix+= 1
+                continue #Nothing to be done
+            thismatchindx= (alldata['UNIQID'] == invaliddata[ii]['UNIQID'])
+            thismatch= alldata[thismatchindx]
+            validindx= (thismatch['FEH'] != -9999.00)
+            if numpy.sum(validindx) == 0.: 
+                nofix+= 1
+                continue #None are valid
+            fix+= 1
+            newfeh[ii]= thismatch['FEH'][validindx][0]
+        data['FEH'][indx]= newfeh
+        if False:
+            print "%i out of %i [Fe/H] fixed ..." % (fix,len(data))
+            print "%i out of %i [Fe/H] not fixed ..." % (nofix,len(data))
+        data= data[(data['FEH'] != -9999.00)] #require valid [Fe/H]
     #Combine l=150 locations into a single location
     if _COMBINEL150:
         locs= numpy.array(list(set(data['LOCATION'])))
