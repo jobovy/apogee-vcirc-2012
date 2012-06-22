@@ -6,6 +6,7 @@ import multiprocessing
 import fitsio
 from readVclosData import readVclosData
 import isomodel
+import isodist
 from fitvc import mloglike, _dm, \
     _DEGTORAD, _REFV0, _REFR0, \
     _BINTEGRATEDMAX, _BINTEGRATEDMIN, _BINTEGRATENBINS, \
@@ -24,6 +25,7 @@ def createFakeData(parser):
                         cohort=options.cohort,
                         lmin=options.lmin,
                         bmax=options.bmax,
+                        validfeh=options.indivfeh, #if indivfeh, we need validfeh
                         ak=True,
                         cutmultiples=options.cutmultiples,
                         jkmax=options.jkmax)
@@ -31,13 +33,53 @@ def createFakeData(parser):
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
     #Set up the isochrone
-    print "Setting up the isochrone model ..."
-    iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z)
-    if options.dwarf:
-        iso= [iso, 
-              isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,dwarf=True)]
+    #Set up the isochrone
+    if not options.isofile is None and os.path.exists(options.isofile):
+        print "Loading the isochrone model ..."
+        isofile= open(options.isofile,'rb')
+        iso= pickle.load(isofile)
+        if options.indivfeh:
+            zs= pickle.load(isofile)
+        elif options.varfeh:
+            locl= pickle.load(isofile)
+        isofile.close()
     else:
-        iso= [iso]
+        print "Setting up the isochrone model ..."
+        if options.indivfeh:
+            #Load all isochrones
+            iso= []
+            zs= numpy.arange(0.0005,0.03005,0.0005)
+            for ii in range(len(zs)):
+                iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                             expsfh=options.expsfh,
+                                             Z=zs[ii]))
+        elif options.varfeh:
+            locs= list(set(data['LOCATION']))
+            iso= []
+            for ii in range(len(locs)):
+                indx= (data['LOCATION'] == locs[ii])
+                locl= numpy.mean(data['GLON'][indx]*_DEGTORAD)
+                iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                             expsfh=options.expsfh,
+                                             marginalizefeh=True,
+                                             glon=locl))
+        else:
+            iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
+                                   expsfh=options.expsfh)
+        if options.dwarf:
+            iso= [iso,
+                  isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
+                                    dwarf=True,expsfh=options.expsfh)]
+        else:
+            iso= [iso]
+        if not options.isofile is None:
+            isofile= open(options.isofile,'wb')
+            pickle.dump(iso,isofile)
+            if options.indivfeh:
+                pickle.dump(zs,isofile)
+            elif options.varfeh:
+                pickle.dump(locl,isofile)
+            isofile.close()
     df= None
     print "Pre-calculating isochrone distance prior ..."
     logpiso= numpy.zeros((len(data),_BINTEGRATENBINS))
@@ -46,8 +88,18 @@ def createFakeData(parser):
     dm= _dm(ds)
     for ii in range(len(data)):
         mh= data['H0MAG'][ii]-dm
-        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
-                              +(data['J0MAG']-data['K0MAG'])[ii],mh)
+        if options.indivfeh:
+            #Find closest Z
+            thisZ= isodist.FEH2Z(data[ii]['FEH'])
+            indx= numpy.argmin((thisZ-zs))
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+        elif options.varfeh:
+            #Find correct iso
+            indx= (locl == data[ii]['LOCATION'])
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+        else:
+            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+                                  +(data['J0MAG']-data['K0MAG'])[ii],mh)
     if options.dwarf:
         logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
         dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
@@ -97,7 +149,7 @@ def createFakeData(parser):
                                                            logpiso,
                                                            thislogpisodwarf,
                                                            True,
-                                                           None,None)),
+                                                           None,None,None)),
                                       range(options.nvlos),
                                       numcores=numpy.amin([len(vlos),multiprocessing.cpu_count(),thismulti]))
         for jj in range(options.nvlos):
@@ -115,7 +167,7 @@ def createFakeData(parser):
                                    cosb,
                                    sinb,
                                    logpiso,
-                                   thislogpisodwarf,True,None,None)
+                                   thislogpisodwarf,True,None,None,None)
     """
     for jj in range(options.nvlos):
         pvlos[:,jj]= -mloglike(params,numpy.zeros(len(data))+vlos[jj],
@@ -129,7 +181,7 @@ def createFakeData(parser):
                                cosb,
                                sinb,
                                logpiso,
-                               thislogpisodwarf,True,None,None)
+                               thislogpisodwarf,True,None,None,None)
     """
     for ii in range(len(data)):
         pvlos[ii,:]-= logsumexp(pvlos[ii,:])
