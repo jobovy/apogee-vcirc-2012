@@ -50,12 +50,12 @@ def plot_vpecvo(filename,plotfilename):
 
     #Inset, closed orbit at the Sun
     lp= LogarithmicHaloPotential(normalize=1.)
-    ep= EllipticalDiskPotential(phib=numpy.pi/2.,p=0.,tform=-100.,tsteady=-100.,twophio=0.045)
-    o= Orbit([1.,0.,1.+10./220.,0.])
+    ep= EllipticalDiskPotential(phib=numpy.pi/2.,p=0.,tform=-100.,tsteady=-100.,twophio=0.072725)
+    o= Orbit([1.,0.,1.+16./220.,0.])
     oc= Orbit([1.,0.,1.,0.])
     ts= numpy.linspace(0.,4.*numpy.pi,1001)
     o.integrate(ts,[lp,ep])
-    #print o.e(analytic=True,pot=lp)
+    print o.e(analytic=True,pot=lp)
     oc.integrate(ts,lp)
     left, bottom, width, height= 0.45, 0.45, 0.25, 0.25
     axInset= pyplot.axes([left,bottom,width,height])
