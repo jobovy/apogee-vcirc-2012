@@ -1,3 +1,4 @@
+import os, os.path
 import numpy
 import cPickle as pickle
 from scipy.maxentropy import logsumexp
@@ -17,7 +18,11 @@ def createFakeData(parser):
     if len(args) == 0:
         parser.print_help()
         return
-        #Read the data
+    if os.path.exists(options.plotfile):
+        print "Outfile "+options.plotfile+" exists ..."
+        print "Returning ..."
+        return None
+    #Read the data
     numpy.random.seed(options.seed)
     print "Reading the data ..."
     data= readVclosData(postshutdown=options.postshutdown,
