@@ -329,6 +329,18 @@ all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_ah_hs_innerouterah:
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio
 
+all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_feh_hs_innerouterfeh:
+	$(PYTHON) fitvc.py --fiths \
+	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_feh_hs_innerouterfeh.sav \
+	--noroprior --dwarf --fitvpec --fitsratio \
+	--dfmodel=simplegaussiandrift --rotcurve=powerlaw --fitfeh --fitfehinnerouter
+	$(PYTHON) fitvc.py --fiths --fitfeh --fitfehinnerouter \
+	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_feh_hs_innerouterfeh_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_feh_hs_innerouterfeh.sav \
+	 --mcsample --nsamples=$(NSAMPLES) --rotcurve=powerlaw \
+	--noroprior --dfmodel=simplegaussiandrift \
+	--dwarf --fitvpec --fitsratio
+
 all_simpledrift_noro_dwarf_cubic_vpec_sratio_hs:
 	$(PYTHON) fitvc.py --fiths \
 	$(FITSDIR)all_simpledrift_noro_dwarf_cubic_vpec_sratio_hs.sav \
