@@ -10,6 +10,7 @@ from matplotlib.ticker import NullFormatter
 from galpy.orbit import Orbit
 from galpy.potential import EllipticalDiskPotential, LogarithmicHaloPotential
 from fitvc import _REFV0, _REFR0, _PMSGRA, _VRSUN
+_ROTCURVE= 'flat'
 def plot_vpecvo(filename,plotfilename):
     if not os.path.exists(filename):
         raise IOError("given filename does not exist")
@@ -18,8 +19,12 @@ def plot_vpecvo(filename,plotfilename):
     savefile.close()
     vos= numpy.array([s[0] for s in params])*_REFV0
     ros= numpy.array([s[1] for s in params])*_REFR0
-    vpec= numpy.array([s[7] for s in params])*_PMSGRA*ros -vos#7 w/ dwarf
-    vpecR= numpy.array([s[6] for s in params])*_VRSUN#6 w/ dwarf
+    if _ROTCURVE == 'flat':
+        vpec= numpy.array([s[7] for s in params])*_PMSGRA*ros -vos#7 w/ dwarf
+        vpecR= numpy.array([s[6] for s in params])*_VRSUN#6 w/ dwarf
+    elif _ROTCURVE == 'powerlaw' or _ROTCURVE == 'linear':
+        vpec= numpy.array([s[8] for s in params])*_PMSGRA*ros -vos#7 w/ dwarf
+        vpecR= numpy.array([s[7] for s in params])*_VRSUN#6 w/ dwarf
     bovy_plot.bovy_print()
     levels= list(special.erf(0.5*numpy.arange(1,4)))
     levels.append(1.01) #HACK to not plot outliers
