@@ -30,8 +30,8 @@ def plot_vpecvo(filename,plotfilename):
     levels.append(1.01) #HACK to not plot outliers
     axScatter, axHistx,axHisty= bovy_plot.scatterplot(vpecR,#vos/ros+vpec/ros,
                                                       vpec,'k,',levels=levels,
-                          xlabel=r'$v_{R,\odot}\ [\mathrm{km\ s}^{-1}]$',
-                          ylabel=r'$v_{\phi,\odot}-v_0\ [\mathrm{km\ s}^{-1}]$',
+                                                      xlabel=r'$v_{R,\odot}\ [\mathrm{km\ s}^{-1}]$',
+                                                      ylabel=r'$v_{\phi,\odot}-v_0\ [\mathrm{km\ s}^{-1}]$',
                           bins=31,
                           xrange=[-15.,0.],
                           yrange=[0.,35.],
