@@ -295,6 +295,10 @@ def get_options():
                       action="store_true", dest="fitsrinnerouter",
                       default=False,
                       help="If set, fit for the sigma_r separately for the inner disk")
+    parser.add_option("--fitfehinnerouter",
+                      action="store_true", dest="fitfehinnerouter",
+                      default=False,
+                      help="If set, fit for the feh offset separately for the inner disk")
     parser.add_option("--dwarfinnerouter",
                       action="store_true", dest="dwarfinnerouter",
                       default=False,
@@ -365,6 +369,9 @@ def get_options():
     parser.add_option("--fitah",action="store_true", dest="fitah",
                       default=False,
                       help="If set, fit for an extinction-correction offset")
+    parser.add_option("--fitfeh",action="store_true", dest="fitfeh",
+                      default=False,
+                      help="If set, fit for a [Fe/H] offset (with indivfeh)")
     parser.add_option("--expsfh",action="store_true", dest="expsfh",
                       default=False,
                       help="If set, use an exponentially declining SFH")
