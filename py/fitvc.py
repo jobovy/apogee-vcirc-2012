@@ -181,7 +181,7 @@ def fitvc(parser):
         if options.indivfeh:
             #Find closest Z
             thisZ= isodist.FEH2Z(data[ii]['FEH'])
-            indx= numpy.argmin((thisZ-zs))
+            indx= numpy.argmin(numpy.fabs(thisZ-zs))
             logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
         elif options.varfeh:
             #Find correct iso
@@ -720,7 +720,7 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
             if options.indivfeh:
                 #Find closest Z
                 thisZ= isodist.FEH2Z(feh[ii])
-                indx= numpy.argmin((thisZ-zs))
+                indx= numpy.argmin(numpy.fabs(thisZ-zs))
                 logpiso[ii]= iso[0][indx](jk[ii],mh)
             elif options.varfeh:
                 raise NotImplementedError("changing dm with varfeh not implemented yet")
@@ -738,7 +738,7 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
             if options.indivfeh:
                 #Find closest Z
                 thisZ= isodist.FEH2Z(feh[ii])
-                indx= numpy.argmin((thisZ-zs))
+                indx= numpy.argmin(numpy.fabs(thisZ-zs))
                 logpiso[ii]= iso[0][indx](jk[ii]+1.5/1.55*ah,mh) #Accounts for red. law
             elif options.varfeh:
                 raise NotImplementedError("changing ah with varfeh not implemented yet")
@@ -751,7 +751,7 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
                 if options.indivfeh:
                     #Find closest Z
                     thisZ= isodist.FEH2Z(feh[ii])
-                    indx= numpy.argmin((thisZ-zs))
+                    indx= numpy.argmin(numpy.fabs(thisZ-zs))
                     logpiso[ii]= iso[0][indx](jk[ii]+1.5/1.55*ah,mh) #Accounts for red. law
                 elif options.varfeh:
                     raise NotImplementedError("changing ah with varfeh not implemented yet")
@@ -772,7 +772,7 @@ def _mloglikedIntegrand(d,params,vhelio,l,b,jk,h,
                     thisZ= isodist.FEH2Z(feh[ii]+dfehinnerouter)
                 else:
                     thisZ= isodist.FEH2Z(feh[ii]+dfeh)
-                indx= numpy.argmin((thisZ-zs))
+                indx= numpy.argmin(numpy.fabs(thisZ-zs))
                 logpiso[ii]= iso[0][indx](jk[ii],mh)
             elif options.varfeh:
                 raise NotImplementedError("changing feh with varfeh not implemented yet")

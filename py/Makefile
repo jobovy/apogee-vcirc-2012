@@ -1,4 +1,4 @@
-FITSDIR=../fits_indivfeh_new/
+FITSDIR=../fits_indivfeh_correct/
 NSAMPLES=10000
 
 .PHONY: all_simpledrift_noro_dwarf_vpec_sratio_hs \
