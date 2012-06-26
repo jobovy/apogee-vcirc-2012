@@ -1,5 +1,5 @@
-FAKEDIR=../fake_indivfeh_new/
-FITSDIR=../fits_indivfeh_new/
+FAKEDIR=../fake_indivfeh_correct/
+FITSDIR=../fits_indivfeh_correct/
 NSAMPLES=10000
 
 all: fake fake2 fake3 fitfake fitfake_pl fitfake2 fitfake3 \
