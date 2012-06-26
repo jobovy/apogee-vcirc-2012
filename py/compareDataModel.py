@@ -129,6 +129,10 @@ def get_options():
                       action="store_true", dest="fitsratioinnerouter",
                       default=False,
                       help="If set, fit for the ration squared of tangential to radial dispersion")
+    parser.add_option("--fitfehinnerouter",
+                      action="store_true", dest="fitfehinnerouter",
+                      default=False,
+                      help="If set, fit for the feh offset separately for the inner disk")
     #Data options
     parser.add_option("--lmin",dest='lmin',default=25.,type='float',
                       help="readVclosData 'lmin'")
@@ -165,6 +169,9 @@ def get_options():
     parser.add_option("--fitah",action="store_true", dest="fitah",
                       default=False,
                       help="If set, fit for an extinction-correction offset")
+    parser.add_option("--fitfeh",action="store_true", dest="fitfeh",
+                      default=False,
+                      help="If set, fit for a [Fe/H] offset (with indivfeh)")
     parser.add_option("--expsfh",action="store_true", dest="expsfh",
                       default=False,
                       help="If set, use an exponentially declining SFH")
