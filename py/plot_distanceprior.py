@@ -14,6 +14,7 @@ from matplotlib import pyplot
 from galpy.util import bovy_plot
 from readVclosData import readVclosData
 import isomodel
+import isodist
 from fitvc import _logpd, _dm, _REFR0, _DEGTORAD, \
     _BINTEGRATEDMIN, _BINTEGRATEDMAX, _BINTEGRATENBINS
 def plot_distanceprior(parser):
@@ -27,6 +28,7 @@ def plot_distanceprior(parser):
                         bmax=options.bmax,
                         ak=True,
                         cutmultiples=options.cutmultiples,
+                        validfeh=options.indivfeh, #if indivfeh, we need validfeh
                         jkmax=options.jkmax,
                         datafilename=options.fakedata)
     l= data['GLON']*_DEGTORAD
@@ -43,11 +45,22 @@ def plot_distanceprior(parser):
         print "Loading the isochrone model ..."
         isofile= open(options.isofile,'rb')
         iso= pickle.load(isofile)
-        locl= pickle.load(isofile)
+        if options.indivfeh:
+            zs= pickle.load(isofile)
+        elif options.varfeh:
+            locl= pickle.load(isofile)
         isofile.close()
     else:
         print "Setting up the isochrone model ..."
-        if options.varfeh:
+        if options.indivfeh:
+            #Load all isochrones
+            iso= []
+            zs= numpy.arange(0.0005,0.03005,0.0005)
+            for ii in range(len(zs)):
+                iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
+                                             expsfh=options.expsfh,
+                                             Z=zs[ii]))
+        elif options.varfeh:
             locs= list(set(data['LOCATION']))
             iso= []
             for ii in range(len(locs)):
@@ -78,7 +91,12 @@ def plot_distanceprior(parser):
     dm= _dm(ds)
     for ii in range(len(data)):
         mh= h[ii]-dm 
-        if options.varfeh:
+        if options.indivfeh:
+            #Find closest Z
+            thisZ= isodist.FEH2Z(data[ii]['FEH'])
+            indx= numpy.argmin(numpy.fabs(thisZ-zs))
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
+        elif options.varfeh:
             #Find correct iso
             indx= (locl == data[ii]['LOCATION'])
             logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+jk[ii],mh)
@@ -228,9 +246,12 @@ def get_options():
     parser.add_option("--expsfh",action="store_true", dest="expsfh",
                       default=False,
                       help="If set, use an exponentially declining SFH")
-    parser.add_option("--varfeh",action="store_false", dest="varfeh",
-                      default=True,
+    parser.add_option("--varfeh",action="store_true", dest="varfeh",
+                      default=False,
                       help="If set, don't use a varying [Fe/H] distribution as a function of l")
+    parser.add_option("--indivfeh",action="store_false", dest="indivfeh",
+                      default=True,
+                      help="If set, use distances calculated based on the individual [Fe/H] of the objects")
     parser.add_option("--isofile",dest="isofile",default=None,
                       help="if set, store or restore the isochrone model(s) in this file")
     return parser
