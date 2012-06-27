@@ -15,7 +15,7 @@ def plot_rotcurves(plotfilename):
     vo, ro, dvdr= 0.93050113,  1.00377579, 0.01625223
     vlinear= (vo+dvdr*(rs/_REFR0-1.))*_REFV0
     #4: quadratic
-    vo, ro, dvdr, d2vdr2= 0.92954738,  1.00440273, 0.02909439,  0.2#5129582
+    vo, ro, dvdr, d2vdr2= 0.92954738,  1.00440273, 0.02909439,  0.25129582
     vquadratic= (vo+dvdr*(rs/_REFR0-1.)+d2vdr2*(rs/_REFR0-1.)**2.)*_REFV0
     #5: cubic
     vo, ro, dvdr, d2vdr2, d3vdr3=  0.9416574, 1.01691786, -0.10708624, -0.07733835,  0.42241186
