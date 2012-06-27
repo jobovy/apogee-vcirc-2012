@@ -12,7 +12,16 @@ all: fake fake2 fake3 fitfake fitfake_pl fitfake2 fitfake3 \
      fitfakedehnen2_hr2 fitfakedehnen2_hr4 \
      fitfakedehnen4_hr2 fitfakedehnen5_hr2 \
      fitfakedehnen4_hr4 fitfakedehnen5_hr4 \
-     fitfakedehnen2_hr3
+     fitfakedehnen2_hr3 \
+     fitfakedehnen_hr3_linear \
+     fitfakedehnen2_hr3_linear \
+     fitfakedehnen3_hr3_linear \
+     fitfakedehnen_hr3_quadratic \
+     fitfakedehnen2_hr3_quadratic \
+     fitfakedehnen3_hr3_quadratic \
+     fitfakedehnen_hr3_cubic \
+     fitfakedehnen2_hr3_cubic \
+     fitfakedehnen3_hr3_cubic
 
 .PHONY:
 	fake \
@@ -122,7 +131,7 @@ fakedehnen3:
 fakedehnen4:
 	$(PYTHON) createFakeData.py --isofile=$(FITSDIR)isos.dat \
 	-o $(FAKEDIR)fake4_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
-	--nvlos=201 --dfmodel=dehnen
+	--nvlos=201 --dfmodel=dehnen \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
 	--noro -m 15 --dwarf --fitvpec --fitsratio --fiths --seed=4
 
@@ -257,6 +266,20 @@ fitfakedehnen_hr3_pl:
 	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_powerlaw_vpec_sratio_hs_hr3_$(NSAMPLES).sav \
 	--mcsample --nsamples=$(NSAMPLES) \
 	--init=$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_powerlaw_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
+fitfakedehnen_hr3_linear:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_linear_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --rotcurve=linear
+	$(PYTHON) fitvc.py --rotcurve=linear --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_linear_vpec_sratio_hs_hr3_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_linear_vpec_sratio_hs_hr3.sav \
 	--noro --dwarf --fitvpec --fitsratio --fiths
 
 fitfakedehnen2_hr3_pl:
@@ -398,4 +421,116 @@ fitfakedehnen5_hr4:
 	--mcsample --nsamples=$(NSAMPLES) \
 	--init=$(FAKEDIR)all5_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr4.sav \
 	--noro --dwarf --fitvpec --fitsratio --fiths --hr=4.
+
+fitfakedehnen_hr3_quadratic:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_quadratic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --rotcurve=quadratic
+	$(PYTHON) fitvc.py --rotcurve=quadratic --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_quadratic_vpec_sratio_hs_hr3_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_quadratic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
+fitfakedehnen_hr3_cubic:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_cubic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --rotcurve=cubic
+	$(PYTHON) fitvc.py --rotcurve=cubic --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_cubic_vpec_sratio_hs_hr3_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_cubic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
+fitfakedehnen2_hr3_linear:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_linear_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --rotcurve=linear
+	$(PYTHON) fitvc.py --rotcurve=linear --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_linear_vpec_sratio_hs_hr3_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_linear_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
+fitfakedehnen2_hr3_quadratic:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_quadratic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --rotcurve=quadratic
+	$(PYTHON) fitvc.py --rotcurve=quadratic --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_quadratic_vpec_sratio_hs_hr3_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_quadratic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
+fitfakedehnen2_hr3_cubic:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_cubic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --rotcurve=cubic
+	$(PYTHON) fitvc.py --rotcurve=cubic --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_cubic_vpec_sratio_hs_hr3_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_cubic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
+fitfakedehnen3_hr3_linear:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_linear_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --rotcurve=linear
+	$(PYTHON) fitvc.py --rotcurve=linear --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_linear_vpec_sratio_hs_hr3_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_linear_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
+fitfakedehnen3_hr3_quadratic:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_quadratic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --rotcurve=quadratic
+	$(PYTHON) fitvc.py --rotcurve=quadratic --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_quadratic_vpec_sratio_hs_hr3_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_quadratic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
+
+fitfakedehnen3_hr3_cubic:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_cubic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --rotcurve=cubic
+	$(PYTHON) fitvc.py --rotcurve=cubic --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_cubic_vpec_sratio_hs_hr3_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_cubic_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths
 
