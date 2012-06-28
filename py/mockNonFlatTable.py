@@ -8,8 +8,8 @@ from fitvc import _PMSGRA, _VRSUN, _REFV0, _REFR0
 from resultsTable import sixtyeigthinterval
 _FLATFIT= '../fits/all_simpledrift_noro_dwarf_vpec_sratio_hs.sav'
 _FLATSAMPLES= '../fits/all_simpledrift_noro_dwarf_vpec_sratio_hs_10000samples.sav'
-_NSECTIONS= 4
-_SECTIONS= ['powerlaw','linear','quadratic','cubic']
+_NSECTIONS= 3
+_SECTIONS= ['powerlaw','linear','cubic']
 _NMOCKS= 3
 _MOCKFIT= ['../fake_indivfeh_correct/all_simpledrift-dehnen_noro_dwarf_FLAT_vpec_sratio_hs_hr3.sav',
            '../fake_indivfeh_correct/all2_simpledrift-dehnen_noro_dwarf_FLAT_vpec_sratio_hs_hr3.sav',
@@ -149,7 +149,10 @@ def mockNonFlatTable(parser):
         for ii in range(len(names)):
             #Set up line
             if ii == 0:
-                printline= _SECTIONS[kk]
+                if _SECTIONS[kk] == 'powerlaw':
+                    printline= 'power-law'
+                else:
+                    printline= _SECTIONS[kk]
             else:
                 printline= " "
             printline+= ' & '
