@@ -576,7 +576,7 @@ if __name__ == '__main__':
     filename= '../fits/all_simpledrift_noro_dwarf_vpec_sratio_hs_10000samples.sav'
     bins= 16
     options= set_options(None)
-    ext= 'png'
+    ext= 'ps'
     #First plot vc,ro
     rovc(filename=filename,bins=bins,options=options)
     bovy_plot.bovy_end_print(os.path.join(outdir,'pdf_vc_ro.'+ext))
