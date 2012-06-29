@@ -449,6 +449,9 @@ def get_options():
                       dest="dwarf",
                       default=False,
                       help="setting this adds dwarf contamination")
+    #Second population
+    parser.add_option("--hr2",dest='hr2',default=5.,type='float',
+                      help="Second population scale length")
     #Distance marginalization by binning or not
     parser.add_option("--dontbintegrate",action="store_true",
                       dest="dontbintegrate",

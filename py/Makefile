@@ -25,6 +25,7 @@ NSAMPLES=10000
 	all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_innerouter \
 	all_simpledrift_noro_dwarf_powerlaw_vpec_sratioinnerouter_innerouter \
 	all_multiplepops_noro_dwarf_vpec_sratio \
+	all_twopops_noro_dwarf_vpec_sratio_hs \
 	loc4240_simpledrift_noro_dwarf_vpec_sratio \
 	allwoloc4240_simpledrift_noro_dwarf_vpec_sratio_hs \
 	allwoloc4241_simpledrift_noro_dwarf_vpec_sratio_hs
@@ -400,6 +401,30 @@ all_multiplepops_noro_dwarf_vpec_sratio_hs:
 	 --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=multiplepops \
 	--dwarf --fitvpec --fitsratio
+
+all_twopops_noro_dwarf_vpec_sratio_hs:
+	$(PYTHON) fitvc.py --fiths --isofile=$(FITSDIR)isos.dat \
+	$(FITSDIR)all_twopops_noro_dwarf_vpec_sratio_hs.sav \
+	--noroprior --dwarf --fitvpec --fitsratio \
+	--dfmodel=twopops
+	$(PYTHON) fitvc.py --fiths --isofile=$(FITSDIR)isos.dat \
+	$(FITSDIR)all_twopops_noro_dwarf_vpec_sratio_hs_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_twopops_noro_dwarf_vpec_sratio_hs.sav \
+	 --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=twopops \
+	--dwarf --fitvpec --fitsratio
+
+all_twopops_noro_dwarf_vpec_sratio_hs_hr26:
+	$(PYTHON) fitvc.py --fiths --isofile=$(FITSDIR)isos.dat \
+	$(FITSDIR)all_twopops_noro_dwarf_vpec_sratio_hs_hr26.sav \
+	--noroprior --dwarf --fitvpec --fitsratio \
+	--dfmodel=twopops --hr2=6.
+	$(PYTHON) fitvc.py --fiths --isofile=$(FITSDIR)isos.dat \
+	$(FITSDIR)all_twopops_noro_dwarf_vpec_sratio_hs_hr26_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_twopops_noro_dwarf_vpec_sratio_hs_hr26.sav \
+	 --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=twopops \
+	--dwarf --fitvpec --fitsratio --hr2=6.
 
 loc4240_simpledrift_noro_dwarf_vpec_sratio_hs:
 	$(PYTHON) fitvc.py --fiths \

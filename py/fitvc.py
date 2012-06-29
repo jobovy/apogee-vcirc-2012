@@ -513,6 +513,13 @@ def _initialize_params(options):
         init_params.append(-0.1)
         isDomainFinite.append([False,False])
         domain.append([0.,0.])       
+    if options.dfmodel.lower() == 'twopops':
+        init_params.append(0.5)
+        init_params.append(numpy.log(35./_REFV0)+1.)
+        isDomainFinite.append([True,True])
+        isDomainFinite.append([False,False])
+        domain.append([0.,1.])       
+        domain.append([0.,0.])
     return (init_params,isDomainFinite,domain)
 
 def cb(x): print x
@@ -553,6 +560,8 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
     if options.fitm2 and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fiths] < 0. or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fiths] < -0.5 or params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fiths] > 0.5):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     if options.dwarfinnerouter and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fiths+options.fitsrinnerouter] < 0. or params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fiths+options.fitsrinnerouter] > 1.):
+        return numpy.finfo(numpy.dtype(numpy.float64)).max
+    if options.dfmodel.lower() == 'twopops' and (params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter] < 0. or params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter] > 1.):
         return numpy.finfo(numpy.dtype(numpy.float64)).max
     #For each star, marginalize over distance
     if options.dontbintegrate:
@@ -602,6 +611,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
             dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
                                     _BINTEGRATENBINS)/params[1]/_REFR0
         if options.multi > 1: #BOVY: MAY BE BROKEN
+            raise NotImplementedError("'multi' evaluation of the log likelihood in all likelihood broken")
             thisout= numpy.zeros((len(vhelio),_BINTEGRATENBINS,2))
             thisout= multi.parallel_map((lambda x: _mloglikedIntegrand(ds[x],
                                                                        params,vhelio/params[0]/_REFV0,
@@ -803,7 +813,19 @@ def _logpd(params,d,l,b,jk,h,df,options,R,theta,cosb,sinb,logpiso):
 def _logpddf(params,d,l,b,R,theta,cosb,sinb,options):
     """Prior on distance distribution, including Jacobian"""
     absZ= numpy.fabs(d*sinb)
-    if options.densmodel.lower() == 'expdisk':
+    if options.dfmodel.lower() == 'twopops':
+        npops= 2
+        hrpops= [options.hr,
+                 options.hr2]
+        ppops= numpy.log(numpy.array([1.-params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fitfehinnerouter],
+                                      params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fitfehinnerouter]]))
+        logdensRZ= numpy.zeros((len(R),npops))
+        for ii in range(npops):
+            logdensRZ[:,ii]= (-(R-1.)/hrpops[ii]\
+                                   -absZ/options.hz)*params[1]*_REFR0\
+                                   -ppops[ii]
+        logdensRZ= mylogsumexp(logdensRZ,axis=1)
+    elif options.densmodel.lower() == 'expdisk':
         logdensRZ= (-(R-1.)/options.hr-absZ/options.hz)*params[1]*_REFR0
     return logdensRZ+2.*numpy.log(d*params[1])+numpy.log(cosb)
 
@@ -892,9 +914,41 @@ def _logdf(params,vpec,R,options,df,l,theta,vcf):
             out[:,ii]= taupops[ii]/_TAU0-lognorm\
                 +norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
         #Sum
-        retval= numpy.zeros(len(vpec))
-        for ii in range(len(vpec)): out[ii,0]= logsumexp(out[ii,:])
-        return out[:,0]
+        out= mylogsumexp(out,axis=1)
+        return out
+    elif options.dfmodel.lower() == 'twopops':
+        npops= 2
+        out= numpy.zeros((len(vpec),npops))
+        sigmapops= [numpy.exp(params[2])/params[0],
+                    numpy.exp(params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fitfehinnerouter])/params[0]]
+        ppops= numpy.log(numpy.array([1.-params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fitfehinnerouter],
+                                      params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah+options.fitfeh+options.fitfehinnerouter]]))
+        hrpops= [options.hr/params[1]/_REFR0,
+                 options.hr2/params[1]/_REFR0]
+        logpk= numpy.zeros((len(vpec),npops))
+        for ii in range(npops):
+            va= asymmetricDriftModel.va(R,
+                                        sigmapops[ii],
+                                        hR=hrpops[ii],
+                                        hs=thishs/params[1]/_REFR0,
+                                        vc=_vc(params,R,options,vcf))*sinlt
+            #va= vc- <v>
+            if options.fitsratio:
+                slos= numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
+            elif options.fitsratioinnerouter:
+                innerl= (l < 97.*_DEGTORAD)
+                slos= numpy.sqrt(1.+sinlt**2.*(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
+                slos[innerl]= numpy.sqrt(1.+sinlt[innerl]**2.*(params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf]-1.))*numpy.exp(-(R[innerl]-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
+            else:
+                slos= numpy.sqrt(1.-0.5*sinlt**2.)*numpy.exp(-(R-1.)/thishs*params[1]*_REFR0)*sigmapops[ii]
+            t= (vpec+va)/slos
+            logpk[:,ii]= ppops[ii]-(R-1.)/hrpops[ii]
+            out[:,ii]= logpk[:,ii]\
+                +norm.logpdf(t)-numpy.log(slos*params[0]*_REFV0)
+        #Sum
+        lognorm= mylogsumexp(logpk,axis=1)
+        out= mylogsumexp(out,axis=1)
+        return out-lognorm
     elif options.dfmodel.lower() == 'simpleskeweddrift':
         coslt= numpy.cos(l+theta)
         va= asymmetricDriftModel.va(R,numpy.exp(params[2])/params[0],
@@ -1068,6 +1122,23 @@ def skeweddf(vR,vT,sigmaR,xi,omega,alphaskew):
     return norm.pdf(vR/sigmaR)/sigmaR\
         *skewnormal.skewnormal(vT,m=xi,s=omega,a=alphaskew)
 
+def mylogsumexp(arr,axis=0):
+    """Faster logsumexp?"""
+    minarr= numpy.amax(arr,axis=axis)
+    if axis == 1:
+        minarr= numpy.reshape(minarr,(arr.shape[0],1))
+    if axis == 0:
+        minminarr= numpy.tile(minarr,(arr.shape[0],1))
+    elif axis == 1:
+        minminarr= numpy.tile(minarr,(1,arr.shape[1]))
+    elif axis == None:
+        minminarr= numpy.tile(minarr,arr.shape)
+    else:
+        raise NotImplementedError("'mylogsumexp' not implemented for axis > 2")
+    if axis == 1:
+        minarr= numpy.reshape(minarr,(arr.shape[0]))
+    return minarr+numpy.log(numpy.sum(numpy.exp(arr-minminarr),axis=axis))
+
 def print_samples_qa(samples):
     print "Mean, standard devs, acor tau, acor mean, acor s ..."
     for kk in range(len(samples[0])):
@@ -1230,6 +1301,9 @@ def get_options():
                       dest="dwarf",
                       default=False,
                       help="setting this adds dwarf contamination")
+    #Second population
+    parser.add_option("--hr2",dest='hr2',default=5.,type='float',
+                      help="Second population scale length")
     #Distance marginalization by binning or not
     parser.add_option("--dontbintegrate",action="store_true",
                       dest="dontbintegrate",
