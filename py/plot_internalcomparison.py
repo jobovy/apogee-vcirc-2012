@@ -339,7 +339,7 @@ def plot_internalcomparison(parser):
     options.hs= fid_hs
     options.dfmodel= 'multiplepops'
     fid_params=copy.copy(params)
-    params[2]= -1.5
+    params[2]= -1.8
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
@@ -729,8 +729,8 @@ def get_options():
     parser.add_option("--expsfh",action="store_true", dest="expsfh",
                       default=False,
                       help="If set, use an exponentially declining SFH")
-    parser.add_option("--varfeh",action="store_false", dest="varfeh",
-                      default=True,
+    parser.add_option("--varfeh",action="store_true", dest="varfeh",
+                      default=False,
                       help="If set, don't use a varying [Fe/H] distribution as a function of l")
     parser.add_option("--indivfeh",action="store_false", dest="indivfeh",
                       default=True,

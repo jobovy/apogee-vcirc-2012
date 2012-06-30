@@ -38,7 +38,8 @@ import asymmetricDriftModel
 import skewnormal
 _PMSGRA= 30.24 #km/s/kpc
 _PMSGRA_ERR= 0.12 #km/s/kpc
-_VRSUN= -11.1
+_VRSUN= -11.1 #SBD10
+_VTSUN= 12.24 #SBD10
 #Reference values of parameters, such that fit should be around 1.
 _REFV0= 235. #km/s
 _REFR0= 8. #kpc
@@ -414,11 +415,18 @@ def _calc_covar(rs,hyper_params,options):
     return numpy.exp(2.*hyper_params[0])*out
 
 def _initialize_params(options):
-    init_params= [235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1]
-    isDomainFinite= [[True,False],[True,True],[False,False],
-                     [True,True]]
-    domain= [[0.,0.],[5./_REFR0,11./_REFR0],
-             [0.,0.],[0.,1.]]
+    if options.fixvo is None:
+        init_params= [235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1]
+        isDomainFinite= [[True,False],[True,True],[False,False],
+                         [True,True]]
+        domain= [[0.,0.],[5./_REFR0,11./_REFR0],
+                 [0.,0.],[0.,1.]]
+    else:
+        init_params= [8./_REFR0,numpy.log(35./_REFV0),0.1]
+        isDomainFinite= [[True,True],[False,False],
+                         [True,True]]
+        domain= [[5./_REFR0,11./_REFR0],
+                 [0.,0.],[0.,1.]]
     if not options.nooutliermean:
         init_params.append(0.1)
         isDomainFinite.append([False,False])
@@ -532,6 +540,11 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
              logpiso,logpisodwarf,arrout,vcf,iso,feh):
     """minus log likelihood Eqn (1),
     params= [vc(ro),ro,sigmar]"""
+    #If vo is fixed, insert it before proceeding
+    if not options.fixvo is None:
+        params= list(copy.copy(params))
+        params.insert(0,options.fixvo/_REFV0)
+        params= numpy.array(params)
     #Boundaries
     if params[0] <= 0.: #Don't allow counter-rotation
         return numpy.finfo(numpy.dtype(numpy.float64)).max
@@ -1020,6 +1033,8 @@ def _vgal(params,vhelio,l,b,options,sinl,cosl):
     if options.fitvpec:
         return vhelio-params[5-options.nooutliermean+options.dwarf+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')]*cosl*_VRSUN/params[0]/_REFV0\
             +params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf]*sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
+    elif options.sbdvpec:
+        return vhelio-cosl*_VRSUN/params[0]/_REFV0+sinl*(_VTSUN/params[0]/_REFV0+1.) #params[1]=Ro
     else:
         return vhelio-cosl*_VRSUN/params[0]/_REFV0+sinl*_PMSGRA*params[1]*_REFR0/params[0]/_REFV0 #params[1]=Ro
 
@@ -1170,6 +1185,9 @@ def get_options():
     parser.add_option("--fitm2",action="store_true", dest="fitm2",
                       default=False,
                       help="If set, fit for an m=2 component")
+    #Fix vo? CRAZY!!
+    parser.add_option("--fixvo",dest='fixvo',default=None,type='float',
+                      help="If set, fix vo to this value, and optimize other parameters")
     #Ro prior
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,
@@ -1177,7 +1195,10 @@ def get_options():
     #Sun's peculiar velocity
     parser.add_option("--fitvpec",action="store_true", dest="fitvpec",
                       default=False,
-                      help="If set, fit for the peculiar velocity of the Sun as well, CURRENTLY ASSUMES flat rotation curve")
+                      help="If set, fit for the peculiar velocity of the Sun as well")
+    parser.add_option("--sbdvpec",action="store_true", dest="sbdvpec",
+                      default=False,
+                      help="If set, use the SBD10 value for the Solar motion + vo as vpec")
     #Velocity distribution model
     parser.add_option("--dfmodel",dest='dfmodel',default='simplegaussian',
                       help="DF model to use")
