@@ -146,7 +146,7 @@ def plot_externalcomparison(parser):
     #First calculate fiducial model
     if not options.dwarf:
         logpisodwarf= None
-    fid_logl= numpy.sum(logl.logl(init=params,data=data,options=options))
+    fid_logl= numpy.sum(logl.logl(init=params,data=data,options=copy.copy(options))) #Copy options, since logl sets multi=1
     avg_plate_model_fid= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
@@ -278,7 +278,7 @@ def plot_externalcomparison(parser):
     params= pickle.load(savefile)
     savefile.close()
     options.fixvo= 250.
-    vo250_logl= numpy.sum(logl.logl(init=params,data=data,options=options))
+    vo250_logl= numpy.sum(logl.logl(init=params,data=data,options=copy.copy(options)))
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
@@ -318,7 +318,7 @@ def plot_externalcomparison(parser):
     savefile.close()
     options.sbdvpec= True
     options.fitvpec= False
-    sbd_logl= numpy.nansum(logl.logl(init=params,data=data,options=options))
+    sbd_logl= numpy.nansum(logl.logl(init=params,data=data,options=copy.copy(options)))
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
