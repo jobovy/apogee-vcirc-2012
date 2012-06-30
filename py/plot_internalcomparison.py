@@ -671,6 +671,9 @@ def get_options():
     parser.add_option("--fitvpec",action="store_true", dest="fitvpec",
                       default=False,
                       help="If set, fit for the peculiar velocity of the Sun as well, CURRENTLY ASSUMES flat rotation curve")
+    parser.add_option("--sbdvpec",action="store_true", dest="sbdvpec",
+                      default=False,
+                      help="If set, use the SBD10 value for the Solar motion + vo as vpec")
     #Velocity distribution model
     parser.add_option("--dfmodel",dest='dfmodel',default='simplegaussian',
                       help="DF model to use")
