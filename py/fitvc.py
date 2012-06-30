@@ -415,18 +415,23 @@ def _calc_covar(rs,hyper_params,options):
     return numpy.exp(2.*hyper_params[0])*out
 
 def _initialize_params(options):
+    init_params= []
+    isDomainFinite= []
+    domain= []
     if options.fixvo is None:
-        init_params= [235./_REFV0,8./_REFR0,numpy.log(35./_REFV0),0.1]
-        isDomainFinite= [[True,False],[True,True],[False,False],
-                         [True,True]]
-        domain= [[0.,0.],[5./_REFR0,11./_REFR0],
-                 [0.,0.],[0.,1.]]
-    else:
-        init_params= [8./_REFR0,numpy.log(35./_REFV0),0.1]
-        isDomainFinite= [[True,True],[False,False],
-                         [True,True]]
-        domain= [[5./_REFR0,11./_REFR0],
-                 [0.,0.],[0.,1.]]
+        init_params.append(235./_REFV0)
+        isDomainFinite.append([True,False])
+        domain.append([0.,0.])
+    if options.fixro is None:
+        init_params.append(8./_REFR0)
+        isDomainFinite.append([True,True])
+        domain.append([5./_REFR0,11./_REFR0])
+    init_params.append(numpy.log(35./_REFV0))
+    init_params.append(0.1)
+    isDomainFinite.append([False,False])
+    isDomainFinite.append([True,True])
+    domain.append([0.,0.])
+    domain.append([0.,1.])
     if not options.nooutliermean:
         init_params.append(0.1)
         isDomainFinite.append([False,False])
@@ -544,6 +549,11 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
     if not options.fixvo is None:
         params= list(copy.copy(params))
         params.insert(0,options.fixvo/_REFV0)
+        params= numpy.array(params)
+    #If vo is fixed, insert it before proceeding
+    if not options.fixro is None:
+        params= list(copy.copy(params))
+        params.insert(1,options.fixro/_REFR0)
         params= numpy.array(params)
     #Boundaries
     if params[0] <= 0.: #Don't allow counter-rotation
@@ -1188,6 +1198,9 @@ def get_options():
     #Fix vo? CRAZY!!
     parser.add_option("--fixvo",dest='fixvo',default=None,type='float',
                       help="If set, fix vo to this value, and optimize other parameters")
+    #Fix ro
+    parser.add_option("--fixro",dest='fixro',default=None,type='float',
+                      help="If set, fix ro to this value, and optimize other parameters")
     #Ro prior
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,

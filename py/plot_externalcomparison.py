@@ -379,6 +379,9 @@ def get_options():
     #Fix vo? CRAZY!!
     parser.add_option("--fixvo",dest='fixvo',default=None,type='float',
                       help="If set, fix vo to this value, and optimize other parameters")
+    #Fix ro
+    parser.add_option("--fixro",dest='fixro',default=None,type='float',
+                      help="If set, fix ro to this value, and optimize other parameters")
     #Ro prior
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,
