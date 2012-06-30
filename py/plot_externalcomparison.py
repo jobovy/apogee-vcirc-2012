@@ -167,7 +167,7 @@ def plot_externalcomparison(parser):
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$\mathrm{fiducial}$',top_right=True,size=14.)
     thisax= pyplot.gca()
-    thisax.set_ylim(-14.5,14.5)
+    thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
     nullfmt   = NullFormatter()         # no labels
@@ -216,7 +216,7 @@ def plot_externalcomparison(parser):
     bovy_plot.bovy_text(r'$\mathrm{power\!\!-\!\!law\ rotation\ curve}, \beta = 0.1$',
                         top_right=True,size=14.)
     #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
-    thisax.set_ylim(-14.5,14.5)
+    thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
     thisax.xaxis.set_major_formatter(nullfmt)
@@ -264,7 +264,7 @@ def plot_externalcomparison(parser):
     bovy_plot.bovy_text(r'$\mathrm{power\!\!-\!\!law\ rotation\ curve}, \beta = -0.1$',
                         top_right=True,size=14.)
     pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
-    thisax.set_ylim(-14.5,14.5)
+    thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
     thisax.xaxis.set_major_formatter(nullfmt)
@@ -301,9 +301,9 @@ def plot_externalcomparison(parser):
     pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ v_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (params[1]*_REFR0,2.*(fid_logl-vo250_logl)),
+    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ v_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (params[0]*_REFR0,2.*(fid_logl-vo250_logl)),
                         top_right=True,size=14.)
-    thisax.set_ylim(-14.5,14.5)
+    thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
     thisax.xaxis.set_major_formatter(nullfmt)
