@@ -392,7 +392,17 @@ def plot_internalcomparison(parser):
     dm= _dm(ds)
     for ii in range(len(data)):
         mh= data['H0MAG'][ii]-dm
-        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+        if options.indivfeh:
+            #Find closest Z
+            thisZ= isodist.FEH2Z(data[ii]['FEH'])
+            indx= numpy.argmin((thisZ-zs))
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+        elif options.varfeh:
+            #Find correct iso
+            indx= (locl == data[ii]['LOCATION'])
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+        else:
+            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
                               +(data['J0MAG']-data['K0MAG'])[ii],mh)
     if options.dwarf:
         logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
@@ -473,7 +483,17 @@ def plot_internalcomparison(parser):
     dm= _dm(ds)
     for ii in range(len(data)):
         mh= data['H0MAG'][ii]-dm
-        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+        if options.indivfeh:
+            #Find closest Z
+            thisZ= isodist.FEH2Z(data[ii]['FEH'])
+            indx= numpy.argmin((thisZ-zs))
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+        elif options.varfeh:
+            #Find correct iso
+            indx= (locl == data[ii]['LOCATION'])
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+        else:
+            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
                               +(data['J0MAG']-data['K0MAG'])[ii],mh)
     if options.dwarf:
         logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
@@ -549,8 +569,18 @@ def plot_internalcomparison(parser):
     dm= _dm(ds)
     for ii in range(len(data)):
         mh= data['H0MAG'][ii]-dm
-        logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
-                              +(data['J0MAG']-data['K0MAG'])[ii],mh)
+        if options.indivfeh:
+            #Find closest Z
+            thisZ= isodist.FEH2Z(data[ii]['FEH'])
+            indx= numpy.argmin((thisZ-zs))
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+        elif options.varfeh:
+            #Find correct iso
+            indx= (locl == data[ii]['LOCATION'])
+            logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
+        else:
+            logpiso[ii,:]= iso[0](numpy.zeros(_BINTEGRATENBINS)
+                                  +(data['J0MAG']-data['K0MAG'])[ii],mh)
     if options.dwarf:
         logpisodwarf= numpy.zeros((len(data),_BINTEGRATENBINS))
         dwarfds= numpy.linspace(_BINTEGRATEDMIN_DWARF,_BINTEGRATEDMAX_DWARF,
@@ -630,6 +660,9 @@ def get_options():
     parser.add_option("--fitm2",action="store_true", dest="fitm2",
                       default=False,
                       help="If set, fit for an m=2 component")
+    #Fix vo? CRAZY!!
+    parser.add_option("--fixvo",dest='fixvo',default=None,type='float',
+                      help="If set, fix vo to this value, and optimize other parameters")
     #Ro prior
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,

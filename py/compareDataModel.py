@@ -79,6 +79,9 @@ def get_options():
     parser.add_option("--fitm2",action="store_true", dest="fitm2",
                       default=False,
                       help="If set, fit for an m=2 component")
+    #Fix vo? CRAZY!!
+    parser.add_option("--fixvo",dest='fixvo',default=None,type='float',
+                      help="If set, fix vo to this value, and optimize other parameters")
     #Ro prior
     parser.add_option("--noroprior",action="store_true", dest="noroprior",
                       default=False,
