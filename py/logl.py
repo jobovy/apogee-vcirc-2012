@@ -130,5 +130,5 @@ def logl(init=None,data=None,options=None):
                    cosb,
                    sinb,
                    logpiso,
-                   logpisodwarf,True,None,iso) #None iso for now
+                   logpisodwarf,True,None,iso,data['FEH']) #None iso for now
     return out
