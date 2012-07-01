@@ -37,15 +37,15 @@ def plot_asymmetricdrift(outdir='../tex'):
     lines= []
     lines.append(bovy_plot.bovy_plot(rs,vas_fid/sigmaR_hot**2.,'k-',
                                      xlabel=r'$R\ [\mathrm{kpc}]$',
-                                     ylabel=r'$v_c\,(v_c-\bar{v}_T) / \sigma_R^2$',
+                                     ylabel=r'$V_c\,(V_c-\bar{V}_T) / \sigma_R^2$',
                                      xrange=[0.,25.],
                                      yrange=[0.,6.5]))
     lines.append(bovy_plot.bovy_plot(rs,vas_cold/sigmaR_cold**2.,'--',color='0.4',
                                      overplot=True))
     bovy_plot.bovy_text(r'$h_R = 3\, \mathrm{kpc}$'+'\n'+
                         r'$h_\sigma = 8\, \mathrm{kpc}$',top_left=True)
-    labels=[r'$\sigma_R(R_0) = 0.2\,v_c(R_0)$',
-            r'$\sigma_R(R_0) = 0.1\,v_c(R_0)$']
+    labels=[r'$\sigma_R(R_0) = 0.2\,V_c(R_0)$',
+            r'$\sigma_R(R_0) = 0.1\,V_c(R_0)$']
     l1= pyplot.legend(lines,labels,loc=4,
                       frameon=False,numpoints=1)
     bovy_plot.bovy_end_print(os.path.join(outdir,'vaR.ps'))
@@ -54,7 +54,7 @@ def plot_asymmetricdrift(outdir='../tex'):
     bovy_plot.bovy_print(fig_height=3.)
     bovy_plot.bovy_plot([rs[0],rs[-1]],[0.,0.],'k-',
                         xlabel=r'$R\ [\mathrm{kpc}]$',
-                        ylabel=r'$(v_a - v_a^{\mathrm{fid}}) / v_c(R_0)$',
+                        ylabel=r'$(V_a - V_a^{\mathrm{fid}}) / V_c(R_0)$',
                         xrange=[0.,25.],
                         yrange=[-0.1,0.1])
     #hR=2 kpc

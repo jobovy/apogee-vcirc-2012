@@ -45,7 +45,7 @@ def mockTable(parser):
     #Set up sections
     names= ['$V_c(R_0)\ [\mathrm{km\ s}^{-1}]$',
             '$R_0\ [\mathrm{kpc}]$',
-            '$v_{R,\odot}\ [\mathrm{km\ s}^{-1}]$',
+            '$V_{R,\odot}\ [\mathrm{km\ s}^{-1}]$',
             '$\Omega_{\odot}\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$',
             '$\\sigma_R(R_0)\ [\mathrm{km\ s}^{-1}]$',
             '$R_0/h_\sigma$',

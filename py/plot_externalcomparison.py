@@ -317,9 +317,9 @@ def plot_externalcomparison(parser):
     pyplot.errorbar(l_plate,avg_plate-avg_plate_modelr8,
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
-    #bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ v_c(R_0) = 250\ \mathrm{km\ s}^{-1}\ \mathrm{has}\ R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (params[0]*_REFR0,2.*(fid_logl-vo250_logl)),
+    #bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ V_c(R_0) = 250\ \mathrm{km\ s}^{-1}\ \mathrm{has}\ R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (params[0]*_REFR0,2.*(fid_logl-vo250_logl)),
     #top_right=True,size=14.)
-    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ v_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (8.,2.*(fid_logl-vo250r8_logl)),
+    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ V_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (8.,2.*(fid_logl-vo250r8_logl)),
                         top_right=True,size=14.)
     thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
@@ -357,7 +357,7 @@ def plot_externalcomparison(parser):
     pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ \vec{v}_\odot = \vec{v}_c(R_0) + \mathrm{SBD10}, \Delta \chi^2 = %.0f$' % (2.*(fid_logl-sbd_logl)),
+    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ \vec{V}_\odot = \vec{V}_c(R_0) + \mathrm{SBD10}, \Delta \chi^2 = %.0f$' % (2.*(fid_logl-sbd_logl)),
                         top_right=True,size=14.)
     #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     thisax.set_ylim(-19.5,19.5)
