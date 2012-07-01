@@ -175,18 +175,18 @@ def plot_externalcomparison(parser):
     #pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
-    #Second is powerlaw with beta=0.1
+    #Second is powerlaw with beta=0.15
     #fid_slope= params[5-options.nooutliermean+options.dwarf]
     #params[5-options.nooutliermean+options.dwarf]= 0.
     fid_params= copy.copy(params)
     if options.rotcurve.lower() == 'flat':
         params= list(params)
-        params.insert(6,0.1)
+        params.insert(6,0.15)
         params= numpy.array(params)
         fid_rotcurve= options.rotcurve
         options.rotcurve= 'powerlaw'
     elif options.rotcurve.lower() == 'powerlaw':
-        params[6]= 0.1
+        params[6]= 0.15
         fid_rotcurve= options.rotcurve
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
@@ -213,7 +213,7 @@ def plot_externalcomparison(parser):
     pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$\mathrm{power\!\!-\!\!law\ rotation\ curve}, \beta = 0.1$',
+    bovy_plot.bovy_text(r'$\mathrm{power\!\!-\!\!law\ rotation\ curve}, \beta = 0.15$',
                         top_right=True,size=14.)
     #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     thisax.set_ylim(-19.5,19.5)
@@ -223,18 +223,18 @@ def plot_externalcomparison(parser):
     #pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ [\mathrm{deg}]$')
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
-    #Third is powerlaw with beta=-0.1
+    #Third is powerlaw with beta=-0.15
     #fid_slope= params[5-options.nooutliermean+options.dwarf]
     #params[5-options.nooutliermean+options.dwarf]= 0.
     fid_params= copy.copy(params)
     if options.rotcurve.lower() == 'flat':
         params= list(params)
-        params.insert(6,-0.1)
+        params.insert(6,-0.15)
         params= numpy.array(params)
         fid_rotcurve= options.rotcurve
         options.rotcurve= 'powerlaw'
     elif options.rotcurve.lower() == 'powerlaw':
-        params[6]= -0.1
+        params[6]= -0.15
         fid_rotcurve= options.rotcurve
     avg_plate_model= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
@@ -261,7 +261,7 @@ def plot_externalcomparison(parser):
     pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$\mathrm{power\!\!-\!\!law\ rotation\ curve}, \beta = -0.1$',
+    bovy_plot.bovy_text(r'$\mathrm{power\!\!-\!\!law\ rotation\ curve}, \beta = -0.15$',
                         top_right=True,size=14.)
     pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     thisax.set_ylim(-19.5,19.5)
@@ -272,16 +272,26 @@ def plot_externalcomparison(parser):
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
     #Second is vc=250
-    #Load sbd fit
     #Load initial parameters from file
-    savefile= open(options.vo250file,'rb')
-    params= pickle.load(savefile)
+    #savefile= open(options.vo250file,'rb')
+    #params= pickle.load(savefile)
+    #savefile.close()
+    #options.fixvo= 250.
+    #vo250_logl= numpy.sum(logl.logl(init=params,data=data,options=copy.copy(options)))
+    #avg_plate_model= calc_model(params,options,data,
+    #                            logpiso,logpisodwarf,
+    #                            df,nlocs,locations,iso)
+    #Load initial parameters from file
+    savefile= open(options.vo250r8file,'rb')
+    paramsr8= pickle.load(savefile)
     savefile.close()
     options.fixvo= 250.
-    vo250_logl= numpy.sum(logl.logl(init=params,data=data,options=copy.copy(options)))
-    avg_plate_model= calc_model(params,options,data,
+    options.fixro= 8.
+    vo250r8_logl= numpy.sum(logl.logl(init=paramsr8,data=data,options=copy.copy(options)))
+    avg_plate_modelr8= calc_model(paramsr8,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
+    options.fixro= None
     options.fixvo= None
     left, bottom, width, height= 0.1, 0.9-4.*dx, 0.8, dx
     thisax= pyplot.axes([left,bottom,width,height])
@@ -295,13 +305,21 @@ def plot_externalcomparison(parser):
     pyplot.errorbar(l_plate,avg_plate-avg_plate_model_fid,
                     yerr=siga_plate,marker='o',color='0.6',
                     linestyle='none',elinestyle='-')
+    #bovy_plot.bovy_plot(l_plate,
+    #                    avg_plate-avg_plate_model,
+    #                    'o',overplot=True,color='k')
+    #pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
+    #                yerr=siga_plate,marker='o',color='k',
+    #                linestyle='none',elinestyle='-')
     bovy_plot.bovy_plot(l_plate,
-                        avg_plate-avg_plate_model,
+                        avg_plate-avg_plate_modelr8,
                         'o',overplot=True,color='k')
-    pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
+    pyplot.errorbar(l_plate,avg_plate-avg_plate_modelr8,
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ v_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (params[0]*_REFR0,2.*(fid_logl-vo250_logl)),
+    #bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ v_c(R_0) = 250\ \mathrm{km\ s}^{-1}\ \mathrm{has}\ R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (params[0]*_REFR0,2.*(fid_logl-vo250_logl)),
+    #top_right=True,size=14.)
+    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ v_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (8.,2.*(fid_logl-vo250r8_logl)),
                         top_right=True,size=14.)
     thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
@@ -342,7 +360,7 @@ def plot_externalcomparison(parser):
     bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ \vec{v}_\odot = \vec{v}_c(R_0) + \mathrm{SBD10}, \Delta \chi^2 = %.0f$' % (2.*(fid_logl-sbd_logl)),
                         top_right=True,size=14.)
     #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
-    thisax.set_ylim(-29.5,29.5)
+    thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
     #thisax.xaxis.set_major_formatter(nullfmt)
@@ -526,6 +544,9 @@ def get_options():
     #File with fits for vc=250
     parser.add_option("--vo250file",dest='vo250file',default=None,
                       help="Name of the file that has the vc=250. fit")
+    #File with fits for vc=250, ro=8.
+    parser.add_option("--vo250r8file",dest='vo250r8file',default=None,
+                      help="Name of the file that has the vc=250., ro=8. fit")
     #File with fits for sbdvpec
     parser.add_option("--sbdfile",dest='sbdfile',default=None,
                       help="Name of the file that has the sbdvpec fit")
