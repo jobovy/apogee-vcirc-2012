@@ -73,7 +73,20 @@ def plot_asymmetricdrift(outdir='../tex'):
     bovy_plot.bovy_plot(rs,va(rs/Ro,0.14,hR=hR,hs=242./Ro)-vas_fid,overplot=True,
                         ls='-',color='0.65')
     bovy_plot.bovy_text(17.5,0.05,r'$R_0/h_\sigma = 0.034$')
-    bovy_plot.bovy_end_print(os.path.join(outdir,'vaR_diffs.ps'))
+    #Now plot the actual model used in the bestfit
+    bovy_plot.bovy_print(fig_height=3.)
+    bovy_plot.bovy_plot(rs,va(rs/Ro,0.14,hR=hR,hs=242./Ro),'k-',
+                        xlabel=r'$R\ [\mathrm{kpc}]$',
+                        ylabel=r'$V_a / V_c(R_0)$',
+                        xrange=[0.,25.],
+                        yrange=[0.,0.08])
+    bovy_plot.bovy_plot(rs,va(rs/Ro,0.14,hR=hR,hs=1.),
+                        'k--',overplot=True)
+    bovy_plot.bovy_text(r'$h_R = 3\, \mathrm{kpc}$'+'\n'+
+                        r'$R_0/h_\sigma = 0.034$',top_right=True)
+    bovy_plot.bovy_text(r'$h_R = 3\, \mathrm{kpc}$'+
+                        '\n'+r'$R_0/h_\sigma = 1$',top_left=True)
+    bovy_plot.bovy_end_print(os.path.join(outdir,'vaR_used.ps'))
     
 
 if __name__ == '__main__':
