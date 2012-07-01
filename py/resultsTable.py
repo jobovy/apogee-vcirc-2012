@@ -62,7 +62,7 @@ def resultsTable(parser):
             '$\\mathrm{d} V_c / \mathrm{d} R \left(R_0 \\right)\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$',
             '$A\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$',
             '$B\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$',
-            '$(B^2-A^2)/(2\piG)\ [\mathrm{M_{\odot}\ pc}^{-3}]$',
+            '$(B^2-A^2)/(2\pi G)\ [\mathrm{M_{\odot}\ pc}^{-3}]$',
             '$\\Omega_0\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$',
             '$R_0\ [\mathrm{kpc}]$',
             '$V_{R,\odot}\ [\mathrm{km\ s}^{-1}]$',
