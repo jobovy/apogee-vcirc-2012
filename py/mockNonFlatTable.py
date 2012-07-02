@@ -100,6 +100,13 @@ def mockNonFlatTable(parser):
             missing.insert(2,1)
             scale.insert(2,1.)
         elif _SECTIONS[kk] == 'cubic':
+            if not 'quadratic' in _SECTIONS:
+                #First insert quadratic
+                names.insert(2,'$\\mathrm{d}^2 V_c / \mathrm{d} R^2 \left(R_0 \\right)\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-2}]$')
+                flatbestfits.insert(2,None)
+                flatxs.insert(2,None)
+                missing.insert(2,1)
+                scale.insert(2,1.)
             #Assumes that quadratic was already inserted
             names.insert(3,'$\\mathrm{d}^3 V_c / \mathrm{d} R^3 \left(R_0 \\right)\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-3}]$')
             flatbestfits.insert(3,None)
