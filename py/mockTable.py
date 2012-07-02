@@ -4,8 +4,12 @@ import math
 import numpy
 import cPickle as pickle
 from optparse import OptionParser
+from readVclosData import readVclosData
 from fitvc import _PMSGRA, _VRSUN, _REFV0, _REFR0
+import logl
+from plot_pdfs import set_options
 from resultsTable import sixtyeigthinterval
+_INDIVCHI2= False
 _FLATFIT= '../fits/all_simpledrift_noro_dwarf_vpec_sratio_hs.sav'
 _FLATSAMPLES= '../fits/all_simpledrift_noro_dwarf_vpec_sratio_hs_10000samples.sav'
 _NMOCKS= 5
@@ -19,6 +23,11 @@ _MOCKSAMPLES= ['../fake_indivfeh_correct/all_simpledrift-dehnen_noro_dwarf_vpec_
                '../fake_indivfeh_correct/all3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_10000.sav',
                '../fake_indivfeh_correct/all4_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_10000.sav',
                '../fake_indivfeh_correct/all5_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_10000.sav']
+_MOCKDATA= ['../fake_indivfeh_correct/fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits',
+            '../fake_indivfeh_correct/fake2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits',
+            '../fake_indivfeh_correct/fake3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits',
+            '../fake_indivfeh_correct/fake4_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits',
+            '../fake_indivfeh_correct/fake5_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits']            
 def mockTable(parser):
     (options,args)= parser.parse_args()
     cmdline= '%python mockTable.py '+args[0]
@@ -49,9 +58,10 @@ def mockTable(parser):
             '$\Omega_{\odot}\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$',
             '$\\sigma_R(R_0)\ [\mathrm{km\ s}^{-1}]$',
             '$R_0/h_\sigma$',
-            '$\\sigma_\phi^2 / \sigma_R^2$']
+            '$\\sigma_\phi^2 / \sigma_R^2$',
+            '$\Delta\chi^2/\mathrm{dof}$']
     scale= [_REFV0,
-            _REFR0,_VRSUN,1.,_REFV0,1.,1.]
+            _REFR0,_VRSUN,1.,_REFV0,1.,1.,1.]
     flatbestfits= []
     flatxs= []
     mockbestfits= []
@@ -77,6 +87,29 @@ def mockTable(parser):
     #X^2
     flatbestfits.append(flatparams[8])
     flatxs.append(numpy.array([s[8] for s in flatsamples]))
+    #chi2
+    options= set_options(None)
+    data= readVclosData(validfeh=True)
+    options.isofile='../fits/isos.dat'
+    thislogl= logl.logl(init=flatparams,options=options,data=data)
+    flatbestfits.append(-2.*numpy.sum(thislogl)/(len(data)-len(flatparams)))
+    if _INDIVCHI2:
+        locs= numpy.array(sorted(list(set(data['LOCATION']))))
+        nlocs= len(locs)
+        platel= numpy.zeros(nlocs)
+        for ii in range(nlocs):
+            indx= (data['LOCATION'] == locs[ii])
+            platel[ii]= numpy.mean(data['GLON'][indx])
+            sortindx= numpy.argsort(platel)
+            locs= locs[sortindx]
+            platel= platel[sortindx]
+
+            for jj in range(len(locs)):
+                names.append('$\Delta\chi^2/\mathrm{dof}\ \mathrm{w/o}\ l=%i^\circ$' % int(round(platel[jj])))
+                scale.append(1.)
+                indx= (data['LOCATION'] != locs[jj])
+                flatbestfits.append(-2.*numpy.sum(thislogl[indx])/(len(data[indx])-len(flatparams)))
+    else: locs= []
     ##Same for all mocks
     for ii in range(_NMOCKS):
         thisbestfits= []
@@ -102,6 +135,17 @@ def mockTable(parser):
         #X^2
         thisbestfits.append(mockparams[ii][8])
         thisxs.append(numpy.array([s[8] for s in mocksamples[ii]]))
+        #chi2
+        #Load mock data
+        data= readVclosData(datafilename=_MOCKDATA[ii])       
+        thislogl= logl.logl(init=mockparams[ii],
+                            data=data,
+                            options=options)
+        thisbestfits.append(-2.*numpy.sum(thislogl)/(len(data)-len(mockparams[ii])))
+        if _INDIVCHI2:
+            for jj in range(len(locs)):
+                indx= (data['LOCATION'] != locs[jj])
+                thisbestfits.append(-2.*numpy.sum(thislogl[indx])/(len(data[indx])-len(mockparams)))
         #Append all
         mockbestfits.append(thisbestfits)
         mockxs.append(thisxs)
@@ -113,8 +157,8 @@ def mockTable(parser):
         printline= names[ii]
         #Flat
         printline+= ' & '
-        if False:
-            printline+= '\ldots & '
+        if ii >= len(names)-(len(locs)+1): #chi2
+            printline+= ' \ldots & '
         else:
             bestfit= flatbestfits[ii]*scale[ii]
             xs= flatxs[ii]*scale[ii]
@@ -157,6 +201,14 @@ def mockTable(parser):
         #Mocks
         for jj in range(_NMOCKS):
             printline+= ' & '
+            if ii >= len(names)-(len(locs)+1): #chi2
+                bestfit= mockbestfits[jj][ii]*scale[ii]-flatbestfits[ii]*scale[ii]
+                printline+= '%.2f & ' % bestfit
+                if jj == _NMOCKS-1:
+                    if not ii == (len(names)-1):
+                        printline+= '\\\\'
+                    outfile.write(printline+'\n')
+                continue
             bestfit= mockbestfits[jj][ii]*scale[ii]
             xs= mockxs[jj][ii]*scale[ii]
             lowval, highval= sixtyeigthinterval(bestfit,xs,quantile=quantile)
@@ -196,7 +248,10 @@ def mockTable(parser):
             printline+= value+'&'+err
         if not ii == (len(names)-1):
             printline+= '\\\\'
-        outfile.write(printline+'\n')
+        if ii == (len(names)-(len(locs)+2)):
+            printline+= '\\\\'
+        if ii < (len(names)-(len(locs)+1)):      
+            outfile.write(printline+'\n')
     outfile.write('\\enddata\n')
     outfile.write(cmdline+'\n')
     outfile.close()
