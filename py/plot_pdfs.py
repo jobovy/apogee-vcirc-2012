@@ -21,13 +21,47 @@ _JACKFILES=['../fits/allwoloc4151_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
             '../fits/allwoloc4318_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
             '../fits/allwoloc4319_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
             '../fits/allwoloc4321_simpledrift_noro_dwarf_vpec_sratio_hs.sav']
+_JACKFILES_PL=['../fits/allwoloc4151_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4154_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4157_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4240_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4241_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4242_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4243_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4270_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4271_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4272_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4273_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4318_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4319_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav',
+            '../fits/allwoloc4321_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs.sav']
+
+_JACKFILES_LINEAR=['../fits/allwoloc4151_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4154_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4157_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4240_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4241_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4242_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4243_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4270_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4271_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4272_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4273_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4318_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4319_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav',
+            '../fits/allwoloc4321_simpledrift_noro_dwarf_linear_vpec_sratio_hs.sav']
 _JACKCOLOR='w'
 _JACKSYMBOL='x'
-def load_jack_params():
+def load_jack_params(linear=False,powerlaw=False):
     out= []
     njacks= len(_JACKFILES)
     for ii in range(njacks):
-        savefile= open(_JACKFILES[ii],'rb')
+        if linear:
+            savefile= open(_JACKFILES_LINEAR[ii],'rb')
+        elif powerlaw:
+            savefile= open(_JACKFILES_PL[ii],'rb')
+        else:
+            savefile= open(_JACKFILES[ii],'rb')
         out.append(pickle.load(savefile))
         savefile.close()
     return out
@@ -541,41 +575,65 @@ def rodvcdr(filename=None,options=None,bins=31):
     return None
 def vcdvcdr(filename=None,options=None,bins=31):
     options= set_options(options)
-    params= load_samples(filename)
-    dvcdrs= numpy.array([s[5-options.nooutliermean+options.dwarf] for s in params])*_REFV0/_REFR0
-    vcs= numpy.array([s[0] for s in params])*_REFV0
-    bovy_plot.bovy_print()
-    levels= list(special.erf(0.5*numpy.arange(1,4)))
-    levels.append(1.01) #HACK to not plot outliers
-    bovy_plot.scatterplot(dvcdrs,vcs,'k,',levels=levels,
-                          ylabel=_vclabel,
-                          xlabel=r"$\mathrm{d} v_0 / \mathrm{d} R\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$",
-                          bins=bins,
-                          xrange=[-0.5*_REFV0/_REFR0,0.5*_REFV0/_REFR0],
-                          yrange=_vcrange,
-                          contours=True,
-                          cntrcolors='k',
-                          onedhistx=True,
-                          cmap='gist_yarg')
+    if isinstance(filename,str):
+        params= load_samples(filename)
+        dvcdrs= numpy.array([s[5-options.nooutliermean+options.dwarf] for s in params])*_REFV0/_REFR0
+        vcs= numpy.array([s[0] for s in params])*_REFV0
+        bovy_plot.bovy_print()
+        levels= list(special.erf(0.5*numpy.arange(1,4)))
+        levels.append(1.01) #HACK to not plot outliers
+        bovy_plot.scatterplot(dvcdrs,vcs,'k,',levels=levels,
+                              ylabel=_vclabel,
+                              xlabel=r"$\mathrm{d} v_0 / \mathrm{d} R\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$",
+                              bins=bins,
+                              xrange=[-0.5*_REFV0/_REFR0,0.5*_REFV0/_REFR0],
+                              yrange=_vcrange,
+                              contours=True,
+                              cntrcolors='k',
+                              onedhistx=True,
+                              cmap='gist_yarg')
+        if _PLOTJACK:
+            #Load powerlaw jacks
+            jackparams= load_jack_params(linear=True)
+            for ii in range(len(jackparams)):
+                vcdvcdr(filename=jackparams[ii])
+    else:
+        params= filename
+        bovy_plot.bovy_plot(params[5-options.nooutliermean+options.dwarf]*_REFV0/_REFR0,
+                            params[0]*_REFV0,                            
+                            color=_JACKCOLOR,marker=_JACKSYMBOL,
+                            overplot=True)        
     return None
 def vcbeta(filename=None,options=None,bins=31):
     options= set_options(options)
-    params= load_samples(filename)
-    dvcdrs= numpy.array([s[5-options.nooutliermean+options.dwarf] for s in params])
-    vcs= numpy.array([s[0] for s in params])*_REFV0
-    bovy_plot.bovy_print()
-    levels= list(special.erf(0.5*numpy.arange(1,4)))
-    levels.append(1.01) #HACK to not plot outliers
-    bovy_plot.scatterplot(dvcdrs,vcs,'k,',levels=levels,
-                          ylabel=_vclabel,
-                          xlabel=r'$\beta$',
-                          bins=bins,
-                          xrange=[-0.5,0.5],
-                          yrange=_vcrange,
-                          contours=True,
-                          cntrcolors='k',
-                          onedhistx=True,
-                          cmap='gist_yarg')
+    if isinstance(filename,str):
+        params= load_samples(filename)
+        dvcdrs= numpy.array([s[5-options.nooutliermean+options.dwarf] for s in params])
+        vcs= numpy.array([s[0] for s in params])*_REFV0
+        bovy_plot.bovy_print()
+        levels= list(special.erf(0.5*numpy.arange(1,4)))
+        levels.append(1.01) #HACK to not plot outliers
+        bovy_plot.scatterplot(dvcdrs,vcs,'k,',levels=levels,
+                              ylabel=_vclabel,
+                              xlabel=r'$\beta$',
+                              bins=bins,
+                              xrange=[-0.5,0.5],
+                              yrange=_vcrange,
+                              contours=True,
+                              cntrcolors='k',
+                              onedhistx=True,
+                              cmap='gist_yarg')
+        if _PLOTJACK:
+            #Load powerlaw jacks
+            jackparams= load_jack_params(powerlaw=True)            
+            for ii in range(len(jackparams)):
+                vcbeta(filename=jackparams[ii])
+    else:
+        params= filename
+        bovy_plot.bovy_plot(params[5-options.nooutliermean+options.dwarf],
+                            params[0]*_REFV0,                            
+                            color=_JACKCOLOR,marker=_JACKSYMBOL,
+                            overplot=True)        
     return None
 def vcd2vcdr2(filename=None,options=None,bins=31):
     options= set_options(options)

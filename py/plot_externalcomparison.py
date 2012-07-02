@@ -6,6 +6,7 @@ from optparse import OptionParser
 import math
 import numpy
 from scipy.maxentropy import logsumexp
+from scipy import special, stats
 from galpy.util import bovy_plot
 from matplotlib import pyplot
 from matplotlib.ticker import NullFormatter
@@ -319,12 +320,12 @@ def plot_externalcomparison(parser):
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
     #top_right=True,size=14.)
-    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ V_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (8.,2.*(fid_logl-vo250r8_logl)),
-                        top_right=True,size=14.)
-    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ V_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (8.4,2.*(fid_logl-vo250_logl)),
-                        bottom_right=True,size=14.)
-    bovy_plot.bovy_plot([50.],[-15.],'kx',overplot=True)
-    bovy_plot.bovy_plot([50.],[12.],'ko',overplot=True)
+    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ V_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f\ (%.1f\sigma)$' % (8.,2.*(fid_logl-vo250r8_logl),special.erfinv(stats.chi2.cdf(2.*(fid_logl-vo250r8_logl),10.))*numpy.sqrt(2.)),
+                        top_right=True,size=13.)
+    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ V_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f\ (%.1f\sigma)$' % (8.4,2.*(fid_logl-vo250_logl),special.erfinv(stats.chi2.cdf(2.*(fid_logl-vo250_logl),10.))*numpy.sqrt(2.)),
+                        bottom_right=True,size=13.)
+    bovy_plot.bovy_plot([40.],[-15.],'kx',overplot=True)
+    bovy_plot.bovy_plot([40.],[12.],'ko',overplot=True)
     thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
