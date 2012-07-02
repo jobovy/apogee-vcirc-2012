@@ -273,14 +273,15 @@ def plot_externalcomparison(parser):
     bovy_plot._add_ticks()
     #Second is vc=250
     #Load initial parameters from file
-    #savefile= open(options.vo250file,'rb')
-    #params= pickle.load(savefile)
-    #savefile.close()
-    #options.fixvo= 250.
-    #vo250_logl= numpy.sum(logl.logl(init=params,data=data,options=copy.copy(options)))
-    #avg_plate_model= calc_model(params,options,data,
-    #                            logpiso,logpisodwarf,
-    #                            df,nlocs,locations,iso)
+    savefile= open(options.vo250file,'rb')
+    params= pickle.load(savefile)
+    savefile.close()
+    options.fixvo= 250.
+    options.fixro= 8.4
+    vo250_logl= numpy.sum(logl.logl(init=params,data=data,options=copy.copy(options)))
+    avg_plate_modelr84= calc_model(params,options,data,
+                                logpiso,logpisodwarf,
+                                df,nlocs,locations,iso)
     #Load initial parameters from file
     savefile= open(options.vo250r8file,'rb')
     paramsr8= pickle.load(savefile)
@@ -305,22 +306,25 @@ def plot_externalcomparison(parser):
     pyplot.errorbar(l_plate,avg_plate-avg_plate_model_fid,
                     yerr=siga_plate,marker='o',color='0.6',
                     linestyle='none',elinestyle='-')
-    #bovy_plot.bovy_plot(l_plate,
-    #                    avg_plate-avg_plate_model,
-    #                    'o',overplot=True,color='k')
-    #pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
-    #                yerr=siga_plate,marker='o',color='k',
-    #                linestyle='none',elinestyle='-')
+    bovy_plot.bovy_plot(l_plate,
+                        avg_plate-avg_plate_modelr84,
+                        'x',overplot=True,color='k')
+    pyplot.errorbar(l_plate,avg_plate-avg_plate_modelr84,
+                    yerr=siga_plate,marker='x',color='k',
+                    linestyle='none',elinestyle='-')
     bovy_plot.bovy_plot(l_plate,
                         avg_plate-avg_plate_modelr8,
                         'o',overplot=True,color='k')
     pyplot.errorbar(l_plate,avg_plate-avg_plate_modelr8,
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
-    #bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ V_c(R_0) = 250\ \mathrm{km\ s}^{-1}\ \mathrm{has}\ R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (params[0]*_REFR0,2.*(fid_logl-vo250_logl)),
     #top_right=True,size=14.)
     bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ V_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (8.,2.*(fid_logl-vo250r8_logl)),
                         top_right=True,size=14.)
+    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ V_c(R_0) = 250\ \mathrm{km\ s}^{-1}, R_0 = %.1f\,\mathrm{kpc}, \Delta \chi^2 = %.0f$' % (8.4,2.*(fid_logl-vo250_logl)),
+                        bottom_right=True,size=14.)
+    bovy_plot.bovy_plot([50.],[-15.],'kx',overplot=True)
+    bovy_plot.bovy_plot([50.],[12.],'ko',overplot=True)
     thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()

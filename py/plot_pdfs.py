@@ -7,6 +7,34 @@ from fitvc import get_options, _DEGTORAD, _REFR0, _REFV0, _VRSUN, _PMSGRA
 from galpy.util import bovy_plot
 _vcrange=[180.,250.]
 _vclabel= r'$v_0\ [\mathrm{km\ s}^{-1}]$'
+_JACKFILES=['../fits/allwoloc4151_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4154_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4157_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4240_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4241_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4242_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4243_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4270_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4271_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4272_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4273_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4318_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4319_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
+            '../fits/allwoloc4321_simpledrift_noro_dwarf_vpec_sratio_hs.sav']
+_JACKCOLOR='w'
+_JACKSYMBOL='x'
+def load_jack_params():
+    out= []
+    njacks= len(_JACKFILES)
+    for ii in range(njacks):
+        savefile= open(_JACKFILES[ii],'rb')
+        out.append(pickle.load(savefile))
+        savefile.close()
+    return out
+_PRELOADJACK= True
+if _PRELOADJACK:
+    _JACKPARAMS= load_jack_params()
+_PLOTJACK= True
 def set_options(options):
     if options is None:
         parser= get_options()
@@ -48,21 +76,31 @@ def rovo(filename=None,options=None,bins=31):
     return None
 def rovc(filename=None,options=None,bins=31):
     options= set_options(options)
-    params= load_samples(filename)
-    vcs= numpy.array([s[0] for s in params])*_REFV0
-    ros= numpy.array([s[1] for s in params])*_REFR0
-    bovy_plot.bovy_print()
-    levels= list(special.erf(0.5*numpy.arange(1,4)))
-    levels.append(1.01) #HACK to not plot outliers
-    bovy_plot.scatterplot(ros,vcs,'k,',levels=levels,
-                          ylabel=_vclabel,
-                          xlabel=r'$R_0\ [\mathrm{kpc}]$',
-                          bins=bins,
-                          yrange=_vcrange,
-                          xrange=[6.,12.],
-                          contours=True,
-                          cntrcolors='k',
-                          cmap='gist_yarg',onedhistx=True)
+    if isinstance(filename,str):
+        params= load_samples(filename)
+        vcs= numpy.array([s[0] for s in params])*_REFV0
+        ros= numpy.array([s[1] for s in params])*_REFR0
+        bovy_plot.bovy_print()
+        levels= list(special.erf(0.5*numpy.arange(1,4)))
+        levels.append(1.01) #HACK to not plot outliers
+        bovy_plot.scatterplot(ros,vcs,'k,',levels=levels,
+                              ylabel=_vclabel,
+                              xlabel=r'$R_0\ [\mathrm{kpc}]$',
+                              bins=bins,
+                              yrange=_vcrange,
+                              xrange=[6.,12.],
+                              contours=True,
+                              cntrcolors='k',
+                              cmap='gist_yarg',onedhistx=True)
+        if _PLOTJACK:
+            if _PRELOADJACK:
+                for ii in range(len(_JACKPARAMS)):
+                    rovc(filename=_JACKPARAMS[ii])
+    else:
+        params= filename
+        bovy_plot.bovy_plot(params[1]*_REFR0,params[0]*_REFV0,
+                            color=_JACKCOLOR,marker=_JACKSYMBOL,
+                            overplot=True)        
     return None
 def rosr(filename=None,options=None,bins=31):
     options= set_options(options)
@@ -85,22 +123,33 @@ def rosr(filename=None,options=None,bins=31):
     return None
 def vcsr(filename=None,options=None,bins=31):
     options= set_options(options)
-    params= load_samples(filename)
-    vcs= numpy.array([s[0] for s in params])*_REFV0
-    srs= numpy.exp(numpy.array([s[2] for s in params]))*_REFV0
-    bovy_plot.bovy_print()
-    levels= list(special.erf(0.5*numpy.arange(1,4)))
-    levels.append(1.01) #HACK to not plot outliers
-    bovy_plot.scatterplot(srs,vcs,'k,',levels=levels,
-                          xlabel=r'$\sigma_R\ [\mathrm{km\ s}^{-1}]$',
-                          ylabel=r'$v_0\ [\mathrm{km\ s}^{-1}]$',
-                          bins=bins,
-                          xrange=[20.,50.],
-                          yrange=_vcrange,
-                          contours=True,
-                          cntrcolors='k',
-                          onedhistx=True,
-                          cmap='gist_yarg')
+    if isinstance(filename,str):
+        params= load_samples(filename)
+        vcs= numpy.array([s[0] for s in params])*_REFV0
+        srs= numpy.exp(numpy.array([s[2] for s in params]))*_REFV0
+        bovy_plot.bovy_print()
+        levels= list(special.erf(0.5*numpy.arange(1,4)))
+        levels.append(1.01) #HACK to not plot outliers
+        bovy_plot.scatterplot(srs,vcs,'k,',levels=levels,
+                              xlabel=r'$\sigma_R\ [\mathrm{km\ s}^{-1}]$',
+                              ylabel=r'$v_0\ [\mathrm{km\ s}^{-1}]$',
+                              bins=bins,
+                              xrange=[20.,50.],
+                              yrange=_vcrange,
+                              contours=True,
+                              cntrcolors='k',
+                              onedhistx=True,
+                              cmap='gist_yarg')
+        if _PLOTJACK:
+            if _PRELOADJACK:
+                for ii in range(len(_JACKPARAMS)):
+                    vcsr(filename=_JACKPARAMS[ii])
+    else:
+        params= filename
+        bovy_plot.bovy_plot(numpy.exp(params[2])*_REFV0,
+                            params[0]*_REFV0,
+                            color=_JACKCOLOR,marker=_JACKSYMBOL,
+                            overplot=True)        
     return None
 def rohs(filename=None,options=None,bins=31):
     options= set_options(options)
@@ -123,42 +172,64 @@ def rohs(filename=None,options=None,bins=31):
     return None
 def vchs(filename=None,options=None,bins=31):
     options= set_options(options)
-    params= load_samples(filename)
-    vos= numpy.array([s[0] for s in params])*_REFV0
-    ros= numpy.array([s[1] for s in params])*_REFR0
-    hss= options.hs/numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] for s in params])
-    bovy_plot.bovy_print()
-    levels= list(special.erf(0.5*numpy.arange(1,4)))
-    levels.append(1.01) #HACK to not plot outliers
-    bovy_plot.scatterplot(ros/hss,vos,'k,',levels=levels,
-                          xlabel=r'$R_0/h_\sigma$',
-                          ylabel=_vclabel,
-                          bins=bins,
-                          xrange=[-1.,1.],
-                          yrange=_vcrange,
-                          contours=True,
-                          cntrcolors='k',
-                          onedhistx=True,
-                          cmap='gist_yarg')
+    if isinstance(filename,str):
+        params= load_samples(filename)
+        vos= numpy.array([s[0] for s in params])*_REFV0
+        ros= numpy.array([s[1] for s in params])*_REFR0
+        hss= options.hs/numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] for s in params])
+        bovy_plot.bovy_print()
+        levels= list(special.erf(0.5*numpy.arange(1,4)))
+        levels.append(1.01) #HACK to not plot outliers
+        bovy_plot.scatterplot(ros/hss,vos,'k,',levels=levels,
+                              xlabel=r'$R_0/h_\sigma$',
+                              ylabel=_vclabel,
+                              bins=bins,
+                              xrange=[-1.,1.],
+                              yrange=_vcrange,
+                              contours=True,
+                              cntrcolors='k',
+                              onedhistx=True,
+                              cmap='gist_yarg')
+        if _PLOTJACK:
+            if _PRELOADJACK:
+                for ii in range(len(_JACKPARAMS)):
+                    vchs(filename=_JACKPARAMS[ii])
+    else:
+        params= filename
+        bovy_plot.bovy_plot(params[1]*_REFR0/(options.hs/params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter]),
+                            params[0]*_REFV0,
+                            color=_JACKCOLOR,marker=_JACKSYMBOL,
+                            overplot=True)        
     return None
 def vcx2(filename=None,options=None,bins=31):
     options= set_options(options)
-    params= load_samples(filename)
-    vos= numpy.array([s[0] for s in params])*_REFV0
-    x2s= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf] for s in params])
-    bovy_plot.bovy_print()
-    levels= list(special.erf(0.5*numpy.arange(1,4)))
-    levels.append(1.01) #HACK to not plot outliers
-    bovy_plot.scatterplot(x2s,vos,'k,',levels=levels,
-                          xlabel=r'$\sigma_\phi^2/\sigma_R^2$',
-                          ylabel=_vclabel,
-                          bins=bins,
-                          xrange=[0.,1.5],
-                          yrange=_vcrange,
-                          contours=True,
-                          cntrcolors='k',
-                          onedhists=True,
-                          cmap='gist_yarg')
+    if isinstance(filename,str):
+        params= load_samples(filename)
+        vos= numpy.array([s[0] for s in params])*_REFV0
+        x2s= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf] for s in params])
+        bovy_plot.bovy_print()
+        levels= list(special.erf(0.5*numpy.arange(1,4)))
+        levels.append(1.01) #HACK to not plot outliers
+        bovy_plot.scatterplot(x2s,vos,'k,',levels=levels,
+                              xlabel=r'$\sigma_\phi^2/\sigma_R^2$',
+                              ylabel=_vclabel,
+                              bins=bins,
+                              xrange=[0.,1.5],
+                              yrange=_vcrange,
+                              contours=True,
+                              cntrcolors='k',
+                              onedhists=True,
+                              cmap='gist_yarg')
+        if _PLOTJACK:
+            if _PRELOADJACK:
+                for ii in range(len(_JACKPARAMS)):
+                    vcx2(filename=_JACKPARAMS[ii])
+    else:
+        params= filename
+        bovy_plot.bovy_plot(params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf],
+                            params[0]*_REFV0,
+                            color=_JACKCOLOR,marker=_JACKSYMBOL,
+                            overplot=True)        
     return None
 def roah(filename=None,options=None,bins=31):
     options= set_options(options)
@@ -277,41 +348,63 @@ def rovpect(filename=None,options=None,bins=31):
     return None
 def vovpect(filename=None,options=None,bins=31):
     options= set_options(options)
-    params= load_samples(filename)
-    vpects= numpy.array([s[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf]*_PMSGRA*s[1]*_REFR0 for s in params])
-    vos= numpy.array([s[0] for s in params])*_REFV0
-    bovy_plot.bovy_print()
-    levels= list(special.erf(0.5*numpy.arange(1,4)))
-    levels.append(1.01) #HACK to not plot outliers
-    bovy_plot.scatterplot(vpects-vos,vos,'k,',levels=levels,
-                          xlabel=r'$v_{\phi,\odot}-v_0\ [\mathrm{km\ s}^{-1}]$',
-                          ylabel=_vclabel,
-                          bins=bins,
-                          xrange=[0.,40.],
-                          yrange=_vcrange,
-                          contours=True,
-                          cntrcolors='k',
-                          onedhistx=True,
-                          cmap='gist_yarg')
+    if isinstance(filename,str):
+        params= load_samples(filename)
+        vpects= numpy.array([s[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf]*_PMSGRA*s[1]*_REFR0 for s in params])
+        vos= numpy.array([s[0] for s in params])*_REFV0
+        bovy_plot.bovy_print()
+        levels= list(special.erf(0.5*numpy.arange(1,4)))
+        levels.append(1.01) #HACK to not plot outliers
+        bovy_plot.scatterplot(vpects-vos,vos,'k,',levels=levels,
+                              xlabel=r'$v_{\phi,\odot}-v_0\ [\mathrm{km\ s}^{-1}]$',
+                              ylabel=_vclabel,
+                              bins=bins,
+                              xrange=[0.,40.],
+                              yrange=_vcrange,
+                              contours=True,
+                              cntrcolors='k',
+                              onedhistx=True,
+                              cmap='gist_yarg')
+        if _PLOTJACK:
+            if _PRELOADJACK:
+                for ii in range(len(_JACKPARAMS)):
+                    vovpect(filename=_JACKPARAMS[ii])
+    else:
+        params= filename
+        bovy_plot.bovy_plot(params[6-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+options.dwarf]*_PMSGRA*params[1]*_REFR0-params[0]*_REFV0,
+                            params[0]*_REFV0,
+                            color=_JACKCOLOR,marker=_JACKSYMBOL,
+                            overplot=True)        
     return None
 def vopdwarf(filename=None,options=None,bins=31):
     options= set_options(options)
-    params= load_samples(filename)
-    pdwarfs= numpy.array([s[5-options.nooutliermean] for s in params])
-    vos= numpy.array([s[0] for s in params])*_REFV0
-    bovy_plot.bovy_print()
-    levels= list(special.erf(0.5*numpy.arange(1,4)))
-    levels.append(1.01) #HACK to not plot outliers
-    bovy_plot.scatterplot(pdwarfs,vos,'k,',levels=levels,
-                          xlabel=r'$P(\mathrm{dwarf})$',
-                          ylabel=_vclabel,
-                          bins=bins,
-                          xrange=[0.,1.],
-                          yrange=_vcrange,
-                          contours=True,
-                          cntrcolors='k',
-                          onedhists=True,
-                          cmap='gist_yarg')
+    if isinstance(filename,str):
+        params= load_samples(filename)
+        pdwarfs= numpy.array([s[5-options.nooutliermean] for s in params])
+        vos= numpy.array([s[0] for s in params])*_REFV0
+        bovy_plot.bovy_print()
+        levels= list(special.erf(0.5*numpy.arange(1,4)))
+        levels.append(1.01) #HACK to not plot outliers
+        bovy_plot.scatterplot(pdwarfs,vos,'k,',levels=levels,
+                              xlabel=r'$P(\mathrm{dwarf})$',
+                              ylabel=_vclabel,
+                              bins=bins,
+                              xrange=[0.,1.],
+                              yrange=_vcrange,
+                              contours=True,
+                              cntrcolors='k',
+                              onedhists=True,
+                              cmap='gist_yarg')
+        if _PLOTJACK:
+            if _PRELOADJACK:
+                for ii in range(len(_JACKPARAMS)):
+                    vopdwarf(filename=_JACKPARAMS[ii])
+    else:
+        params= filename
+        bovy_plot.bovy_plot(params[5-options.nooutliermean],
+                            params[0]*_REFV0,
+                            color=_JACKCOLOR,marker=_JACKSYMBOL,
+                            overplot=True)        
     return None
 def roosun(filename=None,options=None,bins=31):
     options= set_options(options)
