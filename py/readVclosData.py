@@ -156,4 +156,7 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
         data['H0MAG'][outerindx]+= outerah
         data['J0MAG'][outerindx]+= outerah*2.5/1.55
         data['K0MAG'][outerindx]+= outerah/1.55
+    #HACK
+    indx= (data['J0MAG']-data['K0MAG'] < 0.5)
+    data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
     return data
