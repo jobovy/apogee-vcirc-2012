@@ -316,7 +316,7 @@ def vcfeh(filename=None,filename2=None,options=None,bins=31):
     levels.append(1.01) #HACK to not plot outliers
     dmrange= [-1.,1.]
     axScatter, axHistx, axHisty= bovy_plot.scatterplot(dms,vcs,'k,',levels=levels,
-                                                       xlabel=r'$\Delta [\mathrm{Fe/H}] [\mathrm{dex}]$',
+                                                       xlabel=r'$\Delta [\mathrm{Fe/H}]\ [\mathrm{dex}]$',
                           ylabel=_vclabel,
                           bins=bins,
                           xrange=dmrange,
@@ -382,7 +382,7 @@ def vcah(filename=None,filename2=None,options=None,bins=31):
     levels.append(1.01) #HACK to not plot outliers
     dmrange= [-.25,.25]
     axScatter, axHistx, axHisty= bovy_plot.scatterplot(dms,vcs,'k,',levels=levels,
-                                                       xlabel=r'$\Delta A_H [\mathrm{mag}]$',
+                                                       xlabel=r'$\Delta A_H\ [\mathrm{mag}]$',
                           ylabel=_vclabel,
                           bins=bins,
                           xrange=dmrange,
@@ -448,7 +448,7 @@ def vcdm(filename=None,filename2=None,options=None,bins=31):
     levels.append(1.01) #HACK to not plot outliers
     dmrange= [-1.25,1.25]
     axScatter, axHistx, axHisty= bovy_plot.scatterplot(dms,vcs,'k,',levels=levels,
-                          xlabel=r'$\Delta \mu [\mathrm{mag}]$',
+                          xlabel=r'$\Delta \mu\ [\mathrm{mag}]$',
                           ylabel=_vclabel,
                           bins=bins,
                           xrange=dmrange,
