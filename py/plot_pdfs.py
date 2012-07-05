@@ -955,20 +955,20 @@ if __name__ == '__main__':
     vcdvcdr(filename=filename,bins=bins,options=options)
     bovy_plot.bovy_end_print(os.path.join(outdir,'pdf_vc_linear.'+ext))
     #vc, dm
-    filename= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_dm_hs_10000samples.sav'
-    filename2= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_dm_hs_innerouterdm_10000samples.sav'
+    filename= '../fits/all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_10000samples.sav'
+    filename2= '../fits/all_simpledrift_noro_dwarf_vpec_sratio_dm_hs_innerouterdm_10000samples.sav'
     vcdm(filename=filename,filename2=filename2,bins=bins,options=options)
     bovy_plot.bovy_end_print(os.path.join(outdir,'pdf_vc_dm.'+ext))
     options.fitdm= False
     #vc, ah
-    filename= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_ah_hs_10000samples.sav'
-    filename2= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_ah_hs_innerouterah_10000samples.sav'
+    filename= '../fits/all_simpledrift_noro_dwarf_vpec_sratio_ah_hs_10000samples.sav'
+    filename2= '../fits/all_simpledrift_noro_dwarf_vpec_sratio_ah_hs_innerouterah_10000samples.sav'
     vcah(filename=filename,filename2=filename2,bins=bins,options=options)
     bovy_plot.bovy_end_print(os.path.join(outdir,'pdf_vc_ah.'+ext))
     options.fitah= False
     #vc, feh
-    filename= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_feh_hs_10000samples.sav'
-    filename2= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_feh_hs_innerouterfeh_10000samples.sav'
+    filename= '../fits/all_simpledrift_noro_dwarf_vpec_sratio_feh_hs_10000samples.sav'
+    filename2= '../fits/all_simpledrift_noro_dwarf_vpec_sratio_feh_hs_innerouterfeh_10000samples.sav'
     vcfeh(filename=filename,filename2=filename2,bins=bins,options=options)
     bovy_plot.bovy_end_print(os.path.join(outdir,'pdf_vc_feh.'+ext))
     options.fitfeh= False
