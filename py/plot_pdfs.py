@@ -5,6 +5,7 @@ import numpy
 from scipy import special
 from fitvc import get_options, _DEGTORAD, _REFR0, _REFV0, _VRSUN, _PMSGRA
 from galpy.util import bovy_plot
+from matplotlib import pyplot
 _vcrange=[180.,250.]
 _vclabel= r'$v_0\ [\mathrm{km\ s}^{-1}]$'
 _JACKFILES=['../fits/allwoloc4151_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
@@ -303,6 +304,204 @@ def ahah(filename=None,options=None,bins=31):
                           cntrcolors='k',
                           onedhists=True,
                           cmap='gist_yarg')
+    return None
+def vcfeh(filename=None,filename2=None,options=None,bins=31):
+    options= set_options(options)
+    options.fitfeh= True
+    params= load_samples(filename)
+    vcs= numpy.array([s[0] for s in params])*_REFV0
+    dms= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] for s in params])
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    dmrange= [-1.,1.]
+    axScatter, axHistx, axHisty= bovy_plot.scatterplot(dms,vcs,'k,',levels=levels,
+                                                       xlabel=r'$\Delta [\mathrm{Fe/H}] [\mathrm{dex}]$',
+                          ylabel=_vclabel,
+                          bins=bins,
+                          xrange=dmrange,
+                          yrange=_vcrange,
+                          contours=True,
+                          cntrcolors='k',
+                          onedhistx=True,
+                                                       retAxes=True,
+                          cmap='gist_yarg')
+    #Now plot inner-outer
+    params= load_samples(filename2)
+    vcs= numpy.array([s[0] for s in params])*_REFV0
+    dms= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] for s in params])
+    dmsinner= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah+options.fitfeh] for s in params])
+    #Just plot contours
+    data= numpy.array([dms,vcs]).T
+    hist, edges= numpy.histogramdd(data,bins=bins,range=[dmrange,_vcrange])
+    X= hist.T
+    X[numpy.isnan(X)]= 0.
+    sortindx= numpy.argsort(X.flatten())[::-1]
+    cumul= numpy.cumsum(numpy.sort(X.flatten())[::-1])/numpy.sum(X.flatten())
+    cntrThis= numpy.zeros(numpy.prod(X.shape))
+    cntrThis[sortindx]= cumul
+    cntrThis= numpy.reshape(cntrThis,X.shape)
+    extent=[dmrange[0],dmrange[1],_vcrange[0],_vcrange[1]]
+    cont= pyplot.contour(cntrThis,levels,colors='k',
+                         extent=extent,
+                         linestyles='dashed',
+                         origin='lower')
+    histx= numpy.nansum(X.T,axis=1)*numpy.fabs(_vcrange[1]-_vcrange[0])/X.shape[1]
+    histx[numpy.isnan(histx)]= 0.
+    dx= (extent[1]-extent[0])/float(len(histx))
+    axHistx.plot(numpy.linspace(extent[0]+dx,extent[1]-dx,len(histx)),histx/3800.,
+                 drawstyle='steps-mid',color='k',ls='--')
+    #Just plot contours
+    data= numpy.array([dmsinner,vcs]).T
+    hist, edges= numpy.histogramdd(data,bins=bins,range=[dmrange,_vcrange])
+    X= hist.T
+    X[numpy.isnan(X)]= 0.
+    sortindx= numpy.argsort(X.flatten())[::-1]
+    cumul= numpy.cumsum(numpy.sort(X.flatten())[::-1])/numpy.sum(X.flatten())
+    cntrThis= numpy.zeros(numpy.prod(X.shape))
+    cntrThis[sortindx]= cumul
+    cntrThis= numpy.reshape(cntrThis,X.shape)
+    cont= pyplot.contour(cntrThis,levels,colors='k',
+                         extent=extent,
+                         linestyles='dashed',
+                         origin='lower')
+    histx= numpy.nansum(X.T,axis=1)*numpy.fabs(_vcrange[1]-_vcrange[0])/X.shape[1]
+    histx[numpy.isnan(histx)]= 0.
+    dx= (extent[1]-extent[0])/float(len(histx))
+    axHistx.plot(numpy.linspace(extent[0]+dx,extent[1]-dx,len(histx)),histx/3800.,
+                 drawstyle='steps-mid',color='k',ls='--')
+    return None
+def vcah(filename=None,filename2=None,options=None,bins=31):
+    options= set_options(options)
+    options.fitah= True
+    params= load_samples(filename)
+    vcs= numpy.array([s[0] for s in params])*_REFV0
+    dms= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] for s in params])
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    dmrange= [-.25,.25]
+    axScatter, axHistx, axHisty= bovy_plot.scatterplot(dms,vcs,'k,',levels=levels,
+                                                       xlabel=r'$\Delta A_H [\mathrm{mag}]$',
+                          ylabel=_vclabel,
+                          bins=bins,
+                          xrange=dmrange,
+                          yrange=_vcrange,
+                          contours=True,
+                          cntrcolors='k',
+                          onedhistx=True,
+                                                       retAxes=True,
+                          cmap='gist_yarg')
+    #Now plot inner-outer
+    params= load_samples(filename2)
+    vcs= numpy.array([s[0] for s in params])*_REFV0
+    dms= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] for s in params])
+    dmsinner= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah] for s in params])
+    #Just plot contours
+    data= numpy.array([dms,vcs]).T
+    hist, edges= numpy.histogramdd(data,bins=bins,range=[dmrange,_vcrange])
+    X= hist.T
+    X[numpy.isnan(X)]= 0.
+    sortindx= numpy.argsort(X.flatten())[::-1]
+    cumul= numpy.cumsum(numpy.sort(X.flatten())[::-1])/numpy.sum(X.flatten())
+    cntrThis= numpy.zeros(numpy.prod(X.shape))
+    cntrThis[sortindx]= cumul
+    cntrThis= numpy.reshape(cntrThis,X.shape)
+    extent=[dmrange[0],dmrange[1],_vcrange[0],_vcrange[1]]
+    cont= pyplot.contour(cntrThis,levels,colors='k',
+                         extent=extent,
+                         linestyles='dashed',
+                         origin='lower')
+    histx= numpy.nansum(X.T,axis=1)*numpy.fabs(_vcrange[1]-_vcrange[0])/X.shape[1]
+    histx[numpy.isnan(histx)]= 0.
+    dx= (extent[1]-extent[0])/float(len(histx))
+    axHistx.plot(numpy.linspace(extent[0]+dx,extent[1]-dx,len(histx)),histx/800.,
+                 drawstyle='steps-mid',color='k',ls='--')
+    #Just plot contours
+    data= numpy.array([dmsinner,vcs]).T
+    hist, edges= numpy.histogramdd(data,bins=bins,range=[dmrange,_vcrange])
+    X= hist.T
+    X[numpy.isnan(X)]= 0.
+    sortindx= numpy.argsort(X.flatten())[::-1]
+    cumul= numpy.cumsum(numpy.sort(X.flatten())[::-1])/numpy.sum(X.flatten())
+    cntrThis= numpy.zeros(numpy.prod(X.shape))
+    cntrThis[sortindx]= cumul
+    cntrThis= numpy.reshape(cntrThis,X.shape)
+    cont= pyplot.contour(cntrThis,levels,colors='k',
+                         extent=extent,
+                         linestyles='dashed',
+                         origin='lower')
+    histx= numpy.nansum(X.T,axis=1)*numpy.fabs(_vcrange[1]-_vcrange[0])/X.shape[1]
+    histx[numpy.isnan(histx)]= 0.
+    dx= (extent[1]-extent[0])/float(len(histx))
+    axHistx.plot(numpy.linspace(extent[0]+dx,extent[1]-dx,len(histx)),histx/800.,
+                 drawstyle='steps-mid',color='k',ls='--')
+    return None
+def vcdm(filename=None,filename2=None,options=None,bins=31):
+    options= set_options(options)
+    options.fitdm= True
+    params= load_samples(filename)
+    vcs= numpy.array([s[0] for s in params])*_REFV0
+    dms= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] for s in params])
+    bovy_plot.bovy_print()
+    levels= list(special.erf(0.5*numpy.arange(1,4)))
+    levels.append(1.01) #HACK to not plot outliers
+    dmrange= [-1.25,1.25]
+    axScatter, axHistx, axHisty= bovy_plot.scatterplot(dms,vcs,'k,',levels=levels,
+                          xlabel=r'$\Delta \mu [\mathrm{mag}]$',
+                          ylabel=_vclabel,
+                          bins=bins,
+                          xrange=dmrange,
+                          yrange=_vcrange,
+                          contours=True,
+                          cntrcolors='k',
+                          onedhistx=True,
+                                                       retAxes=True,
+                          cmap='gist_yarg')
+    #Now plot inner-outer
+    params= load_samples(filename2)
+    vcs= numpy.array([s[0] for s in params])*_REFV0
+    dms= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter] for s in params])
+    dmsinner= numpy.array([s[5-options.nooutliermean+(options.rotcurve.lower() == 'linear') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah] for s in params])
+    #Just plot contours
+    data= numpy.array([dms,vcs]).T
+    hist, edges= numpy.histogramdd(data,bins=bins,range=[dmrange,_vcrange])
+    X= hist.T
+    X[numpy.isnan(X)]= 0.
+    sortindx= numpy.argsort(X.flatten())[::-1]
+    cumul= numpy.cumsum(numpy.sort(X.flatten())[::-1])/numpy.sum(X.flatten())
+    cntrThis= numpy.zeros(numpy.prod(X.shape))
+    cntrThis[sortindx]= cumul
+    cntrThis= numpy.reshape(cntrThis,X.shape)
+    extent=[dmrange[0],dmrange[1],_vcrange[0],_vcrange[1]]
+    cont= pyplot.contour(cntrThis,levels,colors='k',
+                         extent=extent,
+                         linestyles='dashed',
+                         origin='lower')
+    histx= numpy.nansum(X.T,axis=1)*numpy.fabs(_vcrange[1]-_vcrange[0])/X.shape[1]
+    histx[numpy.isnan(histx)]= 0.
+    dx= (extent[1]-extent[0])/float(len(histx))
+    axHistx.plot(numpy.linspace(extent[0]+dx,extent[1]-dx,len(histx)),histx/3000.,
+                 drawstyle='steps-mid',color='k',ls='--')
+    #Just plot contours
+    data= numpy.array([dmsinner,vcs]).T
+    hist, edges= numpy.histogramdd(data,bins=bins,range=[dmrange,_vcrange])
+    X= hist.T
+    X[numpy.isnan(X)]= 0.
+    sortindx= numpy.argsort(X.flatten())[::-1]
+    cumul= numpy.cumsum(numpy.sort(X.flatten())[::-1])/numpy.sum(X.flatten())
+    cntrThis= numpy.zeros(numpy.prod(X.shape))
+    cntrThis[sortindx]= cumul
+    cntrThis= numpy.reshape(cntrThis,X.shape)
+    cont= pyplot.contour(cntrThis,levels,colors='k',
+                         extent=extent,
+                         linestyles='dashed',
+                         origin='lower')
+    histx= numpy.nansum(X.T,axis=1)*numpy.fabs(_vcrange[1]-_vcrange[0])/X.shape[1]
+    histx[numpy.isnan(histx)]= 0.
+    dx= (extent[1]-extent[0])/float(len(histx))
+    axHistx.plot(numpy.linspace(extent[0]+dx,extent[1]-dx,len(histx)),histx/5000.,
+                 drawstyle='steps-mid',color='k',ls='--')
     return None
 def rodm(filename=None,options=None,bins=31):
     options= set_options(options)
@@ -755,6 +954,24 @@ if __name__ == '__main__':
     filename= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_hs_10000samples.sav'
     vcdvcdr(filename=filename,bins=bins,options=options)
     bovy_plot.bovy_end_print(os.path.join(outdir,'pdf_vc_linear.'+ext))
+    #vc, dm
+    filename= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_dm_hs_10000samples.sav'
+    filename2= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_dm_hs_innerouterdm_10000samples.sav'
+    vcdm(filename=filename,filename2=filename2,bins=bins,options=options)
+    bovy_plot.bovy_end_print(os.path.join(outdir,'pdf_vc_dm.'+ext))
+    options.fitdm= False
+    #vc, ah
+    filename= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_ah_hs_10000samples.sav'
+    filename2= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_ah_hs_innerouterah_10000samples.sav'
+    vcah(filename=filename,filename2=filename2,bins=bins,options=options)
+    bovy_plot.bovy_end_print(os.path.join(outdir,'pdf_vc_ah.'+ext))
+    options.fitah= False
+    #vc, feh
+    filename= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_feh_hs_10000samples.sav'
+    filename2= '../fits/all_simpledrift_noro_dwarf_linear_vpec_sratio_feh_hs_innerouterfeh_10000samples.sav'
+    vcfeh(filename=filename,filename2=filename2,bins=bins,options=options)
+    bovy_plot.bovy_end_print(os.path.join(outdir,'pdf_vc_feh.'+ext))
+    options.fitfeh= False
     #vc,quadratic dvcdr
     #filename= '../fits/all_simpledrift_noro_dwarf_quadratic_vpec_sratio_hs_10000samples.sav'
     #vcd2vcdr2(filename=filename,bins=bins,options=options)
