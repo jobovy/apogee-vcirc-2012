@@ -42,6 +42,18 @@ all_simpledrift_noro_dwarf_vpec_sratio_hs:
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio --fiths
 
+all_simpledrift_noro_dwarf_vpec_sratio_hs_dl:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs_dl.sav \
+	--noroprior --dwarf --fitvpec --fitsratio --fiths \
+	--dfmodel=simplegaussiandrift --fitdl
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs_dl_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs_dl.sav \
+	 --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift \
+	--dwarf --fitvpec --fitsratio --fiths --fitdl
+
 all_simpledrift_vo250_ro8_dwarf_vpec_sratio_hs:
 	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
 	$(FITSDIR)all_simpledrift_vo250_ro8_dwarf_vpec_sratio_hs.sav \
