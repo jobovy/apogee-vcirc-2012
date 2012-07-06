@@ -138,6 +138,9 @@ def get_options():
                       action="store_true", dest="fitsratioinnerouter",
                       default=False,
                       help="If set, fit for the ration squared of tangential to radial dispersion")
+    parser.add_option("--fitdl",action="store_true", dest="fitdl",
+                      default=False,
+                      help="If set, fit for an offset in l for the GC")
     parser.add_option("--fitfehinnerouter",
                       action="store_true", dest="fitfehinnerouter",
                       default=False,
@@ -485,9 +488,9 @@ if __name__ == '__main__':
                 pvlosalljhk*= data_int/numpy.sum(pvlosalljhk)/(vlos[1]-vlos[0])
                 bovy_plot.bovy_plot(vlos,pvlosalljhk,'--',color='0.65',overplot=True,lw=2.)
             #Add text
-            bovy_plot.bovy_text(r'$\mathrm{location}\ =\ %i$' % location
-                                +'\n'
-                                +r'$l\ \approx\ %.0f^\circ$' % numpy.mean(thesedata['GLON']),
+            bovy_plot.bovy_text(#r'$\mathrm{location}\ =\ %i$' % location
+                                #+'\n'
+                                r'$l\ \approx\ %.0f^\circ$' % numpy.mean(thesedata['GLON']),
                                 top_right=True,size=14.)
             bovy_plot.bovy_end_print(options.plotfile+'_%i.ps' % location)
 

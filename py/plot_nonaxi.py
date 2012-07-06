@@ -463,6 +463,9 @@ def get_options():
                       action="store_true", dest="fitsratioinnerouter",
                       default=False,
                       help="If set, fit for the ration squared of tangential to radial dispersion")
+    parser.add_option("--fitdl",action="store_true", dest="fitdl",
+                      default=False,
+                      help="If set, fit for an offset in l for the GC")
     parser.add_option("--fitfehinnerouter",
                       action="store_true", dest="fitfehinnerouter",
                       default=False,
