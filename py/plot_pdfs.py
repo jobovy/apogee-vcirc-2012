@@ -109,7 +109,7 @@ def rovo(filename=None,options=None,bins=31):
                           onedhists=True,
                           cmap='gist_yarg')
     return None
-def rovc(filename=None,options=None,bins=31):
+def rovc(filename=None,options=None,bins=31,multipops=False):
     options= set_options(options)
     if isinstance(filename,str):
         params= load_samples(filename)
@@ -126,7 +126,10 @@ def rovc(filename=None,options=None,bins=31):
                               xrange=[6.,12.],
                               contours=True,
                               cntrcolors='k',
-                              cmap='gist_yarg',onedhistx=True)
+                              cmap='gist_yarg',onedhistx=True,
+                              onedhists=multipops)
+        if multipops:
+            bovy_plot.bovy_text(r'$\mathrm{Multiple\ populations,\ SFR} = \exp\left( -t/8\ \mathrm{Gyr}\right)$',top_right=True,size=14.)
         if _PLOTJACK:
             if _PRELOADJACK:
                 for ii in range(len(_JACKPARAMS)):
@@ -972,6 +975,10 @@ if __name__ == '__main__':
     vcfeh(filename=filename,filename2=filename2,bins=bins,options=options)
     bovy_plot.bovy_end_print(os.path.join(outdir,'pdf_vc_feh.'+ext))
     options.fitfeh= False
+    #vc, ro, multiple pops
+    filename= '../fits/all_multiplepops_noro_dwarf_vpec_sratio_hs_10000samples.sav'
+    rovc(filename=filename,bins=bins,options=options,multipops=True)
+    bovy_plot.bovy_end_print(os.path.join(outdir,'pdf_vc_ro_multipops.'+ext))
     #vc,quadratic dvcdr
     #filename= '../fits/all_simpledrift_noro_dwarf_quadratic_vpec_sratio_hs_10000samples.sav'
     #vcd2vcdr2(filename=filename,bins=bins,options=options)
