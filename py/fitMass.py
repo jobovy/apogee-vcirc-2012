@@ -8,6 +8,7 @@ from galpy.potential import MiyamotoNagaiPotential, \
     evaluateRforces    
 from scipy import optimize, integrate
 from fitvc import _REFR0, _REFV0, cb
+from resultsTable import sixtyeigthinterval
 import bovy_mcmc
 _convertrho= (_REFV0**2./_REFR0**2.*0.0002321707838637446)**-1.
 _convertmass= (_REFV0**2.*_REFR0*10.**9.*0.0002321707838637446)/10.**(12)
@@ -22,9 +23,9 @@ def obj(x,data,bp,dp,hp):
     if x[1] > 1. or x[1] < 0.: return numpy.finfo(numpy.dtype(numpy.float64)).max
     if (1.-x[0]-x[1]) > 1. or (1.-x[0]-x[1]) < 0.: return numpy.finfo(numpy.dtype(numpy.float64)).max
     if x[2] < 0. or x[3] < 0. or x[4] < 0.: return numpy.finfo(numpy.dtype(numpy.float64)).max
-    if x[2] > 2. or x[3] > 10. or x[4] > 1.: return numpy.finfo(numpy.dtype(numpy.float64)).max
-    #Renormalize potentials, intially normalized to 1./3. each
+    if x[2] > 2. or x[3] > 10. or x[4] > 2.: return numpy.finfo(numpy.dtype(numpy.float64)).max
     if False:
+        #Renormalize potentials, intially normalized to 1./3. each
         bp= copy.deepcopy(bp)
         dp= copy.deepcopy(dp)
         hp= copy.deepcopy(hp)
@@ -66,11 +67,10 @@ def obj(x,data,bp,dp,hp):
     chi2+= (x[4]-_diskscale)**2./_diskscaleerr**2.
     #Add dark matter density at the Solar radius
     #print hp.dens(1.,0.),_rhodm*x[2]**2.
-    chi2+= (hp.dens(1.,0.)-_rhodm*x[2]**2.)**2./_rhodmerr**2./x[2]**4.
+    #chi2+= (hp.dens(1.,0.)-_rhodm*x[2]**2.)**2./_rhodmerr**2./x[2]**4.
     return chi2
 
 def fitMass():
-    numpy.random.seed(1)
     #Read data
     vcircdata= numpy.loadtxt('vcirc.txt',comments='#',delimiter='|')
     vcircdata[:,0]/= _REFR0
@@ -112,28 +112,30 @@ def fitMass():
                                         [0.,1.],
                                         [0.,2.],
                                         [0.,10.],
-                                        [0.,1.]],
-                                nwalkers=10,
+                                        [0.,2.]],
+                                nwalkers=8,
                                 nsamples=10000)
     print "Done with sampling ..."
     print numpy.mean(numpy.array(samples),axis=0)
     print numpy.std(numpy.array(samples),axis=0)
     samples= numpy.random.permutation(samples)[0:500]
-    #total
-    totalmasssamples= []
-    for s in samples:
-        totalmasssamples.append(totalmass(s))
-    totalmasssamples= numpy.array(totalmasssamples)
-    print "total mass: ", numpy.mean(totalmasssamples), numpy.std(totalmasssamples)
-    bovy_plot.bovy_print()
-    bovy_plot.bovy_hist(totalmasssamples,bins=16,range=[0.,2.])
-    bovy_plot.bovy_end_print('totalmass.png')
     #halo
     totalmasssamples= []
     for s in samples:
         totalmasssamples.append(halomass(s))
     totalmasssamples= numpy.array(totalmasssamples)
     print "halo mass: ", numpy.mean(totalmasssamples), numpy.std(totalmasssamples)
+    print sixtyeigthinterval(halomass(out),totalmasssamples,quantile=.68)
+    #total
+    totalmasssamples= []
+    for s in samples:
+        totalmasssamples.append(totalmass(s))
+    totalmasssamples= numpy.array(totalmasssamples)
+    print "total mass: ", numpy.mean(totalmasssamples), numpy.std(totalmasssamples)
+    print sixtyeigthinterval(totalmass(out),totalmasssamples,quantile=.68)
+    bovy_plot.bovy_print()
+    bovy_plot.bovy_hist(totalmasssamples,bins=16,range=[0.,2.])
+    bovy_plot.bovy_end_print('totalmass.png')
     return None
     #disk
     totalmasssamples= []
@@ -172,4 +174,5 @@ def diskmass(out):
     return integrate.dblquad((lambda x,y: dp.dens(y,x)*y),0.,25./_REFR0,lambda x: 0.,lambda x: 10./_REFR0)[0]*2.*numpy.pi*_convertmass/out[2]**2.
 
 if __name__ == '__main__':
+    numpy.random.seed(1)
     fitMass()
