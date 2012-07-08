@@ -62,7 +62,7 @@ def obj(x,data,bp,dp,hp):
     #Add scale length measurement
     chi2+= (x[4]-_diskscale)**2./_diskscaleerr**2.
     #Add dark matter density at the Solar radius
-    print hp.dens(1.,0.),_rhodm*x[2]**2.
+    #print hp.dens(1.,0.),_rhodm*x[2]**2.
     chi2+= (hp.dens(1.,0.)-_rhodm*x[2]**2.)**2./_rhodmerr**2./x[2]**4.
     return chi2
 
@@ -105,7 +105,7 @@ def fitMass():
     #Halo mass
     halo= integrate.quad((lambda x: hp.dens(x,0.)*x**2.),0.,250./_REFR0)[0]*4.*numpy.pi*_convertmass/out[2]**2.
     bulge= integrate.quad((lambda x: bp.dens(x,0.)*x**2.),0.,250./_REFR0)[0]*4.*numpy.pi*_convertmass/out[2]**2.
-    disk= integrate.dblquad((lambda x,y: dp.dens(y,x)*y),0.,250./_REFR0,lambda x: 0.,lambda x: 20./_REFR0)[0]*2.*numpy.pi*_convertmass/out[2]**2.
+    disk= integrate.dblquad((lambda x,y: dp.dens(y,x)*y),0.,25./_REFR0,lambda x: 0.,lambda x: 10./_REFR0)[0]*2.*numpy.pi*_convertmass/out[2]**2.
     print halo, disk, bulge, halo+disk+bulge
     return None
 
