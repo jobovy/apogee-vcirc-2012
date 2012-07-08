@@ -1,5 +1,6 @@
 import copy
 import numpy
+from galpy.util import bovy_plot
 from galpy.potential import MiyamotoNagaiPotential, \
     NFWPotential,\
     HernquistPotential,\
@@ -7,6 +8,7 @@ from galpy.potential import MiyamotoNagaiPotential, \
     evaluateRforces    
 from scipy import optimize, integrate
 from fitvc import _REFR0, _REFV0, cb
+import bovy_mcmc
 _convertrho= (_REFV0**2./_REFR0**2.*0.0002321707838637446)**-1.
 _convertmass= (_REFV0**2.*_REFR0*10.**9.*0.0002321707838637446)/10.**(12)
 _rhodm= 0.008*_convertrho
@@ -20,6 +22,7 @@ def obj(x,data,bp,dp,hp):
     if x[1] > 1. or x[1] < 0.: return numpy.finfo(numpy.dtype(numpy.float64)).max
     if (1.-x[0]-x[1]) > 1. or (1.-x[0]-x[1]) < 0.: return numpy.finfo(numpy.dtype(numpy.float64)).max
     if x[2] < 0. or x[3] < 0. or x[4] < 0.: return numpy.finfo(numpy.dtype(numpy.float64)).max
+    if x[2] > 2. or x[3] > 10. or x[4] > 1.: return numpy.finfo(numpy.dtype(numpy.float64)).max
     #Renormalize potentials, intially normalized to 1./3. each
     if False:
         bp= copy.deepcopy(bp)
@@ -67,6 +70,7 @@ def obj(x,data,bp,dp,hp):
     return chi2
 
 def fitMass():
+    numpy.random.seed(1)
     #Read data
     vcircdata= numpy.loadtxt('vcirc.txt',comments='#',delimiter='|')
     vcircdata[:,0]/= _REFR0
@@ -90,8 +94,73 @@ def fitMass():
                               callback=cb)
     print out
     #Calculate mass
-    #Set-up best-fit
+    #Halo mass
+    halo= halomass(out)
+    bulge= halomass(out)
+    disk= diskmass(out)
+    print halo, disk, bulge, totalmass(out)
+    #Sample
+    samples= bovy_mcmc.markovpy(out,0.05,
+                                (lambda x: -obj(x,vcircdata,bp,dp,hp)),
+                                (),
+                                isDomainFinite=[[True,True],
+                                                [True,True],
+                                                [True,True],
+                                                [True,True],
+                                                [True,True]],
+                                domain=[[0.,1.],
+                                        [0.,1.],
+                                        [0.,2.],
+                                        [0.,10.],
+                                        [0.,1.]],
+                                nwalkers=10,
+                                nsamples=10000)
+    print "Done with sampling ..."
+    print numpy.mean(numpy.array(samples),axis=0)
+    print numpy.std(numpy.array(samples),axis=0)
+    samples= numpy.random.permutation(samples)[0:500]
+    #total
+    totalmasssamples= []
+    for s in samples:
+        totalmasssamples.append(totalmass(s))
+    totalmasssamples= numpy.array(totalmasssamples)
+    print "total mass: ", numpy.mean(totalmasssamples), numpy.std(totalmasssamples)
+    bovy_plot.bovy_print()
+    bovy_plot.bovy_hist(totalmasssamples,bins=16,range=[0.,2.])
+    bovy_plot.bovy_end_print('totalmass.png')
+    #halo
+    totalmasssamples= []
+    for s in samples:
+        totalmasssamples.append(halomass(s))
+    totalmasssamples= numpy.array(totalmasssamples)
+    print "halo mass: ", numpy.mean(totalmasssamples), numpy.std(totalmasssamples)
+    return None
+    #disk
+    totalmasssamples= []
+    for s in samples:
+        totalmasssamples.append(diskmass(s))
+    totalmasssamples= numpy.array(totalmasssamples)
+    print "disk mass: ", numpy.mean(totalmasssamples), numpy.std(totalmasssamples)
+    #bulge
+    totalmasssamples= []
+    for s in samples:
+        totalmasssamples.append(bulgemass(s))
+    totalmasssamples= numpy.array(totalmasssamples)
+    print "bulge mass: ", numpy.mean(totalmasssamples), numpy.std(totalmasssamples)
+    return None
+
+def totalmass(out):
+    return halomass(out)+bulgemass(out)+diskmass(out)
+
+def bulgemass(out):
     bp= HernquistPotential(a=0.6/_REFR0,normalize=1.-out[0]-out[1])
+    return integrate.quad((lambda x: bp.dens(x,0.)*x**2.),0.,250./_REFR0)[0]*4.*numpy.pi*_convertmass/out[2]**2.
+def halomass(out):
+    hp= NFWPotential(normalize=out[1],
+                     a=out[3])
+    return integrate.quad((lambda x: hp.dens(x,0.)*x**2.),0.,250./_REFR0)[0]*4.*numpy.pi*_convertmass/out[2]**2.
+
+def diskmass(out):
     if _dexp:
         dp= DoubleExponentialDiskPotential(normalize=out[0],
                                            hr=out[4],
@@ -100,14 +169,7 @@ def fitMass():
         dp= MiyamotoNagaiPotential(normalize=out[0],
                                    a=out[4],
                                    b=0.3/_REFR0)
-    hp= NFWPotential(normalize=out[1],
-                     a=out[3])
-    #Halo mass
-    halo= integrate.quad((lambda x: hp.dens(x,0.)*x**2.),0.,250./_REFR0)[0]*4.*numpy.pi*_convertmass/out[2]**2.
-    bulge= integrate.quad((lambda x: bp.dens(x,0.)*x**2.),0.,250./_REFR0)[0]*4.*numpy.pi*_convertmass/out[2]**2.
-    disk= integrate.dblquad((lambda x,y: dp.dens(y,x)*y),0.,25./_REFR0,lambda x: 0.,lambda x: 10./_REFR0)[0]*2.*numpy.pi*_convertmass/out[2]**2.
-    print halo, disk, bulge, halo+disk+bulge
-    return None
+    return integrate.dblquad((lambda x,y: dp.dens(y,x)*y),0.,25./_REFR0,lambda x: 0.,lambda x: 10./_REFR0)[0]*2.*numpy.pi*_convertmass/out[2]**2.
 
 if __name__ == '__main__':
     fitMass()
