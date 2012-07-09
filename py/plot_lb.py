@@ -14,6 +14,7 @@ OUTEXT= 'ps'
 hz= 250.
 ro= 8000.
 dmax= 10000.
+_PLOTHIGHB= False
 def plot_lb():
     #Read basic data
     data= readVclosData()
@@ -47,27 +48,28 @@ def plot_lb():
     pyplot.ylabel(r'$\mathrm{Galactic\ latitude\ [deg]}$')
     bovy_plot._add_ticks()
     #bovy_plot.bovy_end_print(os.path.join(OUTDIR,'data_lb.'+OUTEXT))
-    #Read other data
-    otherdata= readVclosData(meanb=-4.,bmax=10.)
-    nmdata= len(otherdata)
-    otherl= list(otherdata['GLON'])
-    otherb= list(otherdata['GLAT'])
-    otherdata2= readVclosData(meanb=4.,bmax=10.)
-    npdata= len(otherdata2)
-    otherl.extend(list(otherdata2['GLON']))
-    otherb.extend(list(otherdata2['GLAT']))
-    bovy_plot.bovy_plot(otherl,otherb,'.',mec='0.5',mfc='0.5',ms=1.5,
-                        overplot=True)
-    #Add histogram of bs
-    otherl.extend(list(data['GLON']))
-    otherb.extend(list(data['GLAT']))
-    histy, edges, patches= axHisty.hist(otherb,
-                                        bins=49,
-                                        orientation='horizontal',
-                                        normed=True,
-                                        histtype='step',
-                                        range=yrange,
-                                        color='k',zorder=2)
+    if _PLOTHIGHB:
+        #Read other data
+        otherdata= readVclosData(meanb=-4.,bmax=10.)
+        nmdata= len(otherdata)
+        otherl= list(otherdata['GLON'])
+        otherb= list(otherdata['GLAT'])
+        otherdata2= readVclosData(meanb=4.,bmax=10.)
+        npdata= len(otherdata2)
+        otherl.extend(list(otherdata2['GLON']))
+        otherb.extend(list(otherdata2['GLAT']))
+        bovy_plot.bovy_plot(otherl,otherb,'.',mec='0.5',mfc='0.5',ms=1.5,
+                            overplot=True)
+        #Add histogram of bs
+        otherl.extend(list(data['GLON']))
+        otherb.extend(list(data['GLAT']))
+        histy, edges, patches= axHisty.hist(otherb,
+                                            bins=49,
+                                            orientation='horizontal',
+                                            normed=True,
+                                            histtype='step',
+                                            range=yrange,
+                                            color='k',zorder=2)
     #Overlay predictions
     #Center, constant
     ys= numpy.linspace(-1.5,1.5,1001)
@@ -94,9 +96,10 @@ def plot_lb():
     axHisty.plot(pdf,ys,'-',color='0.',lw=1.,zorder=-1.)
     #axHisty.plot(.8*pdf+.2*constpdf,ys,'-',color='0.',lw=1.,zorder=-1.)
     """
-    #positive b, constant
-    constpdf*= float(npdata)/ndata
-    axHisty.plot(constpdf,ys+4.,'k-',zorder=-2)
+    if _PLOTHIGHB:
+        #positive b, constant
+        constpdf*= float(npdata)/ndata
+        axHisty.plot(constpdf,ys+4.,'k-',zorder=-2)
     """
     #Positive, exponential disk
     pdfp= numpy.zeros(len(ys))
@@ -116,9 +119,9 @@ def plot_lb():
     axHisty.plot(pdfp,4.+ys,'-',color='0.',lw=1.,zorder=-1)
     #axHisty.plot(.8*pdfp+.2*constpdf,4.+ys,'-',color='0.',lw=1.,zorder=-1)
     """
-    #negative b, constant
-    constpdf*= nmdata/float(npdata)
-    axHisty.plot(constpdf,ys-4.,'k-',zorder=-2.)
+        #negative b, constant
+        constpdf*= nmdata/float(npdata)
+        axHisty.plot(constpdf,ys-4.,'k-',zorder=-2.)
     """
     #Negative, exponential disk
     pdfm= numpy.zeros(len(ys))
