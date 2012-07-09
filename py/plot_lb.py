@@ -19,7 +19,10 @@ def plot_lb():
     #Read basic data
     data= readVclosData()
     ndata= len(data)
-    yrange= [-6.,6.]
+    if _PLOTHIGHB:
+        yrange= [-6.,6.]
+    else:
+        yrange= [-2.5,2.5]
     #Plot
     if OUTEXT == 'ps':
         bovy_plot.bovy_print(fig_width=8.5,fig_height=6./16.*8.5)
