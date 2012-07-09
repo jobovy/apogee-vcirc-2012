@@ -63,13 +63,18 @@ def plot_lb():
         #Add histogram of bs
         otherl.extend(list(data['GLON']))
         otherb.extend(list(data['GLAT']))
-        histy, edges, patches= axHisty.hist(otherb,
-                                            bins=49,
-                                            orientation='horizontal',
-                                            normed=True,
-                                            histtype='step',
-                                            range=yrange,
-                                            color='k',zorder=2)
+    else:
+        #Add histogram of bs
+        otherl= list(data['GLON'])
+        otherb= list(data['GLAT'])
+        nmdata, npdata= 0,0
+    histy, edges, patches= axHisty.hist(otherb,
+                                        bins=49,
+                                        orientation='horizontal',
+                                        normed=True,
+                                        histtype='step',
+                                        range=yrange,
+                                        color='k',zorder=2)
     #Overlay predictions
     #Center, constant
     ys= numpy.linspace(-1.5,1.5,1001)
@@ -100,25 +105,25 @@ def plot_lb():
         #positive b, constant
         constpdf*= float(npdata)/ndata
         axHisty.plot(constpdf,ys+4.,'k-',zorder=-2)
-    """
-    #Positive, exponential disk
-    pdfp= numpy.zeros(len(ys))
-    plates= list(set(otherdata2['PLATE']))
-    for ii in range(len(plates)):
-        print ii
-        #For each plate, calculate pdf and add with data weights
-        thisdata= otherdata2[(otherdata2['PLATE'] == plates[ii])]
-        thisl= numpy.mean(otherdata2['GLON'])
-        thisndata= len(thisdata)
-        thispdf= numpy.zeros(len(ys))
-        for jj in range(len(ys)):
-            thispdf[jj]= surfacemassLOSd(4.+ys[jj],
-                                          thisl,0.,dmax/ro,4.,dfc,hz/ro)
-        pdfp+= thispdf/numpy.sum(thispdf)/(ys[1]-ys[0])*thisndata
-    pdfp*= float(npdata)/(ndata+nmdata+npdata)/numpy.sum(pdfp)/(ys[1]-ys[0])
-    axHisty.plot(pdfp,4.+ys,'-',color='0.',lw=1.,zorder=-1)
-    #axHisty.plot(.8*pdfp+.2*constpdf,4.+ys,'-',color='0.',lw=1.,zorder=-1)
-    """
+        """
+        #Positive, exponential disk
+        pdfp= numpy.zeros(len(ys))
+        plates= list(set(otherdata2['PLATE']))
+        for ii in range(len(plates)):
+            print ii
+            #For each plate, calculate pdf and add with data weights
+            thisdata= otherdata2[(otherdata2['PLATE'] == plates[ii])]
+            thisl= numpy.mean(otherdata2['GLON'])
+            thisndata= len(thisdata)
+            thispdf= numpy.zeros(len(ys))
+            for jj in range(len(ys)):
+                thispdf[jj]= surfacemassLOSd(4.+ys[jj],
+                thisl,0.,dmax/ro,4.,dfc,hz/ro)
+            pdfp+= thispdf/numpy.sum(thispdf)/(ys[1]-ys[0])*thisndata
+        pdfp*= float(npdata)/(ndata+nmdata+npdata)/numpy.sum(pdfp)/(ys[1]-ys[0])
+        axHisty.plot(pdfp,4.+ys,'-',color='0.',lw=1.,zorder=-1)
+        #axHisty.plot(.8*pdfp+.2*constpdf,4.+ys,'-',color='0.',lw=1.,zorder=-1)
+        """
         #negative b, constant
         constpdf*= nmdata/float(npdata)
         axHisty.plot(constpdf,ys-4.,'k-',zorder=-2.)
