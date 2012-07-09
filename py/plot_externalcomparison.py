@@ -216,7 +216,7 @@ def plot_externalcomparison(parser):
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$\mathrm{power\!\!-\!\!law\ rotation\ curve}, \beta = 0.15$',
                         top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    #pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
@@ -264,7 +264,7 @@ def plot_externalcomparison(parser):
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$\mathrm{power\!\!-\!\!law\ rotation\ curve}, \beta = -0.15$',
                         top_right=True,size=14.)
-    pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
@@ -364,7 +364,7 @@ def plot_externalcomparison(parser):
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ \vec{V}_\odot = \vec{V}_c(R_0) + \mathrm{SBD10}, \Delta \chi^2 = %.0f$' % (2.*(fid_logl-sbd_logl)),
                         top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    #pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()

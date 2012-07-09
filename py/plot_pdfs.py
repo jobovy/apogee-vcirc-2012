@@ -7,7 +7,7 @@ from fitvc import get_options, _DEGTORAD, _REFR0, _REFV0, _VRSUN, _PMSGRA
 from galpy.util import bovy_plot
 from matplotlib import pyplot
 _vcrange=[180.,250.]
-_vclabel= r'$v_0\ [\mathrm{km\ s}^{-1}]$'
+_vclabel= r'$V_c\ [\mathrm{km\ s}^{-1}]$'
 _JACKFILES=['../fits/allwoloc4151_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
             '../fits/allwoloc4154_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
             '../fits/allwoloc4157_simpledrift_noro_dwarf_vpec_sratio_hs.sav',
@@ -129,8 +129,9 @@ def rovc(filename=None,options=None,bins=31,multipops=False):
                               cmap='gist_yarg',onedhistx=True,
                               onedhists=multipops)
         if multipops:
-            bovy_plot.bovy_text(r'$\mathrm{Multiple\ populations,\ SFR} = \exp\left( -t/8\ \mathrm{Gyr}\right)$',top_right=True,size=14.)
-        if _PLOTJACK:
+            bovy_plot.bovy_text(r'$\mathrm{Multiple\ populations}$'+
+                                '\n'+r'$\mathrm{SFR} = \exp\left( -t/8\ \mathrm{Gyr}\right)$',top_right=True,size=14.)
+        if _PLOTJACK and not multipops:
             if _PRELOADJACK:
                 for ii in range(len(_JACKPARAMS)):
                     rovc(filename=_JACKPARAMS[ii])

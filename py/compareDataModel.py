@@ -476,7 +476,7 @@ if __name__ == '__main__':
                                                range=[-200.,200.],
                                                bins=31,
                                                histtype='step',color='k',
-                                               xlabel=r'$\mathrm{heliocentric}\ v_{\mathrm{los}}\ [\mathrm{km\ s}^{-1}]$')
+                                               xlabel=r'$\mathrm{heliocentric}\ V_{\mathrm{los}}\ [\mathrm{km\ s}^{-1}]$')
             #Normalize prediction
             data_int= numpy.sum(hist)*(xvec[1]-xvec[0])
             pvlos*= data_int/numpy.sum(pvlos)/(vlos[1]-vlos[0])

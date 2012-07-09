@@ -30,8 +30,8 @@ def plot_vpecvo(filename,plotfilename):
     levels.append(1.01) #HACK to not plot outliers
     axScatter, axHistx,axHisty= bovy_plot.scatterplot(vpecR,#vos/ros+vpec/ros,
                                                       vpec,'k,',levels=levels,
-                                                      xlabel=r'$v_{R,\odot}\ [\mathrm{km\ s}^{-1}]$',
-                                                      ylabel=r'$v_{\phi,\odot}-v_0\ [\mathrm{km\ s}^{-1}]$',
+                                                      xlabel=r'$V_{R,\odot}\ [\mathrm{km\ s}^{-1}]$',
+                                                      ylabel=r'$V_{\phi,\odot}-V_0\ [\mathrm{km\ s}^{-1}]$',
                           bins=31,
                           xrange=[-15.,0.],
                           yrange=[0.,35.],
@@ -55,8 +55,8 @@ def plot_vpecvo(filename,plotfilename):
 
     #Inset, closed orbit at the Sun
     lp= LogarithmicHaloPotential(normalize=1.)
-    ep= EllipticalDiskPotential(phib=numpy.pi/2.,p=0.,tform=-100.,tsteady=-100.,twophio=0.072725)
-    o= Orbit([1.,0.,1.+16./220.,0.])
+    ep= EllipticalDiskPotential(phib=numpy.pi/2.,p=0.,tform=-100.,tsteady=-100.,twophio=14./220.)#0.072725)
+    o= Orbit([1.,0.,1.+14./220.,0.])
     oc= Orbit([1.,0.,1.,0.])
     ts= numpy.linspace(0.,4.*numpy.pi,1001)
     o.integrate(ts,[lp,ep])

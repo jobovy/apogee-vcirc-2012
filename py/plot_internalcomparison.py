@@ -229,7 +229,7 @@ def plot_internalcomparison(parser):
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$\mathrm{Dehnen\ DF}$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    #pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
@@ -262,7 +262,7 @@ def plot_internalcomparison(parser):
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$h_R = 2\ \mathrm{kpc}$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    #pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
@@ -294,7 +294,7 @@ def plot_internalcomparison(parser):
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$h_R = 4\ \mathrm{kpc}$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    #pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
@@ -327,7 +327,7 @@ def plot_internalcomparison(parser):
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$h_\sigma = 5\ \mathrm{kpc}$',top_right=True,size=14.)
-    pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}\ [\mathrm{km\ s}^{-1}]$')
+    pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}\ [\mathrm{km\ s}^{-1}]$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
@@ -361,7 +361,7 @@ def plot_internalcomparison(parser):
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$\mathrm{Multiple\ populations,\ SFR} = \exp\left( -t/8\ \mathrm{Gyr}\right)$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    #pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
@@ -451,7 +451,7 @@ def plot_internalcomparison(parser):
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$\mathrm{Multiple\ visit\ dispersion} < 1\ \mathrm{km\ s}^{-1}$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    #pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
@@ -539,7 +539,7 @@ def plot_internalcomparison(parser):
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$b = 4^\circ\ \mathrm{fields}$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    #pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
@@ -625,7 +625,7 @@ def plot_internalcomparison(parser):
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$b = -4^\circ\ \mathrm{fields}$',top_right=True,size=14.)
-    #pyplot.ylabel(r'$\langle v_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle v_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    #pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
