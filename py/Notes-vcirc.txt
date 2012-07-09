@@ -1,0 +1,24 @@
+Flat fit: vc < 235 at 0.9982 = 3.1 \sigma
+
+Power-law fit: vc < 235 at 0.9922 = 2.66 \sigma
+
+Linear fit: vc < 235 at 0.9893 = 2.55 \sigma
+
+Cubic fit with R_o < 9.: vc < 235 at 0.942216472618 = 1.9 \sigma
+      	       	     	 vc < 240 at 0.98
+      	       	     	 vc < 245 at 0.995
+
+FeH fit: vc < 235. at 0.9999
+
+FeHInnerOuter fit: vc < 235. at 0.9999
+
+dm: vc < 235 at 0.986695628564
+
+dmInnerOuter: vc < 235. at 0.9999
+
+ah: vc < 235. at 0.9997
+
+ahInnerOuter: vc < 235. at 0.995290635091 (requires ro < 9. and ah well-behaved)
+
+multiplepops: vc < 235. at 0.9901
+
