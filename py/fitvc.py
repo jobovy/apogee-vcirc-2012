@@ -567,7 +567,11 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
         params= numpy.array(params)
     if options.fitdl:
         l= copy.copy(l)
+        sinl= copy.copy(sinl)
+        cosl= copy.copy(cosl)
         l-= params[5-options.nooutliermean+(options.rotcurve.lower() == 'linear')+(options.rotcurve.lower() == 'flatplusuniform') +(options.rotcurve.lower() == 'powerlaw') + 2*(options.rotcurve.lower() == 'quadratic')+3*(options.rotcurve.lower() == 'cubic')+2*options.fitvpec+options.dwarf+options.fitsratio+2*options.fitsratioinnerouter+options.fiths+options.fitsrinnerouter+options.dwarfinnerouter+options.fitdm+options.fitah+options.fitfeh]
+        sinl= numpy.sin(l)
+        cosl= numpy.cos(l)
     #Boundaries
     if params[0] <= 0.: #Don't allow counter-rotation
         return numpy.finfo(numpy.dtype(numpy.float64)).max
