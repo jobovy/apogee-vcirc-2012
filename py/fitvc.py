@@ -171,6 +171,8 @@ def fitvc(parser):
         savefile= open(options.init,'rb')
         init_params= pickle.load(savefile)
         savefile.close()
+    if options.sbdvpec:
+        init_params= [ 0.96025887 , 1.00661491, -1.9503565 ,  0.01060685,  0.54155172 , 0.09690153,  0.32055182,0.22680105]
     #Pre-calculate p(J-K,Hs|...)[isochrone] (in fact does not depend on the parameters if dm or ah are not fitted
     print "Pre-calculating isochrone distance prior ..."
     logpiso= numpy.zeros((len(data),_BINTEGRATENBINS))

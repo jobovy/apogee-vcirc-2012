@@ -264,7 +264,7 @@ def plot_externalcomparison(parser):
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$\mathrm{power\!\!-\!\!law\ rotation\ curve}, \beta = -0.15$',
                         top_right=True,size=14.)
-    pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    pyplot.ylabel(r'$\bar{V}_{\mathrm{data}}-\bar{V}_{\mathrm{model}}$')
     thisax.set_ylim(-19.5,19.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
@@ -362,7 +362,7 @@ def plot_externalcomparison(parser):
     pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
                     yerr=siga_plate,marker='o',color='k',
                     linestyle='none',elinestyle='-')
-    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ \vec{V}_\odot = \vec{V}_c(R_0) + \mathrm{SBD10}, \Delta \chi^2 = %.0f$' % (2.*(fid_logl-sbd_logl)),
+    bovy_plot.bovy_text(r'$\mathrm{best\!\!-\!\!fit}\ \vec{V}_\odot = \vec{V}_c(R_0) + \mathrm{SBD10}, \Delta \chi^2 = %.0f$' % (2.*(fid_logl-sbd_logl)),#,special.erfinv(stats.chi2.cdf(2.*(fid_logl-sbd_logl),10.))*numpy.sqrt(2.)),
                         top_right=True,size=14.)
     #pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
     thisax.set_ylim(-19.5,19.5)
@@ -374,6 +374,7 @@ def plot_externalcomparison(parser):
     bovy_plot._add_ticks()
     #Save
     bovy_plot.bovy_end_print(options.plotfilename)
+    print fid_logl, sbd_logl, 2.*(fid_logl-sbd_logl),special.erfinv(stats.chi2.cdf(2.*(fid_logl-sbd_logl),10.))*numpy.sqrt(2.)
     return None
         
 def get_options():
@@ -480,7 +481,7 @@ def get_options():
                       help="readVclosData 'fehcut'")
     parser.add_option("--cohort",dest='cohort',default=None,
                       help="readVclosData 'cohort'")
-    parser.add_option("--jkmax",dest='jkmax',default=1.2,type='float',
+    parser.add_option("--jkmax",dest='jkmax',default=1.1,type='float',
                       help="readVclosData 'jkmax'")
     parser.add_option("--location",dest='location',default=None,type='int',
                       help="location id when looking at single los")

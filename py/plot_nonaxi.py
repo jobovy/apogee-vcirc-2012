@@ -312,7 +312,7 @@ def plot_nonaxi(parser):
                     linestyle='none',elinestyle='-')
     bovy_plot.bovy_text(r'$\mathrm{spiral}$',
                         top_right=True,size=14.)
-    pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    pyplot.ylabel(r'$\bar{V}_{\mathrm{data}}-\bar{V}_{\mathrm{model}}$')
     thisax.set_ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()

@@ -221,7 +221,7 @@ def plot_bestfit(parser):
                         'ko',overplot=True)
     pyplot.errorbar(l_plate,avg_plate-avg_plate_model,
                     yerr=siga_plate,marker='o',color='k',linestyle='none',elinestyle='-')
-    pyplot.ylabel(r'$\langle V_{\mathrm{los}}\rangle_{\mathrm{data}}-\langle V_{\mathrm{los}}\rangle_{\mathrm{model}}$')
+    pyplot.ylabel(r'$\bar{V}_{\mathrm{data}}-\bar{V}_{\mathrm{model}}$')
     pyplot.ylim(-14.5,14.5)
     pyplot.xlim(0.,360.)
     bovy_plot._add_ticks()
