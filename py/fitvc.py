@@ -862,11 +862,11 @@ def _logpddf(params,d,l,b,R,theta,cosb,sinb,options):
         logdensRZ= numpy.zeros((len(R),npops))
         for ii in range(npops):
             logdensRZ[:,ii]= (-(R-1.)/hrpops[ii]\
-                                   -absZ/options.hz)*params[1]*_REFR0\
+#                                   -absZ/options.hz)*params[1]*_REFR0\
                                    -ppops[ii]
         logdensRZ= mylogsumexp(logdensRZ,axis=1)
     elif options.densmodel.lower() == 'expdisk':
-        logdensRZ= (-(R-1.)/options.hr-absZ/options.hz)*params[1]*_REFR0
+        logdensRZ= (-(R-1.)/options.hr-0.*absZ/options.hz)*params[1]*_REFR0
     return logdensRZ+2.*numpy.log(d*params[1])+numpy.log(cosb)
 
 def _dm(d):
