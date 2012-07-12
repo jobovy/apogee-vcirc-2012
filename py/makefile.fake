@@ -163,11 +163,11 @@ fitfakedehnen_hr3_dl:
 	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_dl.sav \
 	--noro --dwarf --fitvpec --fitsratio --fiths --fitdl
 	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
-	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_dl.fits \
+	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
 	--dfmodel=simplegaussiandrift \
 	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_dl_$(NSAMPLES).sav \
 	--mcsample --nsamples=$(NSAMPLES) \
-	--init=$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3.sav \
+	--init=$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_dl.sav \
 	--noro --dwarf --fitvpec --fitsratio --fiths --fitdl
 
 fitfakedehnen_hr3_wo4241:
