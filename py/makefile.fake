@@ -156,6 +156,20 @@ fitfakedehnen_hr3:
 	--init=$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3.sav \
 	--noro --dwarf --fitvpec --fitsratio --fiths
 
+fitfakedehnen_hr3_dl:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_dl.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --fitdl
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_dl.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_dl_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --fitdl
+
 fitfakedehnen_hr3_wo4241:
 	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
 	-f $(FAKEDIR)fake_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
@@ -183,6 +197,20 @@ fitfakedehnen2_hr3:
 	--mcsample --nsamples=$(NSAMPLES) \
 	--init=$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3.sav \
 	--noro --dwarf --fitvpec --fitsratio --fiths
+
+fitfakedehnen2_hr3_dl:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_dl.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --fitdl
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_dl_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all2_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_dl.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --fitdl
 
 fitfakedehnen2_hr2:
 	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
@@ -225,6 +253,20 @@ fitfakedehnen3_hr3:
 	--mcsample --nsamples=$(NSAMPLES) \
 	--init=$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3.sav \
 	--noro --dwarf --fitvpec --fitsratio --fiths
+
+fitfakedehnen3_hr3_dl:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_dl.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --fitdl
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
+	-f $(FAKEDIR)fake3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs.fits \
+	--dfmodel=simplegaussiandrift \
+	$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_dl_$(NSAMPLES).sav \
+	--mcsample --nsamples=$(NSAMPLES) \
+	--init=$(FAKEDIR)all3_simpledrift-dehnen_noro_dwarf_vpec_sratio_hs_hr3_dl.sav \
+	--noro --dwarf --fitvpec --fitsratio --fiths --fitdl
 
 fitfakedehnen3_hr2:
 	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
