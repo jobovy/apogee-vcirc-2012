@@ -171,7 +171,7 @@ def vcsr(filename=None,options=None,bins=31):
         levels.append(1.01) #HACK to not plot outliers
         bovy_plot.scatterplot(srs,vcs,'k,',levels=levels,
                               xlabel=r'$\sigma_R\ [\mathrm{km\ s}^{-1}]$',
-                              ylabel=r'$v_0\ [\mathrm{km\ s}^{-1}]$',
+                              ylabel=_vclabel,
                               bins=bins,
                               xrange=[20.,50.],
                               yrange=_vcrange,
