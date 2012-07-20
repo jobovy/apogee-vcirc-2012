@@ -11,7 +11,8 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                   cutoutliers=True,
                   akquantiles=None,
                   correctak=False,
-                  validfeh=False):
+                  validfeh=False,
+                  loggcut=None):
     """
     NAME:
        readVclosData
@@ -37,6 +38,7 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
        correctak= if True (default: False), correct the reddening values 
                   (inner/outer)
        validfeh= if True, only select objects with valid [Fe/H]
+       loggcut= if set, cut on logg < this (best with validfeh)
     OUTPUT:
     HISTORY:
        2012-01-25 - Written - Bovy (IAS)
@@ -105,6 +107,8 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
         fix= 0
         nofix= 0
         newfeh= numpy.zeros(len(invaliddata))-9999.00
+        newteff= numpy.zeros(len(invaliddata))-9999.00
+        newlogg= numpy.zeros(len(invaliddata))-9999.00
         for ii in range(len(invaliddata)):
             if invaliddata['NVISITS'][ii] == 1: 
                 nofix+= 1
@@ -117,11 +121,18 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                 continue #None are valid
             fix+= 1
             newfeh[ii]= thismatch['FEH'][validindx][0]
+            newteff[ii]= thismatch['TEFF'][validindx][0]
+            newlogg[ii]= thismatch['LOGG'][validindx][0]
         data['FEH'][indx]= newfeh
+        data['TEFF'][indx]= newteff
+        data['LOGG'][indx]= newlogg
         if False:
             print "%i out of %i [Fe/H] fixed ..." % (fix,len(data))
             print "%i out of %i [Fe/H] not fixed ..." % (nofix,len(data))
         data= data[(data['FEH'] != -9999.00)] #require valid [Fe/H]
+    #Logg cut
+    if not loggcut is None:
+        data= data[(data['LOGG'] < loggcut)]
     #Combine l=150 locations into a single location
     if _COMBINEL150:
         locs= numpy.array(list(set(data['LOCATION'])))

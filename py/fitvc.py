@@ -85,6 +85,7 @@ def fitvc(parser):
                         ak=True,
                         cutmultiples=options.cutmultiples,
                         correctak=options.correctak,
+                        loggcut=options.loggcut,
                         validfeh=options.indivfeh, #if indivfeh, we need validfeh
                         jkmax=options.jkmax,
                         datafilename=options.fakedata)
@@ -1310,6 +1311,9 @@ def get_options():
                       dest="correctak",
                       default=False,
                       help="readVclosData 'correctak'")
+    parser.add_option("--loggcut",dest='loggcut',type='float',
+                      default=None,
+                      help="readVclosData 'loggcut'")
     parser.add_option("--justinner",action="store_true", 
                       dest="justinner",
                       default=False,
