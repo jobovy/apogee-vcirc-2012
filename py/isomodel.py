@@ -16,7 +16,7 @@ class isomodel:
     """isomodel: isochrone model for the distribution in (J-Ks,M_H)"""
     def __init__(self,dwarf=False,imfmodel='lognormalChabrier2001',Z=None,
                  interpolate=False,expsfh=False,marginalizefeh=False,
-                 glon=None,dontgather=False):
+                 glon=None,dontgather=False,loggmax=None):
         """
         NAME:
            __init__
@@ -31,6 +31,7 @@ class isomodel:
            marginalizefeh= if True, marginalize over the FeH distribution along line of sight glon
            glon - galactic longitude in rad of los for marginalizefeh
            dontgather= if True, don't gather surrounding Zs
+           loggmax= if set, cut logg at this maximum
         OUTPUT:
            object
         HISTORY:
@@ -76,7 +77,7 @@ class isomodel:
                 for ii in range(1,len(thisiso.int_IMF)-1):
                     JK= thisiso.J[ii]-thisiso.Ks[ii]
                     H= thisiso.H[ii]
-                    if JK < 0.3: # or thisiso['logg'][ii] > 3.:
+                    if JK < 0.3 or (not loggmax is None and thisiso['logg'][ii] > loggmax):
                         continue
                     if dN[ii] > 0.: 
                         sample.append([JK,H])

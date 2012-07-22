@@ -136,7 +136,8 @@ def fitvc(parser):
             for ii in range(len(zs)):
                 iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
                                              expsfh=options.expsfh,
-                                             Z=zs[ii]))
+                                             Z=zs[ii],
+                                             loggmax=options.loggcut))
         elif options.varfeh:
             locs= list(set(data['LOCATION']))
             iso= []
@@ -146,14 +147,17 @@ def fitvc(parser):
                 iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
                                              expsfh=options.expsfh,
                                              marginalizefeh=True,
+                                             loggmax=options.loggcut,
                                              glon=locl))
         else:
             iso= isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
-                                   expsfh=options.expsfh)
+                                   expsfh=options.expsfh,
+                                   loggmax=options.loggcut)
         if options.dwarf:
             iso= [iso,
                   isomodel.isomodel(imfmodel=options.imfmodel,Z=options.Z,
-                                    dwarf=True,expsfh=options.expsfh)]
+                                    dwarf=True,expsfh=options.expsfh,
+                                    loggmax=options.loggcut)]
         else:
             iso= [iso]
         if not options.isofile is None:
