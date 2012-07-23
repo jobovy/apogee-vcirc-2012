@@ -132,11 +132,16 @@ def fitvc(parser):
         elif options.indivfeh:
             #Load all isochrones
             iso= []
-            zs= numpy.arange(0.0005,0.03005,0.0005)
+            if options.basti:
+                zs= numpy.array([0.0001,0.0003,0.0006,0.001,0.002,0.004,
+                                 0.008,0.01,0.0198,0.03,0.04])
+            else:
+                zs= numpy.arange(0.0005,0.03005,0.0005)
             for ii in range(len(zs)):
                 iso.append(isomodel.isomodel(imfmodel=options.imfmodel,
                                              expsfh=options.expsfh,
                                              Z=zs[ii],
+                                             basti=options.basti,
                                              loggmax=options.loggcut))
         elif options.varfeh:
             locs= list(set(data['LOCATION']))
@@ -1360,6 +1365,10 @@ def get_options():
                       help="If set, use distances calculated based on the individual [Fe/H] of the objects")
     parser.add_option("--isofile",dest="isofile",default=None,
                       help="if set, store or restore the isochrone model(s) in this file")
+    parser.add_option("--basti",action="store_true", 
+                      dest="basti",
+                      default=False,
+                      help="Use Basti isochrones")
     #Add dwarf part?
     parser.add_option("--dwarf",action="store_true", 
                       dest="dwarf",
