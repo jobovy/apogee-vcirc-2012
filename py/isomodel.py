@@ -52,7 +52,7 @@ class isomodel:
         elif Z is None:
             Zs= zs
         elif isinstance(Z,float):
-            if dontgather:
+            if basti or dontgather:
                 Zs= [Z]
             elif Z < 0.001 or Z > 0.0295:
                 Zs= [Z] 
