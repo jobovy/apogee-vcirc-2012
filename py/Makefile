@@ -54,6 +54,18 @@ all_simpledrift_noro_dwarf_vpec_sratio_hs_basti:
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio --fiths --basti
 
+all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs_basti:
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos_basti.dat \
+	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs_basti.sav \
+	--noroprior --dwarf --fitvpec --fitsratio --fiths \
+	--dfmodel=simplegaussiandrift --basti --rotcurve=powerlaw
+	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos_basti.dat \
+	$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs_basti_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)all_simpledrift_noro_dwarf_powerlaw_vpec_sratio_hs_basti.sav \
+	 --mcsample --nsamples=$(NSAMPLES) \
+	--noroprior --dfmodel=simplegaussiandrift --rotcurve=powerlaw \
+	--dwarf --fitvpec --fitsratio --fiths --basti
+
 all_simpledrift_noro_dwarf_vpec_sratio_hs_logg3:
 	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos_logg3.dat \
 	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs_logg3.sav \
