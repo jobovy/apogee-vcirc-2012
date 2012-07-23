@@ -16,7 +16,8 @@ class isomodel:
     """isomodel: isochrone model for the distribution in (J-Ks,M_H)"""
     def __init__(self,dwarf=False,imfmodel='lognormalChabrier2001',Z=None,
                  interpolate=False,expsfh=False,marginalizefeh=False,
-                 glon=None,dontgather=False,loggmax=None):
+                 glon=None,dontgather=False,loggmax=None,
+                 basti=False):
         """
         NAME:
            __init__
@@ -32,13 +33,18 @@ class isomodel:
            glon - galactic longitude in rad of los for marginalizefeh
            dontgather= if True, don't gather surrounding Zs
            loggmax= if set, cut logg at this maximum
+           basti= if True, use Basti isochrones (if False, use Padova)
         OUTPUT:
            object
         HISTORY:
            2012-02-17 - Written - Bovy (IAS)
         """
         #Read isochrones
-        zs= numpy.arange(0.0005,0.03005,0.0005)
+        if basti:
+            zs= numpy.array([0.0001,0.0003,0.0006,0.001,0.002,0.004,0.008,
+                             0.01,0.0198,0.03,0.04])
+        else:
+            zs= numpy.arange(0.0005,0.03005,0.0005)
         if marginalizefeh:
             Zs= numpy.arange(0.008,0.031,0.001)            
             dFeHdZ= 1./Zs
@@ -56,7 +62,10 @@ class isomodel:
                 Zs= [Z-0.001,Z-0.0005,Z,Z+0.0005,Z+0.001] #build up statistics
             else:
                 Zs= [Z-0.0005,Z,Z+0.0005] #build up statistics
-        p= isodist.PadovaIsochrone(Z=Zs)
+        if basti:
+            p= isodist.BastiIsochrone(Z=Zs)
+        else:
+            p= isodist.PadovaIsochrone(Z=Zs)
         #Get relevant data
         sample= []
         weights= []
@@ -66,16 +75,23 @@ class isomodel:
                 #Calculate int_IMF for this IMF model
                 if not imfmodel == 'lognormalChabrier2001': #That would be the default
                     if imfmodel == 'exponentialChabrier2001':
-                        thisiso.int_IMF= isodist.imf.exponentialChabrier2001(thisiso.M_ini,int=True)
+                        int_IMF= isodist.imf.exponentialChabrier2001(thisiso.M_ini,int=True)
                     elif imfmodel == 'kroupa2003':
-                        thisiso.int_IMF= isodist.imf.kroupa2003(thisiso.M_ini,int=True)
+                        int_IMF= isodist.imf.kroupa2003(thisiso.M_ini,int=True)
                     elif imfmodel == 'chabrier2003':
-                        thisiso.int_IMF= isodist.imf.chabrier2003(thisiso.M_ini,int=True)
+                        int_IMF= isodist.imf.chabrier2003(thisiso.M_ini,int=True)
                     else:
                         raise IOError("imfmodel option not understood (non-existing model)")
-                dN= numpy.roll(thisiso.int_IMF,-1)-thisiso.int_IMF
-                for ii in range(1,len(thisiso.int_IMF)-1):
-                    JK= thisiso.J[ii]-thisiso.Ks[ii]
+                elif basti:
+                    int_IMF= isodist.imf.lognormalChabrier2001(thisiso.M_ini,int=True)
+                else:
+                    int_IMF= thisiso.int_IMF
+                dN= numpy.roll(int_IMF,-1)-int_IMF
+                for ii in range(1,len(int_IMF)-1):
+                    if basti:
+                        JK= thisiso.J[ii]-thisiso.K[ii]
+                    else:
+                        JK= thisiso.J[ii]-thisiso.Ks[ii]
                     H= thisiso.H[ii]
                     if JK < 0.3 or (not loggmax is None and thisiso['logg'][ii] > loggmax):
                         continue

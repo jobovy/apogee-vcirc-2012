@@ -5,39 +5,61 @@ import copy
 import math
 import numpy
 from optparse import OptionParser
-import isodist
+import isodist, isodist.imf
 from galpy.util import bovy_plot
 from matplotlib import pyplot
 from matplotlib.ticker import FuncFormatter, MultipleLocator
 OUTDIR= os.path.join(os.getenv('HOME'),'Desktop')
 OUTDIR= '../tex/'
 OUTEXT= 'ps'
-def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.):
+def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.,basti=False):
     #Read isochrones
-    zs= numpy.arange(0.0005,0.03005,0.0005)
+    if basti:
+        zs= numpy.array([0.0001,0.0003,0.0006,0.001,0.002,0.004,0.008,
+                         0.01,0.0198,0.03,0.04])
+    else:
+        zs= numpy.arange(0.0005,0.03005,0.0005)
     if Z is None:
         Zs= zs
-    else:
+    elif not basti:
         if Z < 0.01:
             Zs= [Z-0.001,Z-0.0005,Z,Z+0.0005,Z+0.001] #build up statistics
         else:
             Zs= [Z-0.0005,Z,Z+0.0005] #build up statistics
-    p= isodist.PadovaIsochrone(Z=Zs)
+    else:
+        Zs= [Z]
+    if basti:
+        p= isodist.BastiIsochrone(Z=Zs)
+    else:
+        p= isodist.PadovaIsochrone(Z=Zs)
     #Get relevant data
     sample= []
     weights= []
     for logage in p.logages():
+        print logage, len(p.logages())
         for z in Zs:
             thisiso= p(logage,z)
-            dmpm= numpy.roll(thisiso['int_IMF'],-1)-thisiso['int_IMF']
+            if basti:
+                int_IMF= isodist.imf.lognormalChabrier2001(thisiso['M_ini'],
+                                                           int=True)
+                dmpm= numpy.roll(int_IMF,-1)-int_IMF
+            else:
+                dmpm= numpy.roll(thisiso['int_IMF'],-1)-thisiso['int_IMF']
             for ii in range(1,len(thisiso['M_ini'])-1):
-                JK= thisiso['J'][ii]-thisiso['Ks'][ii]
+                if basti:
+                    JK= thisiso['J'][ii]-thisiso['K'][ii]
+                else:
+                    JK= thisiso['J'][ii]-thisiso['Ks'][ii]
                 H= thisiso['H'][ii]
                 if JK < 0.: # or thisiso['logg'][ii] > 3.5:
                     continue
                 if dmpm[ii] > 0.: 
-                    sample.append([thisiso['J'][ii]-thisiso['Ks'][ii],
-                                   thisiso['H'][ii]])
+                    if basti:
+                        sample.append([thisiso['J'][ii]-thisiso['K'][ii],
+                                       thisiso['H'][ii]])
+                    else:
+                        sample.append([thisiso['J'][ii]-thisiso['Ks'][ii],
+                                       thisiso['H'][ii]])
                     weights.append(dmpm[ii]*10**(logage-7.))
                     #weights.append(dmpm[ii]*10**(logage-7.)*numpy.exp((10.**(logage-7.))/800.))
                 else: 
@@ -126,7 +148,7 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.):
 def get_options():
     usage = "usage: %prog [options]"
     parser = OptionParser(usage=usage)
-    parser.add_option("-o",dest='plotfile',
+    parser.add_option("-o",dest='plotfile',default=None,
                       help="Name of file for plot")
     parser.add_option("-Z",dest='Z',type='float',default=None,
                       help="Metallicity Z")
