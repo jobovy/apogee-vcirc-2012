@@ -36,7 +36,6 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.,basti=False):
     sample= []
     weights= []
     for logage in p.logages():
-        print logage, len(p.logages())
         for z in Zs:
             thisiso= p(logage,z)
             if basti:
