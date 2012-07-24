@@ -89,7 +89,7 @@ class isomodel:
                 dN= numpy.roll(int_IMF,-1)-int_IMF
                 for ii in range(1,len(int_IMF)-1):
                     if basti:
-                        JK= thisiso.J[ii]-thisiso.K[ii]
+                        JK= thisiso.J[ii]-thisiso.K[ii]+0.044 #Carpenter 2001
                     else:
                         JK= thisiso.J[ii]-thisiso.Ks[ii]
                     H= thisiso.H[ii]

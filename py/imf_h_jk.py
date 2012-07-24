@@ -46,7 +46,7 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.,basti=False):
                 dmpm= numpy.roll(thisiso['int_IMF'],-1)-thisiso['int_IMF']
             for ii in range(1,len(thisiso['M_ini'])-1):
                 if basti:
-                    JK= thisiso['J'][ii]-thisiso['K'][ii]
+                    JK= thisiso['J'][ii]-thisiso['K'][ii]+0.044 #Carpenter 2001
                 else:
                     JK= thisiso['J'][ii]-thisiso['Ks'][ii]
                 H= thisiso['H'][ii]
