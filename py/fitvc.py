@@ -112,7 +112,7 @@ def fitvc(parser):
     cosb= numpy.cos(b)
     jk= data['J0MAG']-data['K0MAG']
     jk[(jk < 0.5)]= 0.5 #BOVY: FIX THIS HACK BY EMAILING GAIL
-    if options.basti: jk-= 0.044 #Carpenter 2001
+    if options.basti: jk= 1./0.961*jk-0.047/0.961 #Carpenter 2001
     h= data['H0MAG']
     #Set up the isochrone
     if not options.isofile is None and os.path.exists(options.isofile):
