@@ -12,16 +12,19 @@ from matplotlib.ticker import FuncFormatter, MultipleLocator
 OUTDIR= os.path.join(os.getenv('HOME'),'Desktop')
 OUTDIR= '../tex/'
 OUTEXT= 'ps'
-def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.,basti=False):
+def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.,basti=False,
+             dartmouth=False,kroupa=False):
     #Read isochrones
     if basti:
         zs= numpy.array([0.0001,0.0003,0.0006,0.001,0.002,0.004,0.008,
                          0.01,0.0198,0.03,0.04])
+    elif dartmouth:
+        zs= isodist.FEH2Z(numpy.array([-2.5,-2.,-1.5,-1.,-0.5,0.,0.2,0.3,0.5]))
     else:
         zs= numpy.arange(0.0005,0.03005,0.0005)
     if Z is None:
         Zs= zs
-    elif not basti:
+    elif not basti and not dartmouth:
         if Z < 0.01:
             Zs= [Z-0.001,Z-0.0005,Z,Z+0.0005,Z+0.001] #build up statistics
         else:
@@ -30,6 +33,8 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.,basti=False):
         Zs= [Z]
     if basti:
         p= isodist.BastiIsochrone(Z=Zs)
+    elif dartmouth:
+        p= isodist.DartmouthIsochrone(feh=isodist.Z2FEH(Zs),onlyold=True)
     else:
         p= isodist.PadovaIsochrone(Z=Zs)
     #Get relevant data
@@ -38,15 +43,26 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.,basti=False):
     for logage in p.logages():
         for z in Zs:
             thisiso= p(logage,z)
+            if basti: mini= thisiso['M_ini']
+            elif dartmouth: mini= thisiso['M']
+            else: mini= thisiso['M_ini']
             if basti:
                 int_IMF= isodist.imf.lognormalChabrier2001(thisiso['M_ini'],
                                                            int=True)
                 dmpm= numpy.roll(int_IMF,-1)-int_IMF
+            elif dartmouth:
+                int_IMF= isodist.imf.lognormalChabrier2001(thisiso['M'],
+                                                           int=True)
+                dmpm= numpy.roll(int_IMF,-1)-int_IMF
             else:
-                dmpm= numpy.roll(thisiso['int_IMF'],-1)-thisiso['int_IMF']
-            for ii in range(1,len(thisiso['M_ini'])-1):
+                if kroupa:
+                    int_IMF= isodist.imf.kroupa2003(thisiso['M_ini'],int=True)
+                    dmpm= numpy.roll(int_IMF,-1)-int_IMF
+                else:
+                    dmpm= numpy.roll(thisiso['int_IMF'],-1)-thisiso['int_IMF']
+            for ii in range(1,len(mini)-1):
                 if basti:
-                    JK= thisiso['J'][ii]-thisiso['K'][ii]+0.044 #Carpenter 2001
+                    JK= thisiso['J'][ii]-thisiso['K'][ii]
                 else:
                     JK= thisiso['J'][ii]-thisiso['Ks'][ii]
                 H= thisiso['H'][ii]
@@ -59,7 +75,13 @@ def imf_h_jk(plotfile,Z=None,dwarf=False,log=False,h=12.,basti=False):
                     else:
                         sample.append([thisiso['J'][ii]-thisiso['Ks'][ii],
                                        thisiso['H'][ii]])
-                    weights.append(dmpm[ii]*10**(logage-7.))
+                    if dartmouth:
+                        if logage > numpy.log10(5.)+9.:
+                            weights.append(2.*dmpm[ii]) #Dartmouth are linearly spaced, but spacing is bigger at > 5 Gyr
+                        else:
+                            weights.append(dmpm[ii]) #Dartmouth are linearly spaced?
+                    else:
+                        weights.append(dmpm[ii]*10**(logage-7.))
                     #weights.append(dmpm[ii]*10**(logage-7.)*numpy.exp((10.**(logage-7.))/800.))
                 else: 
                     continue #no use in continuing here
