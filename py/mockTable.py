@@ -203,7 +203,7 @@ def mockTable(parser):
             printline+= ' & '
             if ii >= len(names)-(len(locs)+1): #chi2
                 bestfit= mockbestfits[jj][ii]*scale[ii]-flatbestfits[ii]*scale[ii]
-                printline+= '%.2f & ' % bestfit
+                printline+= '$%.2f$ & ' % bestfit
                 if jj == _NMOCKS-1:
                     if not ii == (len(names)-1):
                         printline+= '\\\\'
