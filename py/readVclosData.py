@@ -12,7 +12,8 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                   akquantiles=None,
                   correctak=False,
                   validfeh=False,
-                  loggcut=None):
+                  loggcut=None,
+                  returnrepeatedsigmas=False):
     """
     NAME:
        readVclosData
@@ -39,6 +40,7 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
                   (inner/outer)
        validfeh= if True, only select objects with valid [Fe/H]
        loggcut= if set, cut on logg < this (best with validfeh)
+       returnrepeatedsigmas= if True, return the list of sigma_multiplemeasurments
     OUTPUT:
     HISTORY:
        2012-01-25 - Written - Bovy (IAS)
@@ -89,13 +91,15 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
         ndata= len(primarydata)
         keepindx= numpy.zeros(ndata,dtype='bool')
         keepindx[:]= False
+        if returnrepeatedsigmas: repeatedsigmas= []
         for ii in range(ndata):
             thesedata= data[(data['UNIQID'] == primarydata['SPECID'][ii])]
             indx= (thesedata['VRADERR'] != 0.)
             if numpy.sum(indx) < 2:
                 continue
             thesedata= thesedata[indx]
-            if numpy.std(thesedata['VRAD']) <= 1.: keepindx[ii]= True
+            if returnrepeatedsigmas: repeatedsigmas.append(numpy.std(thesedata['VHELIO']))
+            if numpy.std(thesedata['VHELIO']) <= 1.: keepindx[ii]= True
         data= primarydata[keepindx]
     if cutoutliers:
         data= data[(numpy.fabs(data['VHELIO']) <= 300.)]
@@ -170,4 +174,8 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
     #HACK
     indx= (data['J0MAG']-data['K0MAG'] < 0.5)
     data['J0MAG'][indx]= 0.5+data['K0MAG'][indx]
-    return data
+    if returnrepeatedsigmas:
+        return (data,repeatedsigmas)
+    else:
+        return data
+    
