@@ -30,7 +30,7 @@ def fieldsTable(parser):
     for ii in range(nlocs):
         indx= (data['LOCATION'] == locs[ii])
         #l
-        printline= '$l = %i^\circ$ ' % int(round(numpy.mean(data['GLON'][indx])))
+        printline= '$%i^\circ$ ' % int(round(numpy.mean(data['GLON'][indx])))
         # # of data
         printline+= '& %i' % numpy.sum(indx)
         # # of data H < 12.2
@@ -40,11 +40,11 @@ def fieldsTable(parser):
         if nn > 0:
             printline+= '& %i' % nn
         else:
-            printline+= '& \ldots '
+            printline+= '& 0'
         # # of data 12.8 <= H < 13.8
         nn= numpy.sum((data['LOCATION'] == locs[ii])*(data['HMAG'] >= 12.8)*(data['HMAG'] < 13.8))
         if nn > 0: printline+= '& %i' % nn
-        else: printline+= '& \ldots '
+        else: printline+= '& 0 '
         #median ak
         printline+= '& %.1f ' % numpy.median(data['AK'][indx])
         #median visits
