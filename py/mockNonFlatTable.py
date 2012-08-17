@@ -38,7 +38,7 @@ def mockNonFlatTable(parser):
             '$\Omega_{\odot}\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$',
             '$\\sigma_R(R_0)\ [\mathrm{km\ s}^{-1}]$',
             '$R_0/h_\sigma$',
-            '$\\sigma_\phi^2 / \sigma_R^2$']
+            '$X^2 \equiv \sigma_\phi^2 / \sigma_R^2$']
     missing= [0,1,0,0,0,0,0,0] #1 if missing for flat
     scale= [_REFV0,1.,
             _REFR0,_VRSUN,1.,_REFV0,1.,1.]
