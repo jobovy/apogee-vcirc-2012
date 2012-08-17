@@ -44,12 +44,12 @@ all_simpledrift_noro_dwarf_vpec_sratio_hs:
 
 cutmultiples_simpledrift_noro_dwarf_vpec_sratio_hs:
 	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
-	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	$(FITSDIR)cutmultiples_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
 	--noroprior --dwarf --fitvpec --fitsratio --fiths \
 	--dfmodel=simplegaussiandrift --cutmultiples
 	$(PYTHON) fitvc.py --isofile=$(FITSDIR)isos.dat \
-	$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs_$(NSAMPLES)samples.sav \
-	--init=$(FITSDIR)all_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
+	$(FITSDIR)cutmultiples_simpledrift_noro_dwarf_vpec_sratio_hs_$(NSAMPLES)samples.sav \
+	--init=$(FITSDIR)cutmultiples_simpledrift_noro_dwarf_vpec_sratio_hs.sav \
 	 --mcsample --nsamples=$(NSAMPLES) \
 	--noroprior --dfmodel=simplegaussiandrift \
 	--dwarf --fitvpec --fitsratio --fiths --cutmultiples
