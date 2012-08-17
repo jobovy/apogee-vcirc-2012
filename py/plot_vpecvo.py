@@ -31,7 +31,7 @@ def plot_vpecvo(filename,plotfilename):
     axScatter, axHistx,axHisty= bovy_plot.scatterplot(vpecR,#vos/ros+vpec/ros,
                                                       vpec,'k,',levels=levels,
                                                       xlabel=r'$V_{R,\odot}\ [\mathrm{km\ s}^{-1}]$',
-                                                      ylabel=r'$V_{\phi,\odot}-V_0\ [\mathrm{km\ s}^{-1}]$',
+                                                      ylabel=r'$V_{\phi,\odot}-V_c\ [\mathrm{km\ s}^{-1}]$',
                           bins=31,
                           xrange=[-15.,0.],
                           yrange=[0.,35.],

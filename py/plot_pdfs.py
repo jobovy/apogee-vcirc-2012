@@ -593,7 +593,7 @@ def vovpect(filename=None,options=None,bins=31):
         levels= list(special.erf(0.5*numpy.arange(1,4)))
         levels.append(1.01) #HACK to not plot outliers
         bovy_plot.scatterplot(vpects-vos,vos,'k,',levels=levels,
-                              xlabel=r'$v_{\phi,\odot}-v_0\ [\mathrm{km\ s}^{-1}]$',
+                              xlabel=r'$V_{\phi,\odot}-V_c\ [\mathrm{km\ s}^{-1}]$',
                               ylabel=_vclabel,
                               bins=bins,
                               xrange=[0.,40.],
@@ -672,7 +672,7 @@ def voosun(filename=None,options=None,bins=31):
     levels.append(1.01) #HACK to not plot outliers
     bovy_plot.scatterplot(vpects,vos,'k,',levels=levels,
                           xlabel=r'$\Omega_{\odot}/\mu_{\mathrm{Sgr\ A}^*}\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$',
-                          ylabel=r'$v_0\ [\mathrm{km\ s}^{-1}]$',
+                          ylabel=r'$V_c\ [\mathrm{km\ s}^{-1}]$',
                           bins=bins,
                           xrange=[0.75,1.25],
                           yrange=[180.,240.],
@@ -787,7 +787,7 @@ def vcdvcdr(filename=None,options=None,bins=31):
         levels.append(1.01) #HACK to not plot outliers
         bovy_plot.scatterplot(dvcdrs,vcs,'k,',levels=levels,
                               ylabel=_vclabel,
-                              xlabel=r"$\mathrm{d} v_0 / \mathrm{d} R\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$",
+                              xlabel=r"$\mathrm{d} V_c / \mathrm{d} R\ [\mathrm{km\ s}^{-1}\ \mathrm{kpc}^{-1}]$",
                               bins=bins,
                               xrange=[-0.5*_REFV0/_REFR0,0.5*_REFV0/_REFR0],
                               yrange=_vcrange,

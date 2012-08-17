@@ -47,8 +47,8 @@ def plot_lb():
                         overplot=True)
     pyplot.xlim(0.,250.)
     pyplot.ylim(yrange[0],yrange[1])
-    pyplot.xlabel(r'$\mathrm{Galactic\ longitude\ [deg]}$')
-    pyplot.ylabel(r'$\mathrm{Galactic\ latitude\ [deg]}$')
+    pyplot.xlabel(r'$\mathrm{Galactic\ longitude}\ l\ \mathrm{[deg]}$')
+    pyplot.ylabel(r'$\mathrm{Galactic\ latitude}\ b\ \mathrm{[deg]}$')
     bovy_plot._add_ticks()
     #bovy_plot.bovy_end_print(os.path.join(OUTDIR,'data_lb.'+OUTEXT))
     if _PLOTHIGHB:
