@@ -37,7 +37,7 @@ def plot_asymmetricdrift(outdir='../tex'):
     lines= []
     lines.append(bovy_plot.bovy_plot(rs,vas_fid/sigmaR_hot**2.,'k-',
                                      xlabel=r'$R\ [\mathrm{kpc}]$',
-                                     ylabel=r'$V_c\,(V_c-\bar{V}_T) / \sigma_R^2$',
+                                     ylabel=r'$V_c\,V_a / \sigma_R^2$',
                                      xrange=[0.,25.],
                                      yrange=[0.,6.5]))
     lines.append(bovy_plot.bovy_plot(rs,vas_cold/sigmaR_cold**2.,'--',color='0.4',

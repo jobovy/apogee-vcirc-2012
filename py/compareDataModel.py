@@ -480,7 +480,7 @@ if __name__ == '__main__':
             #Normalize prediction
             data_int= numpy.sum(hist)*(xvec[1]-xvec[0])
             pvlos*= data_int/numpy.sum(pvlos)/(vlos[1]-vlos[0])
-            bovy_plot.bovy_plot(vlos,pvlos,'-',color='0.65',overplot=True,lw=2.)
+            bovy_plot.bovy_plot(vlos,pvlos,'-',color='0.6',overplot=True,lw=3.)
             if _PLOTZERO:
                 pvloszero*= data_int/numpy.sum(pvloszero)/(vlos[1]-vlos[0])
                 bovy_plot.bovy_plot(vlos,pvloszero,'--',color='0.65',overplot=True,lw=2.)

@@ -225,6 +225,8 @@ def plot_nonaxi(parser):
     avg_plate_model_fid= calc_model(params,options,data,
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
+    print l_plate, avg_plate_model_fid
+    return None
     #Plot everything
     bovy_plot.bovy_print(fig_height=6.,fig_width=7.)
     dx= 0.8/5.
@@ -497,7 +499,7 @@ def get_options():
                       help="readVclosData 'fehcut'")
     parser.add_option("--cohort",dest='cohort',default=None,
                       help="readVclosData 'cohort'")
-    parser.add_option("--jkmax",dest='jkmax',default=1.2,type='float',
+    parser.add_option("--jkmax",dest='jkmax',default=1.1,type='float',
                       help="readVclosData 'jkmax'")
     parser.add_option("--location",dest='location',default=None,type='int',
                       help="location id when looking at single los")
