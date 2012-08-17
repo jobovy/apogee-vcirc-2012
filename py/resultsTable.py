@@ -71,7 +71,7 @@ def resultsTable(parser):
             '$\mu_{\mathrm{Sgr\ A}^{^*}}\ [\mathrm{mas\ yr}^{-1}]$',
             '$\\sigma_R(R_0)\ [\mathrm{km\ s}^{-1}]$',
             '$R_0/h_\sigma$',
-            '$\\sigma_\phi^2 / \sigma_R^2$']
+            '$X^2 \equiv \sigma_\phi^2 / \sigma_R^2$']
     missing= [0,1,1,0,0,1,0,0,0,0,0,0,0,0,0] #1 if missing for flat
     skip= [0,0,0,0,0,0,1,0,0,0,0,1,0,0,0] #1 if line skip after this parameter
     scale= [_REFV0,1.,1.,_REFV0/_REFR0,_REFV0/_REFR0,
