@@ -718,7 +718,7 @@ def mloglike(params,vhelio,l,b,jk,h,df,options,sinl,cosl,cosb,sinb,
                     if numpy.log10(numpy.fabs(out[ii])) <=-2. : out[ii]= numpy.finfo(numpy.dtype(numpy.float64)).max #means all distances were zero prob
                 else:
                     out+= -logsumexp(thisout[ii,:])+logsumexp(logpd[ii,:]) #so we can compare to the +dwarf case
-        print out, params
+        #print out, params
     #BOVY:Apply Ro prior correcly
     if options.noroprior:
         return out

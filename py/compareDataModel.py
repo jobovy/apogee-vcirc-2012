@@ -330,7 +330,7 @@ if __name__ == '__main__':
             if options.indivfeh:
                 #Find closest Z
                 thisZ= isodist.FEH2Z(data[ii]['FEH'])
-                indx= numpy.argmin((thisZ-zs))
+                indx= numpy.argmin(numpy.fabs(thisZ-zs))
                 logpiso[ii,:]= iso[0][indx](numpy.zeros(_BINTEGRATENBINS)+(data['J0MAG']-data['K0MAG'])[ii],mh)
             elif options.varfeh:
                 #Find correct iso

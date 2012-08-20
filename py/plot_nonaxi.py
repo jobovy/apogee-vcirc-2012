@@ -190,6 +190,7 @@ def plot_nonaxi(parser):
                                        +(data['J0MAG']-data['K0MAG'])[ii],mh)
     else:
         logpisodwarf= None
+    """ #Does not matter anyway
     #clean logpiso
     dataindx= []
     for ii in range(len(data)):
@@ -200,6 +201,7 @@ def plot_nonaxi(parser):
     data= data[dataindx]
     logpiso= logpiso[dataindx,:]
     logpisodwarf= logpisodwarf[dataindx,:]
+    """
     #Calculate data means etc.
     #Calculate means
     locations= list(set(data['LOCATION']))
@@ -226,7 +228,6 @@ def plot_nonaxi(parser):
                                 logpiso,logpisodwarf,
                                 df,nlocs,locations,iso)
     print l_plate, avg_plate_model_fid
-    return None
     #Plot everything
     bovy_plot.bovy_print(fig_height=6.,fig_width=7.)
     dx= 0.8/5.
