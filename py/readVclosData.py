@@ -47,11 +47,10 @@ def readVclosData(lmin=25.,bmax=2.,postshutdown=True,fehcut=False,cohort=None,
        2012-01-25 - Written - Bovy (IAS)
     """
     if datafilename is None:
-        datafile= apogee.tools.apallPath()
+        #datafile= apogee.tools.apallPath()
         datafile= os.path.join(os.getenv('DATADIR'),'bovy','vclos','apall-1d-v1-aspcap-v0.3.fits')
     else:
         datafile= datafilename
-    print datafile
     data= fitsio.read(datafile,1)
     if specprimary and not cutmultiples: #If cutmultiples we will cut to primary later
         #Primary data only
