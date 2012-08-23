@@ -1,7 +1,7 @@
 PRO create_aprvall, outfile=outfile, redux=redux, $
                     silent=silent, aspcap=aspcap, abredux=abredux
 if ~keyword_set(redux) then redux= 'v1'
-if ~keyword_set(abredux) then abredux= 'v0.3'
+if ~keyword_set(abredux) then abredux= 'v0.3_1'
 if ~keyword_set(outfile) then begin
     if keyword_set(aspcap) then $
       outfile='$DATADIR/bovy/apogee/apall-1d-'+redux+'-aspcap-'+abredux+'.fits' $
