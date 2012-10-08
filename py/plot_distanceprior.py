@@ -206,6 +206,8 @@ def get_options():
                       help="Plot filename")
     parser.add_option("--densmodel",dest='densmodel',default='expdisk',
                       help="Density model to use")
+    parser.add_option("--dfmodel",dest='dfmodel',default='simplegaussian',
+                      help="DF model to use")
     parser.add_option("--hr",dest='hr',default=3.,type='float',
                       help="scale length in kpc")
     parser.add_option("--hz",dest='hz',default=0.25,type='float',
