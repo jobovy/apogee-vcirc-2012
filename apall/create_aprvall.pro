@@ -92,6 +92,8 @@ apogee_rem_dups, outStr, out, /flag, /structs
 mwrfits, out, outfile, /create
 ;;add AK w/ python
 cmd= "/usr/local/epd/bin/python add_ak.py "+expand_path(outfile)+" "+expand_path(outfile)
-print, cmd
+spawn, cmd
+;;add averages w/ python
+cmd= "/usr/local/epd/bin/python add_avg_ab.py "+expand_path(outfile)+" "+expand_path(outfile)
 spawn, cmd
 END
